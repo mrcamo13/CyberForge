@@ -1,0 +1,27 @@
+{
+  "id": "op03",
+  "title": "Network Sweep",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance",
+  "xp_base": 150,
+  "difficulty": 2,
+  "tools_type": "port_scanner",
+  "challenge_data": "203.0.113.47",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. \"deploymaster\" got us into the deployment server.\nWe found the internal network segment NexusCorp uses for their\napplication tier. One host on that subnet is our next target.\n\nBefore we move, we need to know what is running on it.\nA port scan will tell us which services are exposed.\n\nTARGET HOST: 203.0.113.47\n\nRun the scan. Identify the open port running the web service.\nWe move on that port next.\n\nGHOST OUT.",
+  "challenge": "Which port is the web service running on?",
+  "valid_answers": ["8080", "port 8080"],
+  "hints": [
+    "Hint 1: Go to https://nmap.org/\n        Read \"Port Scanning Basics\" under the documentation section.\n        A web service typically runs on port 80, 443, or a non-standard\n        port like 8080. Type 'tools' to run the simulated scan.",
+    "Hint 2: In a real engagement you would run (requires nmap installed —\n        optional, not required for this exercise):\n        nmap -sV 203.0.113.47\n        The -sV flag probes open ports to identify the service version.\n        In this simulation, type 'tools' to see the scan output.",
+    "Hint 3: Type 'tools' in the game. The port scanner will display\n        all open ports on 203.0.113.47. Look for the port labeled\n        \"http\" or \"http-alt\" — that is the web service.",
+    "Hint 4: SPOILER — The scan shows port 8080 open with service \"http-alt\".\n        This is a non-standard HTTP port commonly used for dev/staging\n        web servers. Type: 8080"
+  ],
+  "learn": "A port scan probes a host to find which TCP/UDP ports are open\nand what services are listening on them.\n\nCommon port numbers to know:\n  22   — SSH (remote shell)\n  80   — HTTP (web, unencrypted)\n  443  — HTTPS (web, encrypted)\n  3306 — MySQL database\n  8080 — HTTP alternate (dev/staging web servers)\n  8443 — HTTPS alternate\n\nTools used in real engagements:\n  nmap    — the standard. Use -sV for version detection.\n  masscan — faster for large ranges but noisier.\n\nPort scanning is one of the first steps in active reconnaissance.\nIt builds a map of the attack surface before exploitation begins.\nPenTest+ calls this \"enumeration.\"",
+  "tools": "Runs a simulated port scan on 203.0.113.47 and displays open ports with service versions.",
+  "debrief": {
+    "summary": "You ran a simulated port scan against NexusCorp host 203.0.113.47\nand identified port 8080 running a web service (nginx). Port scanning is\nthe foundation of active reconnaissance — it tells you what doors exist\nbefore you try to open them.",
+    "real_world": "Every real penetration test begins with port scanning. Testers\nuse nmap with -sV to enumerate services, then pivot to vulnerability\nassessment on each open port. Finding a web server on a non-standard port\nlike 8080 often means a dev or staging environment — these are frequently\nless hardened than production.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"Nmap\" room\nhttps://tryhackme.com/room/furthernmap",
+    "cert_link": "PenTest+ PT0-003 Domain 2 — Reconnaissance:\n\"Given a scenario, perform active reconnaissance using appropriate tools\nsuch as port scanners and service enumeration utilities.\""
+  }
+}

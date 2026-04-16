@@ -1,0 +1,32 @@
+{
+  "id": "case17",
+  "title": "Memory Forensics",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "mem_analyzer",
+  "challenge_data": "PID:4 name:System base:0x00000000 size:8192 permissions:r-- path:[kernel]\nPID:892 name:svchost base:0x7FFE0000 size:4096 permissions:r-x path:C:\\Windows\\System32\\svchost.exe\nPID:1337 name:update base:0xFF001000 size:65536 permissions:rwx path:[anon]\nPID:2048 name:explorer base:0x00400000 size:8192 permissions:r-x path:C:\\Windows\\explorer.exe\nPID:3001 name:powershell base:0x10000000 size:4096 permissions:r-x path:C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nPID:3999 name:svchost base:0x00200000 size:102400 permissions:r-x path:C:\\Windows\\System32\\svchost.exe",
+  "challenge": "What is the PID of the process showing memory injection indicators (executable anonymous memory region)?",
+  "valid_answers": [
+    "1337",
+    "pid 1337",
+    "pid:1337"
+  ],
+  "hints": [
+    "Go to https://attack.mitre.org/techniques/T1055/\n        Read about Process Injection in MITRE ATT&CK.\n        Memory injection leaves specific artifacts: executable code in memory\n        regions that have no backing file on disk (anonymous regions).",
+    "Look at the permissions and path columns together.\n        Normal processes: r-x permissions, path points to an executable on disk.\n        Injected shellcode: rwx permissions (writable + executable) OR\n        r-x permissions but path is [anon] (no disk-backed file).\n        Type 'tools' to run the memory analyzer.",
+    "Type 'tools' in the game. The memory analyzer flags regions where\n        permissions include execute (x) AND path is [anon]. That combination\n        indicates code running in memory with no file on disk — a hallmark\n        of shellcode injection.",
+    "SPOILER — PID 1337 ('update') has rwx permissions and path=[anon].\n        Execute permission on an anonymous (non-file-backed) memory region\n        is a textbook shellcode injection indicator. Type: 1337"
+  ],
+  "tools": "Analyzes a memory map for injection indicators: anonymous executable regions, RWX permissions, anomalous process sizes, and known malicious process names.",
+  "learn": "Memory forensics reveals what was running in a system at the time of\ncompromise — including malware that never touched disk. This is critical\nfor detecting fileless malware and process injection attacks.\n\nKey memory forensics indicators:\n\nAnonymous executable regions ([anon] with r-x or rwx):\n  Normal processes have memory backed by files on disk.\n  Injected shellcode lives in anonymous memory — no corresponding file.\n  This is how fileless malware and Cobalt Strike beacons hide.\n\nRWX permissions (read + write + execute):\n  Memory that is simultaneously writable and executable is suspicious.\n  Legitimate code: loaded read-only or read-execute. Not writable.\n  Malware: writes shellcode then executes it in the same region.\n\nProcess hollowing indicators:\n  Legitimate process path but unusual base address or size.\n  svchost.exe with very large size or unusual memory layout.\n\nCommon memory forensics tools:\n  Volatility     — Python framework, plugin-based, supports Windows/Linux/macOS\n  Rekall         — Volatility fork, cloud forensics focus\n  WinPmem        — Windows memory acquisition tool\n  LiME           — Linux memory acquisition kernel module\n\nVolatility plugins for this scenario:\n  vol.py -f memory.dmp windows.malfind     — finds injected code regions\n  vol.py -f memory.dmp windows.pslist      — process list\n  vol.py -f memory.dmp windows.cmdline     — process command lines",
+  "debrief": {
+    "summary": "PID 1337 ('update') shows the clearest injection indicator: rwx permissions on an anonymous (non-file-backed) memory region. This is textbook shellcode injection — the NIGHTWIRE implant is running entirely in memory with no file on disk, which is why endpoint AV missed it. PID 3999 (svchost, 102400 bytes) is also anomalous and warrants investigation.",
+    "real_world": "Memory forensics is essential for detecting fileless malware, which now accounts for a significant portion of APT intrusions. Tools like Volatility's 'malfind' plugin automate the detection of anonymous executable regions. Memory acquisition must happen before the system is powered off — RAM is volatile evidence.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Volatility' room — https://tryhackme.com/room/volatility",
+    "cert_link": "CySA+ CS0-003 Domain 3 — Incident Response:\n\"Given a scenario, perform incident response activities including the collection and analysis of digital forensic evidence.\"",
+    "exam_tip": "On the exam, memory forensics questions focus on: (1) what tools acquire memory (WinPmem, LiME), (2) what Volatility plugins find malware (malfind for injection, pslist for processes, cmdline for commands), and (3) what constitutes a memory injection indicator (anonymous executable regions, RWX permissions). Fileless malware lives in memory — disk forensics won't find it."
+  },
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — DIGITAL FORENSICS TEAM\nPRIORITY: HIGH\nANALYST: YOU\n\nNIGHTWIRE INVESTIGATION — Project MERIDIAN\n\nMemory forensics on host 10.0.0.15. A memory dump was acquired\nusing WinPmem. The forensic team extracted the process memory map.\n\nMEMORY MAP — host 10.0.0.15:\n  PID:4     System      base:0x00000000  size:8192    r--   [kernel]\n  PID:892   svchost     base:0x7FFE0000  size:4096    r-x   C:\\Windows\\System32\\svchost.exe\n  PID:1337  update      base:0xFF001000  size:65536   rwx   [anon]\n  PID:2048  explorer    base:0x00400000  size:8192    r-x   C:\\Windows\\explorer.exe\n  PID:3001  powershell  base:0x10000000  size:4096    r-x   C:\\Windows\\System32\\...\n  PID:3999  svchost     base:0x00200000  size:102400  r-x   C:\\Windows\\System32\\svchost.exe\n\nOne process shows a clear memory injection indicator.\nWhat is the PID of the suspicious process?"
+}

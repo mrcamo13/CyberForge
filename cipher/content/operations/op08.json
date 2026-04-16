@@ -1,0 +1,27 @@
+{
+  "id": "op08",
+  "title": "Root Access",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits",
+  "xp_base": 250,
+  "difficulty": 4,
+  "tools_type": "suid_scanner",
+  "challenge_data": "/usr/bin",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. The reporting system gave us a shell on the server.\nWe are in as the \"www-data\" service account. Low privileges.\n\nTo complete the mission we need root. NexusCorp's sysadmin\nmisconfigured file permissions — some binaries have the SUID bit\nset, meaning they run as root regardless of who executes them.\n\nFind the misconfigured binary. Use it to escalate to root.\nThat is the final objective.\n\nSCAN PATH: /usr/bin\n\nGHOST OUT.",
+  "challenge": "What is the name of the misconfigured SUID binary (just the binary name, not the full path)?",
+  "valid_answers": ["python3", "python3.10"],
+  "hints": [
+    "Hint 1: Go to https://gtfobins.github.io/\n        Search for binaries with the \"SUID\" filter.\n        GTFOBins documents how common Linux binaries can be used for\n        privilege escalation when the SUID bit is set.",
+    "Hint 2: In a real engagement you would run:\n        find /usr/bin -perm -4000 -type f 2>/dev/null\n        The -perm -4000 flag finds files with the SUID bit set.\n        Any result that appears in GTFOBins is exploitable.\n        Type 'tools' to run the simulated scan.",
+    "Hint 3: Type 'tools' in the game. The SUID scanner shows all\n        binaries in /usr/bin with the SUID bit set. Cross-reference\n        the result with GTFOBins to identify which one is dangerous.",
+    "Hint 4: SPOILER — The scan finds python3.10 with the SUID bit set.\n        From GTFOBins: python3 -c 'import os; os.execl(\"/bin/sh\", \"sh\", \"-p\")'\n        This spawns a root shell. The binary name is: python3\n        Type: python3"
+  ],
+  "learn": "Privilege escalation means moving from a low-privilege account to a\nhigher-privilege one — typically from a service account to root.\n\nSUID (Set User ID) is a Linux file permission flag. When set on a\nbinary, the binary executes with the file owner's permissions (often\nroot) regardless of who runs it.\n\nFinding SUID binaries:\n  find / -perm -4000 -type f 2>/dev/null\n\nIf a SUID binary is in GTFOBins (gtfobins.github.io), it can likely\nbe used to spawn a root shell or read privileged files.\n\nExample — python3 with SUID set:\n  python3 -c 'import os; os.execl(\"/bin/sh\", \"sh\", \"-p\")'\n  This spawns /bin/sh running as root.\n\nOther common privesc vectors:\n  sudo misconfigurations  — sudo -l shows what you can run as root\n  writable cron jobs      — scripts run by root that you can modify\n  weak file permissions   — config files writable by low-priv users\n  kernel exploits         — unpatched kernel vulnerabilities\n\nPrivilege escalation is a core post-exploitation skill covered\nheavily in PenTest+ Domain 3 and every real engagement report.",
+  "tools": "Scans the target directory for binaries with the SUID bit set and flags any that appear in GTFOBins.",
+  "debrief": {
+    "summary": "You identified python3.10 with the SUID bit misconfigured on\nNexusCorp's server and escalated privileges to root. Mission complete.\nFrom Caesar cipher to root shell — recon, enumeration, credential\nattacks, web application exploitation, and privilege escalation.\nThe NexusCorp infiltration is finished.",
+    "real_world": "Privilege escalation findings are critical severity in every real\npentest report. SUID misconfigurations are common on systems where\nadmins install interpreters (Python, Perl, Ruby) without checking\nthe permission implications. GTFOBins is the go-to reference for\nexploiting these in real engagements.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"Linux Privilege Escalation\" room\nhttps://tryhackme.com/room/linprivesc",
+    "cert_link": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits:\n\"Given a scenario, perform post-exploitation techniques including\nprivilege escalation to achieve objectives on a target system.\""
+  }
+}

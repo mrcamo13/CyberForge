@@ -1,0 +1,28 @@
+{
+  "id": "case05",
+  "title": "Incident Phase",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response",
+  "xp_base": 200,
+  "difficulty": 3,
+  "tools_type": "none",
+  "challenge_data": "The staging server has been fully compromised. Root access confirmed. Attacker tools removed. System isolated from network. Backups verified intact.",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — INCIDENT RESPONSE TEAM\nPRIORITY: HIGH\nANALYST: YOU\n\nThe NexusCorp incident has been fully triaged. Here is the\ncurrent status of the affected staging server at 203.0.113.47:\n\nSTATUS REPORT:\n- Root access by attacker confirmed (PID 1004 terminated)\n- Attacker tools and artifacts removed from filesystem\n- Server isolated from network (NIC disabled)\n- Backup copies verified intact and unmodified\n- No evidence of lateral movement to other hosts\n- All IOCs documented and shared with threat intel team\n\nThe incident commander needs to know: given this status,\nwhat is the CURRENT phase of the incident response lifecycle?",
+  "challenge": "What is the current IR lifecycle phase based on the status report?",
+  "valid_answers": ["eradication", "eradication and recovery"],
+  "hints": [
+    "Hint 1: Go to https://www.nist.gov/publications/computer-security-incident-handling-guide\n        Read the NIST SP 800-61 IR lifecycle phases.\n        The four phases are: Preparation → Detection/Analysis →\n        Containment/Eradication/Recovery → Post-Incident Activity.",
+    "Hint 2: Map each status item to a phase:\n        - Attacker confirmed (Detection/Analysis — already done)\n        - Tools removed (this is Eradication)\n        - Server isolated (this is Containment — already done)\n        - Backups verified (this is Recovery preparation)\n        The current action being taken tells you the phase.",
+    "Hint 3: Type 'tools' in the game. The IR reference table shows\n        all phases with their defining actions. Match the status\n        report items to the correct phase.",
+    "Hint 4: SPOILER — Removing attacker tools and artifacts is the\n        definition of Eradication. The server is isolated (Containment\n        done) and tools are being removed (Eradication in progress).\n        Type: eradication"
+  ],
+  "learn": "The Incident Response lifecycle (NIST SP 800-61) has four phases:\n\n1. PREPARATION\n   Build IR capabilities before an incident occurs.\n   Actions: policies, playbooks, tools, training.\n\n2. DETECTION AND ANALYSIS\n   Identify and confirm an incident has occurred.\n   Actions: alert triage, log analysis, IOC identification,\n   scope determination, severity classification.\n\n3. CONTAINMENT, ERADICATION, AND RECOVERY\n   Stop the damage, remove the attacker, restore operations.\n   - Containment: isolate affected systems (disconnect network)\n   - Eradication: remove malware, tools, and attacker persistence\n   - Recovery: restore from clean backups, verify integrity,\n     return to production\n\n4. POST-INCIDENT ACTIVITY\n   Learn from the incident to prevent recurrence.\n   Actions: lessons learned, report writing, IOC sharing,\n   control improvements.\n\nCySA+ Domain 3 tests your ability to identify the correct IR phase\ngiven a scenario and to know which actions belong to which phase.\nEradication ≠ Containment ≠ Recovery — the exam will test the\ndifferences between all three.",
+  "tools": "Displays the NIST SP 800-61 IR lifecycle phases with key actions for each phase.",
+  "debrief": {
+    "summary": "You correctly identified Eradication as the current IR phase. The server was isolated (Containment), attacker tools were removed (Eradication), and backups are verified for Recovery. This closes the NexusCorp incident — from the attacker's first Caesar cipher decode to the defender's final eradication of their access.",
+    "real_world": "IR phase identification is critical for communication and escalation. Telling the CISO 'we are in Eradication' tells them exactly where you are in the process and what comes next. Confusing phases leads to premature return-to-production before the threat is fully removed — a common cause of re-infection.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Incident Response Fundamentals' room\nhttps://tryhackme.com/room/incidentresponse",
+    "cert_link": "CySA+ CS0-003 Domain 3 — Incident Response:\n'Given a scenario, apply the appropriate incident response procedure and identify the current phase of the IR lifecycle.'",
+    "exam_tip": "On the exam, IR phase questions are very common. The most tested distinction is Containment vs Eradication vs Recovery. Containment = stop the spread. Eradication = remove the threat. Recovery = restore operations. Also know that Post-Incident Activity is sometimes called 'Lessons Learned' — both terms appear on the exam."
+  }
+}

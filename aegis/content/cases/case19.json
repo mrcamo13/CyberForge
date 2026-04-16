@@ -1,0 +1,37 @@
+{
+  "id": "case19",
+  "title": "Chain of Custody",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "coc_reference",
+  "challenge_data": "The NIGHTWIRE investigation has identified forensic artifacts on host 10.0.0.15. Evidence includes a memory dump (memory.dmp, 8GB), disk image (disk.img, 512GB), and USB drive found in the server room. Legal has been notified. What must be documented FIRST when taking physical custody of the USB drive?",
+  "challenge": "What must be documented first when establishing chain of custody for physical evidence like a USB drive?",
+  "valid_answers": [
+    "hash",
+    "hash value",
+    "cryptographic hash",
+    "sha256",
+    "md5",
+    "integrity hash",
+    "evidence hash",
+    "checksum"
+  ],
+  "hints": [
+    "Go to https://www.sans.org/white-papers/451/\n        Read about digital forensics evidence handling. The first action\n        when taking custody of physical digital evidence is to establish\n        its integrity so you can prove it was not altered later.",
+    "Before touching any digital evidence for analysis, you must create\n        a cryptographic record of its original state. This record allows you\n        to prove in court that the evidence was not altered during investigation.\n        Type 'tools' to see the full chain of custody procedure reference.",
+    "Type 'tools' in the game. The chain of custody reference lists the\n        exact order of steps for physical evidence handling. The very first\n        step creates a verifiable fingerprint of the evidence.",
+    "SPOILER — The first step is always to document the cryptographic hash\n        (SHA-256 or MD5) of the evidence BEFORE any analysis. This hash is the\n        integrity baseline — any change to the evidence would produce a different\n        hash, proving tampering. Type: hash"
+  ],
+  "tools": "Displays the chain of custody reference including collection steps, documentation requirements, storage procedures, and common errors.",
+  "learn": "Chain of custody is the documented, unbroken sequence of possession for\nevidence. In legal proceedings, broken chain of custody can make evidence\ninadmissible — the entire investigation can be thrown out.\n\nChain of custody for digital evidence:\n\nCOLLECTION:\n  1. Document the scene (photographs, notes, location, time)\n  2. Hash the evidence BEFORE collection (SHA-256 preferred)\n  3. Use write blockers when imaging drives (prevents modification)\n  4. Create forensic copies — never analyze originals\n  5. Hash the copy and verify it matches the original hash\n\nDOCUMENTATION (required for each transfer):\n  - Description of evidence (type, serial number, size)\n  - Date and time of collection/transfer\n  - Person collecting/receiving (full name, role, signature)\n  - Location (where collected, where stored)\n  - Reason for transfer\n  - Hash values (before and after)\n\nSTORAGE:\n  - Physical: evidence bags, tamper-evident seals, secure room\n  - Digital: write-protected storage, access logging, off-site backup\n\nCOMMON CHAIN OF CUSTODY ERRORS:\n  - Analyzing originals instead of forensic copies\n  - Forgetting to use a write blocker during imaging\n  - Missing documentation on a transfer\n  - Not re-hashing after storage to verify integrity\n  - Allowing unauthorized personnel to access evidence\n\nIf chain of custody is broken:\n  Evidence may be deemed inadmissible in court.\n  Investigation credibility is damaged.\n  Attacker prosecution may fail.",
+  "debrief": {
+    "summary": "The first step is always to hash the evidence. The cryptographic hash (SHA-256 or MD5) is the integrity baseline that proves the evidence was not altered during investigation. Without an original hash, you cannot defend the evidence in court. Everything else — write blockers, forensic copies, storage — comes after establishing that baseline hash.",
+    "real_world": "In real forensic investigations, analysts use tools like FTK Imager or sha256sum to hash evidence immediately at the scene, before any analysis. The hash is recorded on the evidence log and signed by witnesses. Many organizations use automated evidence management systems that compute and record hashes automatically on intake.",
+    "next_step": "Practice with real procedures:\nSANS Digital Forensics Poster: https://www.sans.org/posters/windows-forensics/",
+    "cert_link": "CySA+ CS0-003 Domain 3 — Incident Response:\n\"Given a scenario, explain the importance of chain of custody and legal considerations in digital forensics and incident response.\"",
+    "exam_tip": "On the exam, chain of custody questions focus on: (1) hashing first (before analysis), (2) write blockers (before imaging), (3) forensic copies (never analyze originals), and (4) what breaks the chain (unauthorized access, undocumented transfers, missing hashes). The correct sequence is: document -> hash -> write block -> image -> verify -> analyze copy."
+  },
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — LEGAL AND COMPLIANCE\nPRIORITY: HIGH\nANALYST: YOU\n\nNIGHTWIRE INVESTIGATION — Project MERIDIAN\n\nThe NIGHTWIRE investigation has escalated to potential legal\nproceedings. Evidence collected so far:\n  - Memory dump: memory.dmp (8GB) from host 10.0.0.15\n  - Disk image: disk.img (512GB) from host 10.0.0.15\n  - Physical USB drive: found in server room, no label\n\nLegal has requested all evidence be handled with full chain of\ncustody documentation before any further analysis.\n\nA colleague is about to start analyzing the USB drive directly.\nYou need to stop them — what must happen FIRST before the USB\nis touched for analysis?\n\nWhat must be documented FIRST when taking physical custody\nof the USB drive evidence?"
+}

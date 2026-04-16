@@ -1,0 +1,31 @@
+{
+  "id": "case14",
+  "title": "SIEM Triage",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "siem_correlator",
+  "challenge_data": "R001|CONDITION:event_type=auth_failure AND source=external|SEVERITY:high\nR002|CONDITION:event_type=auth_success AND source=external AND details=root|SEVERITY:critical\nR003|CONDITION:event_type=process_create AND details=powershell|SEVERITY:medium\nR004|CONDITION:event_type=network_connect AND details=port=4444|SEVERITY:high|||2026-04-05T22:14:01|firewall|auth_failure|source=external user=admin\n2026-04-05T22:14:03|syslog|auth_failure|source=external user=root\n2026-04-05T22:14:07|syslog|auth_success|source=external user=root details=root\n2026-04-05T22:15:12|sysmon|process_create|details=powershell -enc SQBFAFgA\n2026-04-05T22:16:30|firewall|network_connect|details=dst=185.220.101.45 port=4444\n2026-04-05T22:18:00|syslog|auth_failure|source=internal user=backup",
+  "challenge": "What is the severity level of the highest-priority SIEM alert triggered by events in this log?",
+  "valid_answers": [
+    "critical",
+    "critical severity"
+  ],
+  "hints": [
+    "Go to https://www.elastic.co/guide/en/siem/guide/current/detections-ui-exceptions.html\n        Read about SIEM correlation rules and alert severity levels.\n        Correlation rules fire when ALL their conditions match a single event.\n        Severity levels from lowest to highest: LOW, MEDIUM, HIGH, CRITICAL.",
+    "Match each event against the four active rules.\n        R001 fires on auth_failure from external — check events 22:14:01 and 22:14:03.\n        R002 fires on auth_success for root from external — check event 22:14:07.\n        R003 fires on process_create with powershell — check event 22:15:12.\n        R004 fires on network_connect to port 4444 — check event 22:16:30.\n        Type 'tools' to run the SIEM correlator automatically.",
+    "Type 'tools' in the game. The SIEM correlator evaluates each event\n        against all rules and lists every alert that fired with its severity.\n        Find the alert with the highest severity level.",
+    "SPOILER — Event 22:14:07 (auth_success, source=external, user=root)\n        matches R002 (CRITICAL). Root login from an external source is the\n        most severe event in the log. Type: critical"
+  ],
+  "tools": "Evaluates each event against the active correlation rules and reports all alerts that fired with their severity levels.",
+  "learn": "SIEM (Security Information and Event Management) correlation rules are how\nSOC analysts automate detection. A rule defines conditions — when all\nconditions match an incoming event, an alert fires.\n\nSIEM alert triage workflow:\n  1. Sort alert queue by severity (CRITICAL first)\n  2. Correlate related alerts into incidents (same source IP, same user)\n  3. Identify true positives vs false positives\n  4. Escalate confirmed incidents to incident tickets\n\nAlert severity levels (typical):\n  CRITICAL — requires immediate response (active exploitation, critical asset)\n  HIGH     — investigate within 1 hour (lateral movement, C2 communication)\n  MEDIUM   — investigate within 4 hours (reconnaissance, policy violation)\n  LOW      — investigate within 24 hours (informational, single failed login)\n\nFalse positive reduction:\n  Correlation rules reduce false positives by requiring multiple conditions.\n  Single-condition rules (any failed login) produce alert fatigue.\n  Multi-condition rules (root login from external IP) are more precise.\n\nThis scenario uses a rule-based SIEM. Modern SIEMs also use:\n  User and Entity Behavior Analytics (UEBA) — baseline + anomaly detection\n  Machine learning models — unsupervised pattern detection\n  Threat intel enrichment — automatic IOC matching",
+  "debrief": {
+    "summary": "The highest-priority alert is CRITICAL — rule R002 fired when root successfully authenticated from an external IP at 22:14:07. This is the NIGHTWIRE actor gaining initial foothold via compromised root credentials. The subsequent alerts (R003 PowerShell, R004 port 4444) confirm execution and C2 communication followed within minutes.",
+    "real_world": "SIEM triage is the primary daily workflow for Tier 1 SOC analysts. In a real SOC, the CRITICAL alert would immediately escalate to a Tier 2 analyst and trigger an incident ticket. The correlated events (same 4-minute window, escalating severity) form a clear attack narrative.",
+    "next_step": "Practice with real SIEM tools:\nTryHackMe: 'Investigating with ELK 101' room\nhttps://tryhackme.com/room/investigatingwithelk101",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n\"Given a scenario, analyze output from common security tools used for SIEM monitoring, correlation, and alert triage.\"",
+    "exam_tip": "On the exam, SIEM questions test two things: (1) which rule conditions match which event fields, and (2) which severity is highest. Remember severity order: CRITICAL > HIGH > MEDIUM > LOW. Also: correlation rules require ALL conditions to match — a rule with two conditions only fires when both are present in the same event."
+  },
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — SIEM PLATFORM\nPRIORITY: CRITICAL\nANALYST: YOU\n\nNIGHTWIRE INVESTIGATION — Project MERIDIAN\n\nThe SIEM is generating alerts. Your job is to triage the queue\nand identify the most severe alert that fired during the\nNIGHTWIRE activity window (22:14-22:18 UTC on 2026-04-05).\n\nCORRELATION RULES ACTIVE:\n  R001  auth_failure from external source           [HIGH]\n  R002  auth_success for root from external source  [CRITICAL]\n  R003  process_create with powershell              [MEDIUM]\n  R004  network_connect to port 4444                [HIGH]\n\nEVENT LOG (22:14-22:18 UTC):\n  22:14:01  firewall  auth_failure     source=external user=admin\n  22:14:03  syslog    auth_failure     source=external user=root\n  22:14:07  syslog    auth_success     source=external user=root\n  22:15:12  sysmon    process_create   powershell -enc SQBFAFgA\n  22:16:30  firewall  network_connect  dst=185.220.101.45 port=4444\n  22:18:00  syslog    auth_failure     source=internal user=backup\n\nWhat is the SEVERITY of the highest-priority alert that fired?"
+}

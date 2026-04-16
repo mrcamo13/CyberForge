@@ -1,0 +1,61 @@
+{
+  "pass_threshold": 4,
+  "xp_on_pass": 50,
+  "questions": [
+    {
+      "id": "pt01",
+      "question": "What does a SIEM do?",
+      "options": [
+        "Scans systems for open ports and services",
+        "Aggregates and correlates log data to detect security events",
+        "Encrypts network traffic between endpoints",
+        "Blocks malicious traffic at the network perimeter"
+      ],
+      "correct_index": 1
+    },
+    {
+      "id": "pt02",
+      "question": "In the NIST IR lifecycle, which phase involves isolating an affected system?",
+      "options": [
+        "Preparation",
+        "Detection and Analysis",
+        "Containment",
+        "Post-Incident Activity"
+      ],
+      "correct_index": 2
+    },
+    {
+      "id": "pt03",
+      "question": "What does a CVSS score of 9.8 indicate?",
+      "options": [
+        "Low severity — can be scheduled for next maintenance window",
+        "Medium severity — patch within 90 days",
+        "High severity — patch within 30 days",
+        "Critical severity — patch immediately"
+      ],
+      "correct_index": 3
+    },
+    {
+      "id": "pt04",
+      "question": "An analyst finds the string 'ZGVwbG95bWFzdGVy' in a config file. What type of encoding is this?",
+      "options": [
+        "Hexadecimal",
+        "ROT13",
+        "Base64",
+        "URL encoding"
+      ],
+      "correct_index": 2
+    },
+    {
+      "id": "pt05",
+      "question": "Which HTTP status code indicates a successful request?",
+      "options": [
+        "301 — Moved Permanently",
+        "403 — Forbidden",
+        "200 — OK",
+        "404 — Not Found"
+      ],
+      "correct_index": 2
+    }
+  ]
+}

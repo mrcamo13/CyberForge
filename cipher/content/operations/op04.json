@@ -1,0 +1,27 @@
+{
+  "id": "op04",
+  "title": "Access Logs",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance",
+  "xp_base": 150,
+  "difficulty": 2,
+  "tools_type": "log_analyzer",
+  "challenge_data": "10.0.0.15 - - [11/Apr/2026:02:14:33 +0000] \"GET /admin/dashboard HTTP/1.1\" 200 4821\n203.0.113.91 - - [11/Apr/2026:01:44:12 +0000] \"GET /admin/dashboard HTTP/1.1\" 404 512\n203.0.113.44 - - [11/Apr/2026:02:00:05 +0000] \"GET / HTTP/1.1\" 200 8192\n10.0.0.15 - - [11/Apr/2026:02:14:41 +0000] \"GET /admin/dashboard HTTP/1.1\" 200 4821\n203.0.113.44 - - [11/Apr/2026:02:00:06 +0000] \"GET /about HTTP/1.1\" 200 3104\n10.0.0.15 - - [11/Apr/2026:03:02:17 +0000] \"GET /admin/dashboard HTTP/1.1\" 200 4821\n203.0.113.55 - - [11/Apr/2026:03:15:44 +0000] \"GET /login HTTP/1.1\" 200 2048",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. Port 8080 on 203.0.113.47 leads to a staging web server.\nWe got read access to its access logs before the session dropped.\n\nThere is an admin panel hidden on this server — not linked from\nany page, but someone has been accessing it. The logs will tell us\nwhere it is.\n\nScan the log for the path that returned HTTP 200 from an internal\nIP (10.0.0.x). External IPs get 404 on that path. That is the panel.\n\nGHOST OUT.",
+  "challenge": "What is the path of the admin panel? (include the leading /)",
+  "valid_answers": ["/admin/dashboard", "/admin/dashboard/"],
+  "hints": [
+    "Hint 1: Web server access logs record every HTTP request.\n        Format: IP - - [timestamp] \"METHOD /path HTTP/ver\" STATUS SIZE\n        Look for requests from internal IPs (10.0.0.x range) that returned\n        HTTP status 200 (success). That path is the admin panel.",
+    "Hint 2: In a real engagement you would run:\n        grep \" 200 \" access.log | grep \"^10\\.\"\n        This filters for successful requests from internal IPs.\n        Type 'tools' to run the simulated log analyzer.",
+    "Hint 3: Type 'tools' in the game. The log analyzer highlights\n        all 200-status requests from internal IPs. One path\n        appears only in those results — that is the admin panel.",
+    "Hint 4: SPOILER — The log shows 10.0.0.15 accessing /admin/dashboard\n        with a 200 status. All external IPs get 404 on that path.\n        Type: /admin/dashboard"
+  ],
+  "learn": "Web server access logs record every HTTP request made to the server.\nStandard Apache/nginx log format:\n\n  IP - - [date time] \"METHOD /path HTTP/version\" STATUS_CODE SIZE\n\nStatus codes to know:\n  200 — OK (request succeeded)\n  301 — Redirect (resource moved)\n  403 — Forbidden (resource exists but access blocked)\n  404 — Not Found (resource does not exist or is hidden)\n  500 — Server Error\n\nDuring recon, log analysis reveals:\n- Hidden paths that return 200 for internal IPs but 404 externally\n- Admin panels accessed only from internal network addresses\n- Backup files (.bak, .old) that were accidentally served\n- Rate of failed logins suggesting brute force attempts\n\nIn a real engagement, access to server logs is a goldmine.\nEven read-only log access can map the entire application structure.",
+  "tools": "Parses the server access log and highlights paths returning HTTP 200 from internal IPs (10.0.0.x).",
+  "debrief": {
+    "summary": "You analyzed NexusCorp's web server access log and identified\n/admin/dashboard — a hidden admin panel accessible only from internal IPs.\nLog analysis during recon reveals paths, behaviors, and access patterns\nthat are invisible from the outside.",
+    "real_world": "Pentesters review logs whenever they gain read access to a system.\nAccess logs expose admin panels, backup files, API endpoints, and\ncredential-stuffing attempts. Even a small log excerpt can significantly\nnarrow the attack surface before active exploitation begins.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"Web Fundamentals\" room\nhttps://tryhackme.com/room/webfundamentals",
+    "cert_link": "PenTest+ PT0-003 Domain 2 — Reconnaissance:\n\"Given a scenario, perform passive and active reconnaissance to gather\ninformation about targets including web application enumeration.\""
+  }
+}

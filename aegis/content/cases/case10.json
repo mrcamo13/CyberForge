@@ -1,0 +1,28 @@
+{
+  "id": "case10",
+  "title": "Risk Score",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "risk_scorer",
+  "challenge_data": "likelihood:4|impact:5|asset:production|exploited:yes",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — RISK MANAGEMENT TEAM\nPRIORITY: HIGH\nANALYST: YOU\n\nPost-incident risk assessment for the NexusCorp finding.\nThe risk committee needs a formal risk rating for the\nnginx 1.24.0 RCE vulnerability (CVE-FAKE-2024-099) before\napproving the emergency patch budget.\n\nFINDING DETAILS:\n  Vulnerability:   CVE-FAKE-2024-099 — nginx 1.24.0 Unauth RCE\n  Likelihood:      4 out of 5 (actively exploited in the wild)\n  Impact:          5 out of 5 (production server, full root access)\n  Asset type:      Production (customer-facing)\n  Exploited:       Yes (confirmed in this incident)\n\nUsing a standard 5×5 likelihood × impact risk matrix,\nwhat is the risk RATING for this finding?",
+  "challenge": "What is the risk rating for this finding using a 5x5 likelihood × impact matrix?",
+  "valid_answers": ["critical", "critical risk"],
+  "hints": [
+    "Go to https://www.risksense.com/blog/risk-rating-methodology/\nRead about likelihood × impact risk matrices. The formula is simple:\nRisk Score = Likelihood × Impact. Map the score to a rating band.",
+    "Calculate: Likelihood (4) × Impact (5) = 20.\nStandard rating bands for a 5×5 matrix (max score 25):\n  1-6:   LOW\n  7-12:  MEDIUM\n  13-18: HIGH\n  19-25: CRITICAL\nType 'tools' to run the risk scorer and verify.",
+    "Type 'tools' in the game. The risk scorer calculates likelihood × impact,\nmaps to a rating band, and adds an urgency note if exploited=yes.\nThe rating itself comes from the score alone — read it in the output.",
+    "SPOILER — 4 × 5 = 20. Score 20 falls in the CRITICAL band (19-25).\nThe 'actively exploited' flag confirms immediate action required.\nType: critical"
+  ],
+  "learn": "Risk scoring is how security teams communicate finding severity in business\nterms. Raw CVSS scores tell you about the vulnerability — risk scores\ntell you about the risk to YOUR specific environment.\n\nStandard 5×5 risk matrix:\n  Score = Likelihood (1-5) × Impact (1-5) = 1 to 25\n  LOW:      1-6   — accept, patch at next maintenance window\n  MEDIUM:   7-12  — mitigate within 90 days\n  HIGH:     13-18 — mitigate within 30 days\n  CRITICAL: 19-25 — mitigate immediately\n\nLikelihood factors:\n  1 = Theoretical only, no known exploits\n  3 = Public exploit exists, not widely used\n  5 = Actively exploited in the wild, trivial to exploit\n\nImpact factors:\n  1 = No business impact (test system, no data)\n  3 = Moderate (internal system, limited data)\n  5 = Severe (production, customer data, full system compromise)\n\nRisk vs CVSS:\n  CVSS scores the vulnerability in isolation.\n  Risk scores the vulnerability in your context.\n  A CVSS 9.8 on an air-gapped test system may be LOW risk.\n  A CVSS 5.3 on your primary customer database may be HIGH risk.",
+  "tools": "Calculates risk score using likelihood × impact and maps to a rating band, adjusting for asset type and active exploitation.",
+  "debrief": {
+    "summary": "You correctly scored the finding as CRITICAL (20/25). Likelihood 4 (actively exploited) × Impact 5 (production + full root compromise) = 20, placing it firmly in the CRITICAL band. The confirmed exploitation in this incident removes any ambiguity about the risk level.",
+    "real_world": "Risk scoring is used to justify security budgets and prioritize remediation queues. When you tell the CISO 'CRITICAL risk, score 20/25, actively exploited in production', that language maps directly to emergency patch approval processes. Risk ratings also drive SLA — most organizations require CRITICAL findings to be remediated within 24-48 hours.",
+    "next_step": "Practice with real tools:\nNIST Risk Management Framework: https://csrc.nist.gov/projects/risk-management",
+    "cert_link": "CySA+ CS0-003 Domain 2 — Vulnerability Management:\n\"Given a scenario, apply risk-based prioritization to remediation of vulnerabilities using likelihood and impact analysis.\"",
+    "exam_tip": "On the exam, risk scoring questions give you likelihood and impact values and ask for the rating. Memorize the 5×5 bands: 1-6 LOW, 7-12 MEDIUM, 13-18 HIGH, 19-25 CRITICAL. Also know: risk = likelihood × impact (NOT likelihood + impact). And: CVSS measures vulnerability severity; risk measures business exposure — they are not the same."
+  }
+}

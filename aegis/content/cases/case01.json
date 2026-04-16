@@ -1,0 +1,28 @@
+{
+  "id": "case01",
+  "title": "Suspicious Access",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 100,
+  "difficulty": 1,
+  "tools_type": "log_filter",
+  "challenge_data": "10.0.0.99 - - [11/Apr/2026:02:14:33 +0000] \"GET /admin/dashboard HTTP/1.1\" 200 4821\n203.0.113.44 - - [11/Apr/2026:01:55:02 +0000] \"GET / HTTP/1.1\" 200 8192\n203.0.113.44 - - [11/Apr/2026:01:55:10 +0000] \"GET /about HTTP/1.1\" 200 3104\n10.0.0.99 - - [11/Apr/2026:02:14:41 +0000] \"GET /admin/dashboard HTTP/1.1\" 200 4821\n203.0.113.77 - - [11/Apr/2026:02:30:15 +0000] \"GET /login HTTP/1.1\" 200 2048\n10.0.0.99 - - [11/Apr/2026:03:02:17 +0000] \"GET /admin/dashboard HTTP/1.1\" 200 4821\n203.0.113.91 - - [11/Apr/2026:03:10:05 +0000] \"GET /admin/dashboard HTTP/1.1\" 404 512",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING ALERT — SIEM NOTIFICATION\nPRIORITY: HIGH\nANALYST: YOU\n\nAlert triggered: Repeated access to /admin/dashboard from\nan internal IP outside of business hours.\n\nThe web server access log for the staging server at\n203.0.113.47:8080 has been pulled. Review the log.\nIdentify the internal IP address that accessed the admin\npanel without authorization.\n\nTime to triage.",
+  "challenge": "What internal IP address accessed the admin panel (/admin/dashboard) with HTTP 200?",
+  "valid_answers": ["10.0.0.99"],
+  "hints": [
+    "Hint 1: Go to https://www.splunk.com/en_us/blog/learn/log-analysis.html\n        Read 'What is log analysis?' — focus on filtering by IP and\n        status code. The log format is standard Apache/nginx combined log.",
+    "Hint 2: In a real SOC you would run (in a terminal with log access):\n        grep \"/admin/dashboard\" access.log | grep \" 200 \" | grep \"^10\\.\"\n        This filters for successful admin panel access from internal IPs.\n        Type 'tools' to run the simulated log filter.",
+    "Hint 3: Type 'tools' in the game. The log filter highlights all entries\n        where an internal IP (10.0.0.x) received HTTP 200 on the admin\n        path. The IP address in those lines is your answer.",
+    "Hint 4: SPOILER — IP 10.0.0.99 accessed /admin/dashboard three times\n        with HTTP 200 status. External IP 203.0.113.91 tried the same\n        path but got 404. Type: 10.0.0.99"
+  ],
+  "learn": "Log analysis is the foundation of security operations. When a SIEM\ntriggers an alert, the analyst pulls the relevant logs and filters\nthem to understand what happened, who did it, and when.\n\nStandard Apache/nginx log format:\n  IP - - [timestamp] \"METHOD /path HTTP/ver\" STATUS SIZE\n\nKey fields for triage:\n  Source IP     — internal (10.x) vs external (public IP)\n  Request path  — what resource was accessed\n  Status code   — 200 = success, 404 = not found, 403 = blocked\n  Timestamp     — when it happened (look for after-hours activity)\n\nSOC analyst workflow:\n  1. Identify the anomaly (unusual IP, path, status, or time)\n  2. Determine scope (how many requests, from where, how long)\n  3. Classify (authorized user? insider threat? external attacker?)\n  4. Escalate or close based on severity\n\nCySA+ Domain 1 heavily tests log analysis — it is the single most\ncommon skill tested in Security Operations questions.",
+  "tools": "Filters the web server access log for entries where an internal IP (10.0.0.x) received HTTP 200 on the /admin/dashboard path.",
+  "debrief": {
+    "summary": "You identified 10.0.0.99 as the internal IP accessing /admin/dashboard outside business hours. Log analysis confirmed three successful requests to a restricted path — a key indicator of unauthorized internal access or a compromised internal host.",
+    "real_world": "SOC analysts perform log triage like this dozens of times per shift. SIEM alerts trigger on anomalies; the analyst pulls the raw log, filters by relevant fields, and determines whether it is a true positive requiring escalation or a false alarm.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Splunk: Basics' room\nhttps://tryhackme.com/room/splunk101",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n'Given a scenario, analyze indicators of potentially malicious activity.'",
+    "exam_tip": "On the exam, log analysis questions often show you a log snippet and ask you to identify the attacker's IP, the targeted resource, or the attack technique. Focus on status codes and source IPs. Internal IPs (RFC 1918: 10.x, 172.16-31.x, 192.168.x) accessing sensitive paths with 200 status are always suspicious."
+  }
+}

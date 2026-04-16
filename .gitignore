@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Save files (player data — not part of the codebase)
+aegis/saves/
+cipher/saves/
+
+# Checksums (generated on run, not source)
+aegis/content/checksums.json
+cipher/content/checksums.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp

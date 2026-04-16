@@ -1,0 +1,28 @@
+{
+  "id": "case06",
+  "title": "C2 Beaconing",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 100,
+  "difficulty": 2,
+  "tools_type": "traffic_analyzer",
+  "challenge_data": "2026-04-11T03:15:00,10.0.0.99,203.0.113.47,443,512,0\\n2026-04-11T03:15:30,10.0.0.99,185.220.101.45,4444,128,30\\n2026-04-11T03:16:00,10.0.0.99,185.220.101.45,4444,128,30\\n2026-04-11T03:16:30,10.0.0.99,185.220.101.45,4444,128,30\\n2026-04-11T03:17:00,10.0.0.99,8.8.8.8,53,64,0\\n2026-04-11T03:17:30,10.0.0.99,185.220.101.45,4444,128,30\\n2026-04-11T03:18:00,10.0.0.99,203.0.113.91,80,4096,0",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — THREAT HUNT TEAM\nPRIORITY: HIGH\nANALYST: YOU\n\nPost-incident review of the NexusCorp compromise. Forensics\ncaptured network flow data from 10.0.0.99 during the attack\nwindow (03:15-03:18 UTC).\n\nNETWORK FLOW — 10.0.0.99 (03:15-03:18 UTC):\nTIMESTAMP            SRC           DST                PORT  BYTES  INTERVAL\n2026-04-11T03:15:00  10.0.0.99  →  203.0.113.47       443   512    —\n2026-04-11T03:15:30  10.0.0.99  →  185.220.101.45     4444  128    30s\n2026-04-11T03:16:00  10.0.0.99  →  185.220.101.45     4444  128    30s\n2026-04-11T03:16:30  10.0.0.99  →  185.220.101.45     4444  128    30s\n2026-04-11T03:17:00  10.0.0.99  →  8.8.8.8            53    64     —\n2026-04-11T03:17:30  10.0.0.99  →  185.220.101.45     4444  128    30s\n2026-04-11T03:18:00  10.0.0.99  →  203.0.113.91       80    4096   —\n\nOne of these destinations shows a classic C2 beaconing pattern.\nIdentify the C2 server IP.",
+  "challenge": "What is the external IP address that 10.0.0.99 is beaconing to?",
+  "valid_answers": ["185.220.101.45"],
+  "hints": [
+    "Go to https://attack.mitre.org/techniques/T1071/\nRead about Command and Control via Application Layer Protocol.\nBeaconing is defined by: regular interval, consistent payload size,\nrepeated connections to the same external IP.",
+    "Filter the connections: look for repeated outbound connections where\ninterval_sec is consistent (same value every time) and bytes is the\nsame each time. A 0 interval means no repeated pattern — ignore those.\nType 'tools' to run the traffic analyzer.",
+    "Type 'tools' in the game. The traffic analyzer flags connections\nwith a consistent interval and payload as [BEACON]. The flagged\ndestination IP is your answer.",
+    "SPOILER — 185.220.101.45 on port 4444 receives 4 connections at\nexactly 30-second intervals with exactly 128 bytes each. This is\ntextbook C2 beaconing. Type: 185.220.101.45"
+  ],
+  "learn": "Command and Control (C2) beaconing is how malware maintains contact with\nan attacker's server after initial compromise. The malware calls home at\nregular intervals to receive commands and send results.\n\nBeaconing indicators:\n  Consistent interval   — exact same number of seconds between connections\n  Consistent payload    — same byte count each time (heartbeat packet)\n  Unusual port          — non-standard ports (4444, 1337, 9001 are common)\n  Non-business hours    — C2 traffic often runs 24/7 regardless of time\n  External destination  — connections leaving the network perimeter\n\nHow to detect in a SOC:\n  1. Baseline normal traffic for each internal host\n  2. Alert on connections with < 60s interval to the same external IP\n  3. Investigate any non-standard port with repeated connections\n  4. Cross-reference destination IP with threat intel feeds\n\nThis technique maps to MITRE ATT&CK T1071 — Application Layer Protocol\n(Command and Control tactic). CySA+ Domain 1 tests network traffic analysis\nas a core SOC analyst skill.",
+  "tools": "Analyzes network connection records and flags beaconing patterns (consistent interval + consistent payload size).",
+  "debrief": {
+    "summary": "You identified 185.220.101.45 as the C2 server. The compromised host 10.0.0.99 was beaconing every 30 seconds with a 128-byte heartbeat — a classic C2 pattern. This confirms the attacker maintained persistent access after the initial privilege escalation.",
+    "real_world": "Detecting C2 beaconing is one of the most high-value threat hunting activities in a SOC. Most SIEM and NDR platforms have built-in beaconing detection based on interval and payload consistency. Analysts also manually review NetFlow data for hosts with unusually regular outbound connection patterns.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Network Analysis' room\nhttps://tryhackme.com/room/packetsframes",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n\"Given a scenario, analyze data to identify indicators of malicious activity including network traffic indicators of C2 communication.\"",
+    "exam_tip": "On the exam, C2 beaconing questions give you a connection table and ask you to identify the suspicious destination. Look for: consistent intervals (same seconds between connections), same payload size, non-standard ports (anything other than 80, 443, 53), and connections persisting outside business hours. The combination of regular interval + consistent bytes is the defining signature."
+  }
+}

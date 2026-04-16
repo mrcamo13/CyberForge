@@ -1,0 +1,32 @@
+{
+  "id": "case16",
+  "title": "Threat Hunt",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 250,
+  "difficulty": 4,
+  "tools_type": "hunt_analyzer",
+  "challenge_data": "NIGHTWIRE is using living-off-the-land techniques to avoid detection|||process:powershell.exe -enc SQBFAFgA\nprocess:certutil.exe -decode payload.b64\nprocess:svchost.exe -k netsvcs\nnetwork:10.0.0.15 to 185.220.101.45:443\nfile:/tmp/update.sh created\nregistry:HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run modified\nprocess:explorer.exe parent=userinit.exe",
+  "challenge": "Based on the evidence collected, what is the threat hunt confidence score (as a percentage, 0-100) that NIGHTWIRE is using living-off-the-land techniques?",
+  "valid_answers": [
+    "60",
+    "60%",
+    "60 percent"
+  ],
+  "hints": [
+    "Go to https://lolbas-project.github.io/\n        Read about Living Off the Land Binaries and Scripts (LOLBAS).\n        These are legitimate Windows tools (certutil, powershell, mshta, etc.)\n        abused by attackers to run malicious code without dropping new files.",
+    "For each evidence item, decide if it SUPPORTS, REFUTES, or is NEUTRAL\n        for the LOLBAS hypothesis:\n        powershell -enc (encoded command)  -> SUPPORTS (classic LOLBAS)\n        certutil -decode                   -> SUPPORTS (file transfer via LOLBAS)\n        svchost.exe -k netsvcs             -> REFUTES (normal system process)\n        network to 185.220.101.45:443      -> NEUTRAL (C2 traffic, not LOLBAS-specific)\n        /tmp/update.sh                     -> NEUTRAL (Linux artifact)\n        registry Run modified              -> SUPPORTS (persistence via LOLBAS pattern)\n        explorer.exe normal parent         -> REFUTES (normal process tree)\n        Type 'tools' to run the hunt analyzer.",
+    "Type 'tools' in the game. The hunt analyzer scores each evidence item\n        and calculates: confidence = SUPPORTS / (SUPPORTS + REFUTES) x 100.\n        Count the SUPPORTS and REFUTES items, then calculate.",
+    "SPOILER — 3 items SUPPORT (powershell -enc, certutil -decode, registry Run),\n        2 items REFUTE (svchost normal, explorer normal parent), 2 are NEUTRAL.\n        Confidence = 3 / (3 + 2) x 100 = 60%. Type: 60"
+  ],
+  "tools": "Evaluates each evidence item against the hunt hypothesis and calculates a confidence score based on supporting vs refuting evidence.",
+  "learn": "Threat hunting is proactive — analysts form a hypothesis and look for evidence\nto confirm or refute it, rather than waiting for alerts to fire.\n\nThreat hunting methodology:\n  1. HYPOTHESIS   — Form a specific, testable statement about attacker behavior\n                    Good: \"Attacker is using certutil for file transfer\"\n                    Bad:  \"Something suspicious is happening\"\n  2. DATA SOURCES — Identify which logs/telemetry to examine\n  3. HUNT         — Search for evidence using queries, scripts, or tools\n  4. CLASSIFY     — For each finding: supports / refutes / neutral\n  5. CONFIDENCE   — Score = SUPPORTS / (SUPPORTS + REFUTES) x 100\n  6. ESCALATE     — High confidence -> escalate to incident response\n\nLiving-off-the-Land (LOLBAS) techniques — key indicators:\n  powershell -EncodedCommand  — Base64-encoded payload execution\n  certutil -decode / -urlcache — File download via built-in CA tool\n  wmic process call create    — Remote process creation\n  bitsadmin /transfer         — File transfer via BITS service\n  regsvr32 /s /u /i http://   — Signed binary proxy execution\n  mshta vbscript:             — Script execution via HTML Application host\n  schtasks /create            — Persistence via scheduled task\n  rundll32 javascript:        — Code execution via DLL loader\n\nLOLBAS detection is in CySA+ Domain 1 — hunting for these patterns in\nSysmon Event 1 (process create with command line) is the primary method.",
+  "debrief": {
+    "summary": "The hunt returned 60% confidence — three LOLBAS indicators (encoded PowerShell, certutil decode, Run key persistence) vs two normal process entries. This is moderate confidence: enough to escalate to an IR investigation, not enough to definitively attribute to NIGHTWIRE. The encoded PowerShell command (SQBFAFgA decodes to 'IEX' — Invoke-Expression) is a particularly strong indicator.",
+    "real_world": "Threat hunting teams use confidence scores to prioritize their findings. A 60% score typically triggers a Tier 2 investigation to collect more specific evidence before escalating to full IR. Tools like Splunk, Elastic, and Velociraptor are used to run hunts at scale across thousands of endpoints simultaneously.",
+    "next_step": "Practice with real tools:\nLOLBAS Project: https://lolbas-project.github.io/\nTryHackMe: 'Threat Hunting: Introduction' room",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n\"Given a scenario, perform threat hunting activities and apply threat intelligence to identify and analyze threats.\"",
+    "exam_tip": "On the exam, threat hunting questions test the methodology: hypothesis first, then evidence collection, then confidence scoring. Key LOLBAS binaries to memorize: certutil, powershell -enc, wmic, bitsadmin, mshta, regsvr32, rundll32. If you see these with unusual arguments, they support a LOLBAS hypothesis."
+  },
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — THREAT HUNT TEAM\nPRIORITY: HIGH\nANALYST: YOU\n\nNIGHTWIRE INVESTIGATION — Project MERIDIAN\n\nIntelligence suggests NIGHTWIRE uses living-off-the-land (LOLBAS)\ntechniques — abusing built-in Windows tools to avoid AV detection.\n\nHUNT HYPOTHESIS:\n  \"NIGHTWIRE is using living-off-the-land techniques to avoid detection\"\n\nEVIDENCE COLLECTED FROM HOST 10.0.0.15:\n  process  powershell.exe -enc SQBFAFgA\n  process  certutil.exe -decode payload.b64\n  process  svchost.exe -k netsvcs\n  network  10.0.0.15 to 185.220.101.45:443\n  file     /tmp/update.sh created\n  registry HKLM\\...\\CurrentVersion\\Run modified\n  process  explorer.exe parent=userinit.exe\n\nWhat is the confidence score (as a percentage) that the evidence\nSUPPORTS the hypothesis that NIGHTWIRE is using LOLBAS techniques?"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "op01",
+  "title": "Caesar Cipher",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance",
+  "xp_base": 100,
+  "difficulty": 1,
+  "tools_type": "caesar_decoder",
+  "challenge_data": "QHAXVFRUS",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. NexusCorp's night-shift sysadmin made a mistake.\nLeft an unencrypted terminal session open on the external\nmonitoring node. We intercepted a single string before it closed.\n\nLooks like an encoded access password for the vault system.\nWhoever sent it tried to hide it using a Caesar cipher.\nOld school. Won't hold up.\n\nDecode the string. Get the password. We move at 0300.\n\nINTERCEPTED STRING: \"QHAXVFRUS\"\n\nGHOST OUT.",
+  "challenge": "What is the decoded vault password?",
+  "valid_answers": ["nexuscorp"],
+  "hints": [
+    "Hint 1: Go to https://gchq.github.io/CyberChef/\n        Search \"ROT\" and drag the ROT13 recipe to the Recipe box.\n        Change the Amount value from 13 and paste \"QHAXVFRUS\" in the Input box.\n        Adjust the Amount until the output is a real word.",
+    "Hint 2: Run this in a NEW terminal (not in the game):\n        python3 -c \"\n        msg='QHAXVFRUS'\n        for shift in range(26):\n            print(shift, ''.join(chr((ord(c)-65-shift)%26+65)\n            if c.isupper() else c for c in msg))\"\n        Look for the shift that produces a recognizable word.",
+    "Hint 3: Type 'tools' in the game. The Caesar decoder will\n        display all 26 shift results automatically.\n        Look for the one that makes a real word.",
+    "Hint 4: SPOILER — Caesar cipher with shift 3.\n        Q->N, H->E, A->X, X->U, V->S, F->C, R->O, U->R, S->P\n        Decoded = NEXUSCORP\n        Type: nexuscorp"
+  ],
+  "learn": "A Caesar cipher is one of the oldest encryption techniques.\nEach letter in the message is shifted a fixed number of\npositions in the alphabet. Julius Caesar used a shift of 3.\n\nA->D, B->E, C->F ... Z->C\n\nTo decrypt: shift backwards by the same amount.\nQ(shift 3 back)=N, H=E, A=X, X=U, V=S ... -> NEXUSCORP\n\nReal attackers encounter encoded strings in config files,\nenvironment variables, logs, and memory dumps. Recognizing\nencoding schemes (Caesar, Base64, hex, ROT13) and decoding\nthem quickly is a core reconnaissance skill.",
+  "tools": "Runs the Caesar decoder on the intercepted string QHAXVFRUS. Displays all 26 shift results so you can identify the one that produces a real word.",
+  "debrief": {
+    "summary": "You identified and decoded a Caesar cipher — a substitution\ncipher where each letter is shifted by a fixed amount.\nShift 3 backwards turned \"QHAXVFRUS\" into \"NEXUSCORP.\"",
+    "real_world": "Penetration testers regularly find encoded strings in config\nfiles, environment variables, and intercepted traffic.\nRecognizing and decoding these quickly is a core recon skill\nthat shows up in every real engagement.",
+    "next_step": "Next step — practice with real tools:\nTryHackMe: \"Crypto 101\"\nhttps://tryhackme.com/room/cryptoaddicted",
+    "cert_link": "PenTest+ PT0-003 Domain 2 — Reconnaissance:\n\"Given a scenario, perform passive and active reconnaissance.\""
+  }
+}

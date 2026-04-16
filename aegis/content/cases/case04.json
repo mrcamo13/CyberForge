@@ -1,0 +1,28 @@
+{
+  "id": "case04",
+  "title": "Rogue Process",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 150,
+  "difficulty": 2,
+  "tools_type": "process_analyzer",
+  "challenge_data": "PID:1001 python3.10 user:www-data SUID:yes parent:bash\nPID:1002 nginx user:www-data SUID:no parent:systemd\nPID:1003 sshd user:root SUID:no parent:systemd\nPID:1004 python3.10 user:root SUID:yes parent:python3.10\nPID:1005 mysql user:mysql SUID:no parent:systemd",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING ALERT — EDR PLATFORM\nPRIORITY: CRITICAL\nANALYST: YOU\n\nThe EDR platform on the staging server flagged an anomaly.\nA process is running with elevated privileges that should not be.\n\nPROCESS LIST — 203.0.113.47 (captured at 03:15 UTC):\n\nPID  PROCESS      USER      SUID  PARENT\n1001 python3.10   www-data  yes   bash\n1002 nginx        www-data  no    systemd\n1003 sshd         root      no    systemd\n1004 python3.10   root      yes   python3.10\n1005 mysql        mysql     no    systemd\n\nA process spawned a root shell. Identify the malicious PID.",
+  "challenge": "What is the PID of the malicious process running as root via SUID abuse?",
+  "valid_answers": ["1004", "pid 1004", "pid:1004"],
+  "hints": [
+    "Hint 1: Go to https://gtfobins.github.io/#python\n        Read how python3 with the SUID bit set can spawn a root shell.\n        Look for a process in the list that is running as root, has\n        SUID set, and has an unusual parent process.",
+    "Hint 2: Legitimate root processes are spawned by systemd or init.\n        A process running as root with a non-system parent is suspicious.\n        Filter the process list: user=root AND SUID=yes AND parent != systemd\n        Type 'tools' to run the process analyzer.",
+    "Hint 3: Type 'tools' in the game. The process analyzer flags\n        processes with anomalous privilege combinations. Look for\n        the process marked as suspicious — that PID is your answer.",
+    "Hint 4: SPOILER — PID 1004 is python3.10 running as root with SUID=yes,\n        spawned by another python3.10 process (PID 1001, www-data).\n        This is the SUID privilege escalation from op08 — python3.10\n        was used to spawn a root shell. Type: 1004"
+  ],
+  "learn": "Process analysis is used to detect malware, unauthorized tools, and\nprivilege escalation in progress on a live system.\n\nSuspicious process indicators:\n  Unexpected user     — web server process (www-data) spawning a shell\n  SUID on interpreters — python, perl, ruby with SUID = privesc risk\n  Unusual parent       — root process spawned by a non-system parent\n  Known tool names     — nc, ncat, python, bash running unexpectedly\n\nNormal parent chain for system processes:\n  systemd → nginx       (expected)\n  systemd → sshd        (expected)\n  bash    → python3.10  (suspicious — interactive shell spawning python)\n  python3 → python3.10  (root) — very suspicious\n\nWhen investigating a process:\n  1. Check the user — should this process run as this user?\n  2. Check SUID — should this binary have the SUID bit?\n  3. Check the parent — how was this process spawned?\n  4. Cross-reference with EDR alerts and system baseline\n\nProcess analysis maps to CySA+ Domain 1 endpoint security and\nanomaly detection objectives.",
+  "tools": "Analyzes the process list and flags processes with anomalous privilege combinations (SUID + root + non-system parent).",
+  "debrief": {
+    "summary": "You identified PID 1004 — a python3.10 process running as root with the SUID bit set, spawned by a www-data shell. This is the attacker's privilege escalation from op08 caught in real time. The EDR alert was a true positive: unauthorized root access via SUID misconfiguration.",
+    "real_world": "EDR platforms generate process alerts constantly. The analyst must quickly distinguish normal system processes from malicious ones. A SUID interpreter (python, perl) spawning a root process from a non-privileged parent is one of the clearest signs of privilege escalation.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Linux Process Analysis' room\nhttps://tryhackme.com/room/linuxprocessanalysis",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n'Given a scenario, analyze indicators of potentially malicious activity on endpoint systems including anomalous process behavior.'",
+    "exam_tip": "On the exam, process analysis questions often show a process table and ask you to identify the malicious PID or explain why it is suspicious. Key indicators: unexpected user for process type, SUID on interpreters, unusual parent-child chains, and known attack tool names (nc, ncat, python -c, bash -i)."
+  }
+}

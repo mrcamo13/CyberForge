@@ -1,0 +1,222 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "case01",
+      "title": "Suspicious Access",
+      "status": "active",
+      "difficulty": 1,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case02",
+      "title": "Encoded Artifact",
+      "status": "active",
+      "difficulty": 1,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case03",
+      "title": "Scan Report",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case04",
+      "title": "Rogue Process",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case05",
+      "title": "Incident Phase",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response"
+    },
+    {
+      "id": "case06",
+      "title": "C2 Beaconing",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case07",
+      "title": "IOC Hunt",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case08",
+      "title": "ATT&CK Mapping",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case09",
+      "title": "Firewall Gap",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case10",
+      "title": "Risk Score",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case11",
+      "title": "Exec Brief",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case12",
+      "title": "Remediation Order",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case13",
+      "title": "Breach Notification",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case14",
+      "title": "SIEM Triage",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case15",
+      "title": "Log Sources",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case16",
+      "title": "Threat Hunt",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations"
+    },
+    {
+      "id": "case17",
+      "title": "Memory Forensics",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response"
+    },
+    {
+      "id": "case18",
+      "title": "Disk Forensics",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response"
+    },
+    {
+      "id": "case19",
+      "title": "Chain of Custody",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response"
+    },
+    {
+      "id": "case20",
+      "title": "Containment",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response"
+    },
+    {
+      "id": "case21",
+      "title": "Timeline",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response"
+    },
+    {
+      "id": "case22",
+      "title": "Vuln Triage",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case23",
+      "title": "Patch Inhibitors",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case24",
+      "title": "Attack Surface",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case25",
+      "title": "Code Review",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case26",
+      "title": "Threat Intel Vulns",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management"
+    },
+    {
+      "id": "case27",
+      "title": "Security Metrics",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case28",
+      "title": "Compliance Gap",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case29",
+      "title": "SLA Tracking",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case30",
+      "title": "Lessons Learned",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    },
+    {
+      "id": "case31",
+      "title": "Executive Report",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "CySA+ CS0-003 Domain 4 — Reporting and Communication"
+    }
+  ]
+}

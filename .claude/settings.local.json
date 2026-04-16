@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone:*)",
+      "WebSearch",
+      "Bash(python3 -c ':*)",
+      "Bash(python3)",
+      "Bash(python -c \"from utils.terminal import print_success, print_error, print_warning, print_info, print_muted, print_header, print_divider, clear_screen, normalize_input; print\\('OK'\\)\")",
+      "Bash(python -c \"from utils.player import calculate_xp, evaluate_badges; print\\(calculate_xp\\(100, 0\\)\\)\")",
+      "Bash(python -m unittest tests/test_save_manager.py -v)",
+      "Bash(python -c \"from utils.tools import run_tool; print\\(run_tool\\('caesar_decoder', 'QHAXVFRUS'\\)\\)\")",
+      "Bash(python check_imports.py)",
+      "Bash(python -c \"import json; json.load\\(open\\('content/operations/op01.json'\\)\\); json.load\\(open\\('content/placement_test.json'\\)\\); json.load\\(open\\('content/registry.json'\\)\\); print\\('All JSON valid'\\)\")",
+      "Bash(python validate_content.py)",
+      "Bash(python -c \"from engine.operation_runner import load_operation; print\\(load_operation\\('op01'\\)['title']\\)\")",
+      "Bash(python -c \"import main; print\\('main.py imports OK'\\)\")",
+      "Bash(python -m unittest discover tests/ -v)",
+      "Bash(python -m unittest discover tests/)",
+      "Bash(python main.py --dev)",
+      "Bash(python -c ':*)",
+      "Bash(python -c \"from engine.case_runner import load_case; print\\(load_case\\('case01'\\)['title']\\)\")",
+      "Bash(python -m unittest tests/test_tools_stage2.py -v)"
+    ]
+  }
+}

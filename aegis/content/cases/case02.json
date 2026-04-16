@@ -1,0 +1,28 @@
+{
+  "id": "case02",
+  "title": "Encoded Artifact",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 100,
+  "difficulty": 1,
+  "tools_type": "ioc_classifier",
+  "challenge_data": "ZGVwbG95bWFzdGVy",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING ALERT — THREAT INTEL TEAM\nPRIORITY: MEDIUM\nANALYST: YOU\n\nFollowing the admin panel access from 10.0.0.99, forensics\npulled a config file from the staging server. It contains\na string that does not belong.\n\nSTRING: \"ZGVwbG95bWFzdGVy\"\n\nYour task: classify this indicator of compromise.\nWhat type of encoding was used, and what does it decode to?\nThe threat intel team needs the IOC type for their report.\n\nWhat type of encoding is this?",
+  "challenge": "What encoding type is the string \"ZGVwbG95bWFzdGVy\"?",
+  "valid_answers": ["base64", "base 64", "b64"],
+  "hints": [
+    "Hint 1: Go to https://gchq.github.io/CyberChef/\n        Paste the string in the Input box.\n        Click 'Magic' — CyberChef will auto-detect the encoding type.\n        The detected encoding name is your answer.",
+    "Hint 2: Run this in a NEW terminal (not in the game):\n        python3 -c \"import base64; print(base64.b64decode('ZGVwbG95bWFzdGVy').decode())\"\n        If it decodes without error, it is Base64.",
+    "Hint 3: Type 'tools' in the game. The IOC classifier will analyze\n        the string and identify the encoding type automatically.",
+    "Hint 4: SPOILER — The string uses Base64 encoding. The = padding is\n        absent here (padding is optional for some Base64 variants).\n        It decodes to 'deploymaster' — a credential artifact.\n        Type: base64"
+  ],
+  "learn": "An Indicator of Compromise (IOC) is a piece of evidence that a\nsecurity incident has occurred. IOCs are classified by type so\nthey can be shared, tracked, and acted on.\n\nCommon IOC types:\n  IP address     — source of malicious traffic\n  Domain name    — C2 server or phishing domain\n  File hash      — MD5/SHA256 of a malicious file\n  URL            — malicious link\n  Encoded string — obfuscated data left by an attacker\n\nEncoding types analysts encounter:\n  Base64  — A-Z, a-z, 0-9, +, / characters. Often ends with =\n  Hex     — 0-9, a-f only. Even character count.\n  ROT13   — Only letters, shifted 13 positions\n  URL     — %XX percent-encoded characters\n\nRecognizing encoding on sight is a CySA+ tested skill. The key\nis knowing what each encoding 'looks like' so you can triage quickly\nwithout running a tool on every artifact you encounter.",
+  "tools": "Analyzes the artifact string and identifies the encoding type, then decodes it to reveal the plaintext value.",
+  "debrief": {
+    "summary": "You classified 'ZGVwbG95bWFzdGVy' as Base64 encoding and decoded it to reveal the credential 'deploymaster' — a username left in a config file by the attacker. This is the same credential used to access the deployment server during the attack.",
+    "real_world": "Attackers frequently Base64-encode credentials, commands, and payloads to evade simple string-matching detection. SOC analysts learn to recognize common encoding patterns on sight and decode them as part of triage. Finding decoded credentials triggers a mandatory password reset and access review.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Threat Intelligence Tools' room\nhttps://tryhackme.com/room/threatinteltools",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n'Given a scenario, analyze indicators of potentially malicious activity including encoded artifacts and obfuscated data.'",
+    "exam_tip": "On the exam, IOC classification questions give you a string or artifact and ask you to identify the type or the appropriate response action. Know Base64 (A-Za-z0-9+/=), hex (0-9a-f, even length), and the difference between encoding (reversible, no key) vs encryption (reversible, needs key) vs hashing (one-way, fixed length)."
+  }
+}

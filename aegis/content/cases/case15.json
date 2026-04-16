@@ -1,0 +1,34 @@
+{
+  "id": "case15",
+  "title": "Log Sources",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "log_classifier",
+  "challenge_data": "failed login attempt for user administrator\noutbound connection to 185.220.101.45 port 4444\nDNS query for nightwire-c2.xyz\nnew scheduled task created: WindowsUpdate\npowershell.exe spawned by wscript.exe\nUSB device inserted: SanDisk 64GB",
+  "challenge": "Which log source records Windows scheduled task creation events?",
+  "valid_answers": [
+    "windows security log",
+    "security log",
+    "event 4698",
+    "windows security log (event 4698)",
+    "sysmon"
+  ],
+  "hints": [
+    "Go to https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-object-access-events\n        Read about Windows Security Log event IDs for scheduled tasks.\n        Windows logs task creation in the Security channel under a specific Event ID.",
+    "Windows Security Log records system and security events with Event IDs.\n        Scheduled task creation is a persistence technique — it's logged in the\n        Security channel. The event ID for 'A scheduled task was created' is 4698.\n        Type 'tools' to classify all 6 event types at once.",
+    "Type 'tools' in the game. The log classifier maps each event description\n        to its primary log source. Find the scheduled task entry in the output.",
+    "SPOILER — Scheduled task creation is logged in the Windows Security Log\n        under Event ID 4698. Sysmon Event ID 1 (process create) may also capture\n        the schtasks.exe execution. Primary source: Windows Security Log (Event 4698).\n        Type: windows security log"
+  ],
+  "tools": "Maps each event description to its primary log source using the embedded event type reference table.",
+  "learn": "Knowing which log source records which event is a foundational SOC skill.\nPulling the wrong log wastes investigation time. The CySA+ exam tests this\nextensively — for each event type, you must know where to look.\n\nKey log sources and what they record:\n\nWindows Security Log (Security Event Log):\n  Event 4624 — Successful logon\n  Event 4625 — Failed logon\n  Event 4648 — Logon with explicit credentials\n  Event 4688 — New process created\n  Event 4698 — Scheduled task created\n  Event 4720 — User account created\n  Event 4663 — File object access\n  Event 6416 — New external device recognized (USB)\n\nSysmon (System Monitor — enhanced endpoint logging):\n  Event 1   — Process creation (with command line)\n  Event 3   — Network connection\n  Event 11  — File created\n  Event 13  — Registry modification\n  Event 22  — DNS query\n\nLinux log sources:\n  /var/log/auth.log    — SSH, sudo, PAM authentication\n  /var/log/syslog      — General system events, cron\n  /var/log/kern.log    — Kernel messages (USB, hardware)\n  Web server logs      — nginx/apache access.log, error.log\n\nNetwork log sources:\n  Firewall logs        — blocked/allowed connections, NAT\n  DNS server logs      — all DNS queries by IP\n  DHCP logs            — IP assignment records\n  Proxy logs           — HTTP/HTTPS traffic with URL detail",
+  "debrief": {
+    "summary": "Scheduled task creation is recorded in the Windows Security Log under Event ID 4698. In the NIGHTWIRE investigation, the fake 'WindowsUpdate' scheduled task was the attacker's persistence mechanism — knowing to check Event 4698 is what allows analysts to find it quickly.",
+    "real_world": "Log source knowledge is what separates an analyst who finds evidence from one who doesn't. In a real investigation, you submit log pull requests to the SIEM team or log management system — the faster you identify the right source, the faster the investigation moves.",
+    "next_step": "Practice with real references:\nWindows Event ID reference: https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n\"Given a scenario, identify and use the appropriate log sources and tools to detect and investigate security events.\"",
+    "exam_tip": "Memorize these Event IDs for the exam: 4624 (logon), 4625 (failed logon), 4688 (process create), 4698 (scheduled task), 4720 (account create), 4663 (file access), 6416 (USB). For Linux: auth.log = authentication, syslog = general, kern.log = hardware. For network: firewall logs = connections, DNS logs = domain queries."
+  },
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — LOG MANAGEMENT TEAM\nPRIORITY: MEDIUM\nANALYST: YOU\n\nNIGHTWIRE INVESTIGATION — Project MERIDIAN\n\nThe log management team needs to pull raw logs to support the\nNIGHTWIRE investigation. They need to know WHICH log source\nto query for each event type they're hunting for.\n\nEVENT TYPES TO LOCATE:\n  1. Failed login attempt for user administrator\n  2. Outbound connection to 185.220.101.45 port 4444\n  3. DNS query for nightwire-c2.xyz\n  4. New scheduled task created: WindowsUpdate\n  5. powershell.exe spawned by wscript.exe\n  6. USB device inserted: SanDisk 64GB\n\nFor the scheduled task creation event — which log source\nwould contain this record?"
+}

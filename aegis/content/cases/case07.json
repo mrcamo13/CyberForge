@@ -1,0 +1,28 @@
+{
+  "id": "case07",
+  "title": "IOC Hunt",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 100,
+  "difficulty": 2,
+  "tools_type": "ioc_hunter",
+  "challenge_data": "185.220.101.45,deploymaster,/tmp/.x|||2026-04-11T02:14:33 sshd[1234]: Accepted password for deploymaster from 10.0.0.99\\n2026-04-11T02:15:01 sudo[1235]: deploymaster : TTY=pts/0 ; COMMAND=/bin/bash\\n2026-04-11T02:30:15 nginx[800]: 203.0.113.44 - GET /login HTTP/1.1 200\\n2026-04-11T03:02:17 sshd[1290]: Failed password for root from 203.0.113.91\\n2026-04-11T03:15:45 cron[1301]: (root) CMD (/tmp/.x)",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — THREAT INTEL TEAM\nPRIORITY: HIGH\nANALYST: YOU\n\nThe threat intel team has published a fresh IOC feed for the\nNexusCorp attacker. Three indicators have been extracted from\nthe malware sample and attacker infrastructure.\n\nIOC FEED (NexusCorp Actor):\n  185.220.101.45   — Known C2 server IP\n  deploymaster     — Attacker credential artifact\n  /tmp/.x          — Persistence script path\n\nCross-reference these IOCs against the authentication and\nsystem logs from the staging server.\n\nHow many distinct log entries contain a match?",
+  "challenge": "How many distinct log entries match at least one IOC from the threat intel feed?",
+  "valid_answers": ["3", "three"],
+  "hints": [
+    "Go to https://www.cisa.gov/topics/cyber-threats-and-advisories/indicators-of-compromise\nRead about how IOC feeds are used in threat hunting. Each IOC is\na string to search for in logs, file paths, or network data.",
+    "Go through the log entries one by one and check each for any of\nthe three IOC strings: 185.220.101.45, deploymaster, /tmp/.x\nCount distinct matching lines (a line matches if it contains any IOC).\nType 'tools' to run the IOC hunter automatically.",
+    "Type 'tools' in the game. The IOC hunter searches each log line\nfor any of the three IOC strings and marks matches. Count the\n[MATCH] lines — that is your answer.",
+    "SPOILER — Three log lines match:\nLine 1: 'deploymaster' in sshd accepted password line\nLine 2: 'deploymaster' in sudo command line\nLine 5: '/tmp/.x' in cron execution line\nType: 3"
+  ],
+  "learn": "Threat intelligence IOC correlation is how SOC analysts connect\nattacker artifacts to their own environment. An IOC (Indicator of\nCompromise) is evidence of a threat actor — IPs, domains, usernames,\nfile hashes, or file paths extracted from malware analysis or\nincident reports.\n\nIOC correlation workflow:\n  1. Receive IOC feed (from ISAC, vendor, internal IR team)\n  2. Search logs, EDR telemetry, and network captures for matches\n  3. Each match is a potential true positive — investigate further\n  4. Confirmed matches escalate to incident tickets\n\nTypes of IOCs:\n  Network IOCs   — IP addresses, domains, URLs (check firewall/proxy logs)\n  Host IOCs      — File hashes, paths, registry keys (check EDR)\n  Account IOCs   — Usernames, credentials (check auth logs)\n  Behavioral IOCs — Command patterns (check auditd, syslog)\n\nIOC correlation appears in CySA+ Domain 1 threat intelligence objectives.\nThe exam tests whether you know which log source to check for each IOC type.",
+  "tools": "Searches each log entry for any IOC from the feed and reports matches with the matching indicator highlighted.",
+  "debrief": {
+    "summary": "You found 3 log entries matching threat intel IOCs. 'deploymaster' appeared in both SSH authentication and sudo logs — confirming the attacker used this credential to gain access. '/tmp/.x' appeared in a cron job — revealing persistence that was planted after initial access. The C2 IP 185.220.101.45 was not in these logs (it appeared in network flow data from case06, not auth logs).",
+    "real_world": "Threat intel teams publish IOC feeds after each major incident. SOC analysts run automated correlation rules (SIEM) to match new IOCs against historical log data — this retroactive hunting often uncovers earlier attacker activity that was missed in real time.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Threat Intelligence Tools' room\nhttps://tryhackme.com/room/threatinteltools",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n\"Given a scenario, utilize threat intelligence to support incident response and identify indicators of compromise across log sources.\"",
+    "exam_tip": "On the exam, IOC correlation questions test which log source you check for each IOC type. Network IOCs (IPs, domains) → firewall/proxy logs. Account IOCs (usernames) → authentication logs (syslog, Windows Security log). File IOCs (hashes, paths) → EDR/endpoint telemetry. Hash-based IOCs require exact match; string-based IOCs may have case-insensitive partial matches."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "operations": [
+    {
+      "id": "op01",
+      "title": "Caesar Cipher",
+      "status": "active",
+      "difficulty": 1,
+      "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance"
+    },
+    {
+      "id": "op02",
+      "title": "Vault Secrets",
+      "status": "active",
+      "difficulty": 1,
+      "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance"
+    },
+    {
+      "id": "op03",
+      "title": "Network Sweep",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance"
+    },
+    {
+      "id": "op04",
+      "title": "Access Logs",
+      "status": "active",
+      "difficulty": 2,
+      "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance"
+    },
+    {
+      "id": "op05",
+      "title": "Hash Cracker",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits"
+    },
+    {
+      "id": "op06",
+      "title": "Hidden Paths",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance"
+    },
+    {
+      "id": "op07",
+      "title": "Injection Point",
+      "status": "active",
+      "difficulty": 3,
+      "cert_objective": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits"
+    },
+    {
+      "id": "op08",
+      "title": "Root Access",
+      "status": "active",
+      "difficulty": 4,
+      "cert_objective": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits"
+    }
+  ],
+  "cases": []
+}

@@ -1,0 +1,27 @@
+{
+  "id": "op07",
+  "title": "Injection Point",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits",
+  "xp_base": 200,
+  "difficulty": 3,
+  "tools_type": "sqli_tester",
+  "challenge_data": "admin' --",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. The /backup directory contains a database export and\na secondary login form for the internal reporting system.\n\nThe login form passes user input directly into an SQL query —\nno sanitization. Classic injection point.\n\nIf we inject the right payload into the username field, we can\nbypass the authentication entirely and access the reporting system.\n\nTARGET FORM: http://203.0.113.47:8080/backup/report-login\n\nConstruct the payload. Bypass the login.\n\nGHOST OUT.",
+  "challenge": "What SQL injection payload bypasses the login? (enter the username field value)",
+  "valid_answers": ["admin --", "admin'--", "admin' --"],
+  "hints": [
+    "Hint 1: Go to https://portswigger.net/web-security/sql-injection\n        Read \"What is SQL injection?\" — specifically the section on\n        bypassing login forms using a single quote and comment syntax.\n        SQL comments (--) cause the database to ignore the rest of the query.",
+    "Hint 2: The login query looks like:\n        SELECT * FROM users WHERE username='INPUT' AND password='INPUT'\n        If you inject a single quote after the username, you break the query.\n        Then use -- to comment out the password check entirely.\n        Try entering: admin' --\n        (single quote, space, two dashes)",
+    "Hint 3: Type 'tools' in the game. The SQL injection tester shows\n        exactly how the payload is inserted into the query and what\n        the database receives. Read the constructed query carefully.",
+    "Hint 4: SPOILER — The payload is: admin' --\n        This constructs: SELECT * FROM users WHERE username='admin' --' AND password='...'\n        The -- comments out everything after it. Password check bypassed.\n        Type: admin' --"
+  ],
+  "learn": "SQL injection occurs when user input is inserted directly into an\nSQL query without sanitization. The attacker injects SQL syntax to\nchange the meaning of the query.\n\nClassic login bypass:\n\n  Normal query:\n  SELECT * FROM users WHERE username='alice' AND password='secret'\n\n  Injected query (username = admin' --):\n  SELECT * FROM users WHERE username='admin' --' AND password='...'\n\n  The -- starts a SQL comment. Everything after it is ignored.\n  The query becomes: SELECT * FROM users WHERE username='admin'\n  If 'admin' exists, login succeeds regardless of password.\n\nWhy this works:\n- The application trusts user input\n- Input is concatenated directly into the query string\n- No parameterized queries or prepared statements used\n\nPrevention: always use parameterized queries (prepared statements).\nNever concatenate user input into SQL strings.\n\nSQLi is one of the OWASP Top 10 vulnerabilities and appears on\nvirtually every real web application pentest.",
+  "tools": "Tests the SQL injection payload against the simulated login form and shows the constructed query and result.",
+  "debrief": {
+    "summary": "You constructed an SQL injection payload that bypassed NexusCorp's\nreporting system login by turning the password check into a SQL comment.\nThe application concatenated your input directly into a query string —\na classic injection vulnerability that gives unauthenticated access.",
+    "real_world": "SQL injection remains one of the most common critical vulnerabilities\nfound in web application penetration tests. Parameterized queries\n(prepared statements) prevent it completely — but many legacy applications\nstill concatenate user input directly. Finding an SQLi point typically\nmeans the database contents can be fully extracted.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"SQL Injection\" room\nhttps://tryhackme.com/room/sqlinjectionlm",
+    "cert_link": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits:\n\"Given a scenario, research attack vectors and perform web application\nattacks including injection-based vulnerabilities.\""
+  }
+}

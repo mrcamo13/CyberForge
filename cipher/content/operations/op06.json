@@ -1,0 +1,27 @@
+{
+  "id": "op06",
+  "title": "Hidden Paths",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance",
+  "xp_base": 200,
+  "difficulty": 3,
+  "tools_type": "dir_enumerator",
+  "challenge_data": "http://203.0.113.47:8080",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. We are inside the admin panel. The dashboard shows\nsystem status but the real prize is elsewhere on this server.\n\nWeb servers often have paths that are not linked from any page —\nbackup files, old admin endpoints, API routes left exposed.\nA directory scan will find them by brute-forcing common names.\n\nTARGET: http://203.0.113.47:8080\n\nRun the enumeration. Find the hidden backup endpoint.\nThat is our next entry point.\n\nGHOST OUT.",
+  "challenge": "What is the path of the hidden backup endpoint?",
+  "valid_answers": ["/backup", "/backup/"],
+  "hints": [
+    "Hint 1: Go to https://github.com/OJ/gobuster\n        Read the README — specifically the \"dir\" mode.\n        Directory enumeration tries common path names against a web server.\n        Type 'tools' to run the simulated scan on this target.",
+    "Hint 2: In a real engagement you would run (requires gobuster installed):\n        gobuster dir -u http://203.0.113.47:8080 -w /usr/share/wordlists/dirb/common.txt\n        This tries hundreds of common directory names automatically.\n        In this simulation, type 'tools' to see the results.",
+    "Hint 3: Type 'tools' in the game. The directory enumerator shows\n        all paths that returned a 200 or 301 status on the target.\n        Look for the path that looks like a backup location.",
+    "Hint 4: SPOILER — The scan finds /backup returning HTTP 200.\n        This is a common misconfiguration — backup directories left\n        accessible on web servers. Type: /backup"
+  ],
+  "learn": "Directory enumeration (also called dir busting or web fuzzing) probes\na web server for hidden paths by trying common directory and file names\nfrom a wordlist.\n\nThe tool sends requests like:\n  GET /admin HTTP/1.1\n  GET /backup HTTP/1.1\n  GET /config HTTP/1.1\n  ... (hundreds or thousands more)\n\nPaths that return 200 (found) or 301 (redirect) are flagged.\n\nCommon findings:\n  /backup       — backup archives, often downloadable\n  /admin        — admin panels not linked from the main site\n  /config       — configuration files accidentally served\n  /api          — undocumented API endpoints\n  /.git         — exposed version control repositories\n\nReal tools: gobuster, ffuf, dirb, feroxbuster.\nThis is a standard step in web application penetration testing and\nmaps directly to the \"enumeration\" phase of PenTest+ Domain 2.",
+  "tools": "Runs a simulated directory scan on the target web server and shows all paths that returned a 200 or 301 status.",
+  "debrief": {
+    "summary": "You enumerated the NexusCorp web server and discovered /backup —\na directory left accessible on the server containing backup archives.\nDirectory enumeration is a standard recon step that reveals paths the\napplication never intended to expose publicly.",
+    "real_world": "Directory enumeration is one of the most consistently productive\nsteps in web application testing. Real pentesters find exposed backup\nfiles, configuration files, API endpoints, and admin panels this way.\nTools like gobuster and ffuf with large wordlists can find hundreds of\npaths in seconds.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"Content Discovery\" room\nhttps://tryhackme.com/room/contentdiscovery",
+    "cert_link": "PenTest+ PT0-003 Domain 2 — Reconnaissance:\n\"Given a scenario, perform active reconnaissance including web application\nenumeration to identify hidden resources and attack surface.\""
+  }
+}

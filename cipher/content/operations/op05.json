@@ -1,0 +1,27 @@
+{
+  "id": "op05",
+  "title": "Hash Cracker",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits",
+  "xp_base": 200,
+  "difficulty": 3,
+  "tools_type": "hash_cracker",
+  "challenge_data": "5f4dcc3b5aa765d61d8327deb882cf99",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. We found the admin panel at /admin/dashboard.\nIt requires credentials. We found a config file on the deployment\nserver that stores the admin password as an MD5 hash. No salt.\nClassic mistake.\n\nMD5 hashes can be reversed if the original password appears\nin a known wordlist. Run the hash against our dictionary.\nIf the password is common enough, we will have it in seconds.\n\nHASH: 5f4dcc3b5aa765d61d8327deb882cf99\n\nCrack it. Get the admin password.\n\nGHOST OUT.",
+  "challenge": "What is the plaintext password behind the hash?",
+  "valid_answers": ["password"],
+  "hints": [
+    "Hint 1: Go to https://crackstation.net/\n        Paste the hash: 5f4dcc3b5aa765d61d8327deb882cf99\n        Click \"Crack Hashes\". CrackStation checks the hash against\n        billions of known password hashes instantly.",
+    "Hint 2: Run this in a NEW terminal (not in the game):\n        python3 -c \"import hashlib; words=['password','admin','nexuscorp','letmein','welcome']; h='5f4dcc3b5aa765d61d8327deb882cf99'; [print(w) for w in words if hashlib.md5(w.encode()).hexdigest()==h]\"\n        The matching word is the password.",
+    "Hint 3: Type 'tools' in the game. The hash cracker runs a simulated\n        dictionary attack. Watch for the MATCH FOUND line — that word\n        is the plaintext password.",
+    "Hint 4: SPOILER — MD5(\"password\") = 5f4dcc3b5aa765d61d8327deb882cf99\n        This is one of the most commonly cracked hashes in existence.\n        Type: password"
+  ],
+  "learn": "MD5 is a hashing algorithm — it produces a 128-bit (32 hex character)\nfixed-length digest from any input. Hashes are one-way: you cannot\nmathematically reverse them. But you can crack them.\n\nDictionary attack: hash every word in a wordlist and compare to the\ntarget hash. If the password is in the list, you find it instantly.\n\nWhy MD5 is broken for passwords:\n1. No salt — identical passwords produce identical hashes\n2. Fast — a GPU can compute billions of MD5 hashes per second\n3. Pre-computed rainbow tables exist for common passwords\n\nThe hash 5f4dcc3b5aa765d61d8327deb882cf99 has been in public hash\ndatabases for over a decade. Any cracking tool finds it in milliseconds.\n\nSecure alternatives: bcrypt, scrypt, Argon2 — slow by design,\nsalted by default. Finding MD5 in a password store is a critical\nvulnerability finding in any real engagement.",
+  "tools": "Runs a simulated MD5 dictionary attack against the hash and displays each attempt with the final match.",
+  "debrief": {
+    "summary": "You cracked NexusCorp's admin password hash using a dictionary attack.\nThe password \"password\" was stored as an unsalted MD5 hash — one of the\nmost commonly seen credentials in real breach databases. This gives full\naccess to the admin panel at /admin/dashboard.",
+    "real_world": "Cracking password hashes is a core post-exploitation skill. When\npentesters dump a database or config file containing hashes, they run them\nthrough tools like Hashcat or John the Ripper with wordlists like rockyou.txt.\nMD5 without salting is a critical finding — any common password is crackable\nin seconds.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"John the Ripper\" room\nhttps://tryhackme.com/room/johntheripper0",
+    "cert_link": "PenTest+ PT0-003 Domain 3 — Attacks and Exploits:\n\"Given a scenario, perform credential attacks including password cracking\nand hash analysis techniques.\""
+  }
+}

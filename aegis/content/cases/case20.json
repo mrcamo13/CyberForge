@@ -1,0 +1,34 @@
+{
+  "id": "case20",
+  "title": "Containment",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 3 — Incident Response",
+  "xp_base": 250,
+  "difficulty": 4,
+  "tools_type": "containment_advisor",
+  "challenge_data": "asset:domain_controller|threat:critical|dwell:42|data_sensitivity:restricted|attribution:known",
+  "challenge": "Given a known APT on a domain controller with 42-day dwell time and restricted data sensitivity, what is the recommended first containment action?",
+  "valid_answers": [
+    "network isolation",
+    "network isolation only",
+    "isolate network",
+    "block outbound",
+    "network segment"
+  ],
+  "hints": [
+    "Go to https://www.cisa.gov/sites/default/files/publications/Incident-Response-Plan-Basics_508c.pdf\n        Read about containment strategies in incident response.\n        The key tension: contain the threat vs. tip off the attacker.\n        Nation-state actors may destroy evidence if they know they're burned.",
+    "Consider the scenario parameters:\n        - Threat is CRITICAL — must act\n        - Dwell is 42 days (known actor, 42 > 14) — full isolation is risky\n        - Attribution is KNOWN — attacker may react if they notice isolation\n        - Data sensitivity is RESTRICTED — cannot let them keep accessing it\n        Full isolation stops them completely but they'll know instantly.\n        Network isolation blocks outbound C2 while allowing monitoring.\n        Type 'tools' to run the containment advisor.",
+    "Type 'tools' in the game. The containment advisor scores each option\n        by effectiveness minus detection-tip risk. The option with the best\n        net score is the recommendation.",
+    "SPOILER — Network isolation (block outbound C2, keep monitoring)\n        has the best net score for this scenario. It stops the attacker's\n        active C2 channel while limiting the tip-off risk compared to\n        full isolation. Full isolation would trigger immediate attacker\n        response given the 42-day dwell and known attribution.\n        Type: network isolation"
+  ],
+  "tools": "Scores containment options (full isolation, network isolation, monitoring, account lockout) against scenario parameters and recommends the best strategy.",
+  "learn": "Containment strategy is one of the hardest decisions in incident response.\nThe goal is to stop the threat while preserving evidence and avoiding\ntriggering attacker countermeasures.\n\nContainment options:\n\nFULL ISOLATION (network + account lockout):\n  Stops all attacker access immediately.\n  High tip-off risk — attacker knows immediately.\n  Risk: attacker may trigger destructive payload or evidence wipe.\n  Best for: ransomware (already noisy), low dwell time, unknown actor.\n\nNETWORK ISOLATION (block external C2, keep internal monitoring):\n  Cuts attacker's command channel while maintaining visibility.\n  Lower tip-off risk — attacker may think it's a network issue.\n  Allows continued monitoring to gather forensic evidence.\n  Best for: long dwell APT, known actor, intelligence gathering phase.\n\nMONITORING ONLY (observe without intervening):\n  Maximum intelligence collection. Zero tip-off risk.\n  Low effectiveness — attacker continues operating.\n  Best for: very early in investigation, unknown actor, < 7 day dwell.\n\nACCOUNT LOCKOUT ONLY:\n  Removes attacker's credential access.\n  High tip-off risk if attacker has established monitoring of their accounts.\n  Moderate effectiveness — attacker may have other persistence mechanisms.\n\nDecision factors:\n  Dwell time     — longer dwell = more persistence = higher containment urgency\n  Attribution    — known actor = higher tip-off risk\n  Asset type     — domain controller = high priority but high risk if tipped\n  Data sensitivity — RESTRICTED = cannot allow continued access\n  Legal requirements — law enforcement may want continued monitoring\n\nThe NIST SP 800-61 principle: containment must balance \"stopping the bleeding\"\nagainst the intelligence value of continued observation.",
+  "debrief": {
+    "summary": "Network isolation is the recommended first action — it has the best net score (effectiveness 4 minus tip-risk 2 = 2) for this scenario. Full isolation would be ideal but the 42-day dwell with known attribution makes it too likely the attacker would trigger countermeasures. Cutting the C2 channel while maintaining monitoring balances stopping the breach against preserving forensic evidence and intelligence value.",
+    "real_world": "APT containment decisions are made by senior IR leads, often with legal, executive, and sometimes law enforcement input. The decision to contain vs. observe is documented in the IR plan and requires sign-off. The intelligence community sometimes asks organizations to maintain monitoring on APT actors to gather attribution evidence.",
+    "next_step": "Practice with real frameworks:\nCISA IR Guide: https://www.cisa.gov/sites/default/files/publications/Incident-Response-Plan-Basics_508c.pdf",
+    "cert_link": "CySA+ CS0-003 Domain 3 — Incident Response:\n\"Given a scenario, select and implement the appropriate containment, eradication, and recovery strategy for an incident.\"",
+    "exam_tip": "On the exam, containment questions test the trade-off between effectiveness and evidence preservation. Key rules: ransomware -> full isolation immediately (already noisy). APT with long dwell -> network isolation first (preserve intelligence). Unknown actor -> monitoring first. Also know: NIST IR phases are Preparation -> Detection -> Containment -> Eradication -> Recovery -> Post-Incident."
+  },
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — INCIDENT RESPONSE TEAM\nPRIORITY: CRITICAL\nANALYST: YOU\n\nNIGHTWIRE INVESTIGATION — Project MERIDIAN\n\nThe NIGHTWIRE APT has been active on the Veridian domain controller\nfor 42 days. Attribution is confirmed — a nation-state actor.\n\nASSET DETAILS:\n  Asset type:       Domain controller (DC-01)\n  Threat level:     CRITICAL (confirmed APT, nation-state)\n  Dwell time:       42 days\n  Data sensitivity: RESTRICTED (AD credentials, group policies)\n  Attribution:      KNOWN (nation-state actor, confirmed TTPs)\n\nThe IR team needs a containment recommendation. The challenge:\nif the attacker knows they've been detected (tipped off), they\nmay destroy evidence, exfiltrate remaining data, or activate\ndestructive payloads before we can contain them.\n\nWhat containment strategy should be applied first?"
+}

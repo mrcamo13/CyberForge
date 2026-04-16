@@ -1,0 +1,27 @@
+{
+  "id": "op02",
+  "title": "Vault Secrets",
+  "track": "red",
+  "cert_objective": "PenTest+ PT0-003 Domain 2 — Reconnaissance",
+  "xp_base": 100,
+  "difficulty": 1,
+  "tools_type": "base64_decoder",
+  "challenge_data": "ZGVwbG95bWFzdGVy",
+  "scenario": "CIPHER TERMINAL v1.0 — SECURE CHANNEL ESTABLISHED\n\nINCOMING TRANSMISSION FROM: GHOST (CIPHER Field Agent)\nCLASSIFICATION: PRIORITY ALPHA\n\nOperative. The vault password NEXUSCORP got us in.\n\nThe vault system contains a secondary credentials file.\nNexusCorp's dev team encoded it before storing —\nprobably thought Base64 would hide it. Amateurs.\n\nWe need the username for the internal deployment server.\nIt's buried in this encoded string pulled from the file:\n\nENCODED STRING: \"ZGVwbG95bWFzdGVy\"\n\nDecode it. Get the username. Clock is ticking.\n\nGHOST OUT.",
+  "challenge": "What is the decoded username?",
+  "valid_answers": ["deploymaster"],
+  "hints": [
+    "Hint 1: Go to https://gchq.github.io/CyberChef/\n        Search \"From Base64\" and drag it to the Recipe box.\n        Paste \"ZGVwbG95bWFzdGVy\" in the Input box.\n        The decoded text appears in the Output box.",
+    "Hint 2: Run this in a NEW terminal (not in the game):\n        python3 -c \"import base64; print(base64.b64decode('ZGVwbG95bWFzdGVy').decode())\"\n        The output is the username.",
+    "Hint 3: Type 'tools' in the game. The Base64 decoder will\n        automatically decode the string for you.\n        Read the output carefully.",
+    "Hint 4: SPOILER — Base64 decodes \"ZGVwbG95bWFzdGVy\" to \"deploymaster\".\n        Each group of 4 Base64 characters maps to 3 bytes of original data.\n        Type: deploymaster"
+  ],
+  "learn": "Base64 is an encoding scheme — not encryption.\nIt converts binary data into ASCII text using 64 printable characters\n(A-Z, a-z, 0-9, +, /) so it can be safely transmitted as text.\n\nBase64 is NOT secure. It adds no secrecy — anyone can decode it instantly.\nIt is used for transport, not protection.\n\nPentesters find Base64 constantly: in HTTP headers, JWT tokens,\nenvironment variables, config files, and source code comments.\nRecognizing the = padding at the end is the first clue.\n\nReal example: the Authorization header in HTTP Basic Auth is\njust Base64-encoded \"username:password\". Decode it and you have\ncredentials in plaintext.",
+  "tools": "Decodes the Base64 string from the vault file and displays the plaintext result.",
+  "debrief": {
+    "summary": "You decoded a Base64-encoded credential found during analysis of\nNexusCorp's vault system artifacts. Base64 is encoding, not encryption —\nit provides zero security and is trivially reversed. The username\n\"deploymaster\" opens the internal deployment server.",
+    "real_world": "Pentesters find Base64-encoded credentials in HTTP Basic Auth\nheaders, JWT tokens, environment variables, Docker configs, and source code.\nAlways run suspected Base64 strings through a decoder during recon —\nit costs seconds and occasionally hands you credentials in plaintext.",
+    "next_step": "Practice with real tools:\nTryHackMe: \"Encoding\" room\nhttps://tryhackme.com/room/encodedata",
+    "cert_link": "PenTest+ PT0-003 Domain 2 — Reconnaissance:\n\"Analyze discovered artifacts and encoded data to identify credential material.\""
+  }
+}

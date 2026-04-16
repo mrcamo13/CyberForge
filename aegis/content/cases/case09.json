@@ -1,0 +1,28 @@
+{
+  "id": "case09",
+  "title": "Firewall Gap",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "rule_analyzer",
+  "challenge_data": "DENY ANY 0.0.0.0/0 203.0.113.47 22\\nALLOW ANY 0.0.0.0/0 203.0.113.47 443\\nDENY ANY 0.0.0.0/0 203.0.113.47 3306\\nALLOW ANY 0.0.0.0/0 ANY ANY|||203.0.113.1 203.0.113.47 8080 INBOUND\\n203.0.113.1 203.0.113.47 22 INBOUND\\n10.0.0.99 185.220.101.45 4444 OUTBOUND\\n203.0.113.44 203.0.113.47 443 INBOUND",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — SECURITY ENGINEERING\nPRIORITY: HIGH\nANALYST: YOU\n\nRoot cause analysis: how did the attacker reach nginx on port 8080?\nThe firewall team has provided the ruleset active during the attack.\n\nFIREWALL RULES (evaluated top-down, first match wins):\n  1. DENY  ANY → 203.0.113.47:22   (block SSH)\n  2. ALLOW ANY → 203.0.113.47:443  (allow HTTPS)\n  3. DENY  ANY → 203.0.113.47:3306 (block MySQL)\n  4. ALLOW ANY → ANY:ANY           (allow everything else)\n\nTRAFFIC DURING ATTACK WINDOW:\n  203.0.113.1  → 203.0.113.47:8080  (attacker → nginx)\n  203.0.113.1  → 203.0.113.47:22    (attacker → SSH)\n  10.0.0.99    → 185.220.101.45:4444 (C2 beacon outbound)\n  203.0.113.44 → 203.0.113.47:443   (legitimate HTTPS)\n\nWhat port should have a DENY rule to prevent the initial compromise?",
+  "challenge": "Which specific port number should have had an explicit DENY rule in this ruleset to block the attacker's initial access?",
+  "valid_answers": ["8080"],
+  "hints": [
+    "Go to https://www.cloudflare.com/learning/network-layer/what-is-a-firewall/\nRead about firewall rule ordering — 'first match wins'. A packet\nis allowed or denied by the first rule that matches it.\nLook at what rule matched the attacker's connection to port 8080.",
+    "Trace the attacker's connection (203.0.113.1 → 203.0.113.47:8080)\nthrough the rules top-down. Rule 1 is for port 22 — no match.\nRule 2 is for port 443 — no match. Rule 3 is for port 3306 — no match.\nRule 4 is ALLOW ANY → ANY — match. Port 8080 falls through to the\ncatch-all ALLOW. Type 'tools' to run the rule analyzer.",
+    "Type 'tools' in the game. The rule analyzer evaluates each traffic\nentry against the rules and shows which rule matched. Look for the\nattacker's connection and which port has no specific DENY rule.",
+    "SPOILER — Port 8080 had no explicit DENY rule. The catch-all\nALLOW rule (rule 4) permitted the attacker to reach nginx.\nThe fix: add 'DENY ANY 0.0.0.0/0 203.0.113.47 8080' before rule 4.\nType: 8080"
+  ],
+  "learn": "Firewall rule analysis is a core vulnerability management skill. Misconfigurations\nin firewall rulesets are one of the most common causes of preventable breaches.\n\nKey concepts:\n  First match wins  — rules are evaluated top-down; first matching rule applies\n  Implicit deny     — some firewalls deny all traffic not explicitly permitted\n  Catch-all ALLOW   — 'ALLOW ANY ANY' at the end defeats implicit deny\n  Principle of least privilege — only permit what is explicitly required\n\nCommon firewall misconfigurations:\n  Catch-all ALLOW rules     — as seen here: port 8080 not explicitly blocked\n  Overly broad source ranges — ALLOW from 0.0.0.0/0 instead of specific IPs\n  Missing egress rules       — only inbound rules, no outbound (C2 beacon went out)\n  Rule ordering errors       — ALLOW before DENY for the same traffic\n\nFirewall review checklist:\n  1. Is there an explicit DENY for all unused ports?\n  2. Is the catch-all rule DENY rather than ALLOW?\n  3. Are management ports (22, 3389) restricted to known admin IPs?\n  4. Are egress rules in place for outbound C2 prevention?",
+  "tools": "Evaluates each traffic entry against the firewall rules top-down and shows which rule matched and the resulting action.",
+  "debrief": {
+    "summary": "You identified port 8080 as the firewall gap. The catch-all ALLOW rule permitted all traffic not explicitly denied — and port 8080 was never explicitly denied. The fix is to add a specific DENY rule for port 8080 before the catch-all. The egress gap (port 4444 C2 beacon allowed out) is a bonus finding that would have contained the compromise earlier.",
+    "real_world": "Firewall rule reviews are a standard part of vulnerability management programs. Security teams periodically audit rulesets to identify catch-all ALLOWs, unused open ports, and missing egress controls. Many compliance frameworks (PCI DSS, ISO 27001) require periodic firewall reviews.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Firewalls' room\nhttps://tryhackme.com/room/redteamfirewalls",
+    "cert_link": "CySA+ CS0-003 Domain 2 — Vulnerability Management:\n\"Given a scenario, analyze and interpret output from security technologies and identify misconfigurations that create vulnerability exposure.\"",
+    "exam_tip": "On the exam, firewall rule questions often ask you to trace a packet through a ruleset and identify the matching rule. Remember: first match wins, rules are evaluated top-down. Also know: implicit deny vs explicit deny, and that egress filtering (blocking outbound C2) is just as important as ingress filtering."
+  }
+}

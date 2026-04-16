@@ -1,0 +1,28 @@
+{
+  "id": "case08",
+  "title": "ATT&CK Mapping",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 1 — Security Operations",
+  "xp_base": 150,
+  "difficulty": 3,
+  "tools_type": "attack_mapper",
+  "challenge_data": "python3 binary with SUID bit set exploited to spawn interactive root shell from www-data web process",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING TICKET — THREAT INTEL TEAM\nPRIORITY: MEDIUM\nANALYST: YOU\n\nRoot cause analysis of the NexusCorp privilege escalation.\nThe IR team has documented the following observed behavior:\n\nOBSERVED BEHAVIOR:\n  - python3 binary had SUID bit set on the staging server\n  - Attacker (running as www-data) executed python3 with os.setuid(0)\n  - Result: interactive root shell spawned (PID 1004)\n  - Vector: SUID misconfiguration, no exploit CVE required\n\nMap this behavior to the correct MITRE ATT&CK technique.\nWhat is the ATT&CK Technique ID?",
+  "challenge": "What is the MITRE ATT&CK Technique ID for exploiting SUID binaries to gain elevated privileges?",
+  "valid_answers": ["t1548.001", "1548.001"],
+  "hints": [
+    "Go to https://attack.mitre.org/\nSearch for 'setuid' or 'SUID' in the search bar.\nNavigate to the matching technique and note the Technique ID\n(format: TXXXX or TXXXX.XXX for sub-techniques).",
+    "MITRE ATT&CK organizes techniques by Tactic. The relevant tactic\nhere is 'Privilege Escalation' — the attacker moved from www-data\nto root. Look for a technique about abusing OS permission mechanisms.\nType 'tools' to search the embedded ATT&CK reference.",
+    "Type 'tools' in the game. The ATT&CK mapper searches for keywords\nfrom the behavior description. Look for the technique flagged as\nmatching 'SUID' or 'setuid' in the output.",
+    "SPOILER — T1548.001 is the sub-technique 'Abuse Elevation Control\nMechanism: Setuid and Setgid'. The parent T1548 is too broad — the\nexam and this challenge expect the specific sub-technique.\nTactic: Privilege Escalation. Mitigation: remove unnecessary SUID bits.\nType: T1548.001"
+  ],
+  "learn": "MITRE ATT&CK is the industry-standard framework for describing adversary\ntactics, techniques, and procedures (TTPs). CySA+ CS0-003 requires\nanalysts to map observed behaviors to ATT&CK techniques.\n\nFramework structure:\n  Tactics    — the adversary's goal (e.g. Privilege Escalation)\n  Techniques — how they achieve it (e.g. T1548)\n  Sub-techniques — specific variants (e.g. T1548.001 = Setuid/Setgid)\n  Mitigations — how defenders prevent it\n  Detections  — how defenders detect it\n\nKey ATT&CK tactics for CySA+:\n  Initial Access       — how they got in (T1190 web exploit, T1078 valid accounts)\n  Execution            — running malicious code (T1059 command interpreter)\n  Persistence          — maintaining access (T1053 scheduled tasks)\n  Privilege Escalation — gaining higher access (T1548 SUID/SGID)\n  Defense Evasion      — hiding from detection (T1027 obfuscation)\n  Command and Control  — communicating with attacker (T1071 app layer protocol)\n  Exfiltration         — stealing data (T1041 exfil over C2)\n\nFor the NexusCorp attack, the full kill chain maps to:\n  T1190 → T1078 → T1059.004 → T1548.001 → T1071.001",
+  "tools": "Searches the embedded MITRE ATT&CK technique reference for keywords from the behavior description.",
+  "debrief": {
+    "summary": "You mapped the privilege escalation to T1548.001 — Abuse Elevation Control Mechanism: Setuid and Setgid. This is the ATT&CK sub-technique for SUID/SGID binary abuse. The full NexusCorp kill chain is: T1190 (web exploit) → T1078 (valid accounts via deploymaster) → T1059.004 (Unix shell) → T1548.001 (SUID privesc) → T1071.001 (C2 beaconing).",
+    "real_world": "Mapping incidents to ATT&CK is standard practice for threat intel reports and Purple Team exercises. ATT&CK mappings let defenders identify detection gaps, prioritize security controls, and communicate incident details to other security teams using a shared language.",
+    "next_step": "Practice with real tools:\nMITRE ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/",
+    "cert_link": "CySA+ CS0-003 Domain 1 — Security Operations:\n\"Given a scenario, use the appropriate tools and techniques to determine malicious activity and map it to threat intelligence frameworks including MITRE ATT&CK.\"",
+    "exam_tip": "On the exam, ATT&CK mapping questions describe an observed behavior and ask for the Technique ID or tactic. Key ones to memorize: T1190 (exploit public-facing app), T1078 (valid accounts), T1548 (SUID/sudo), T1059 (command interpreter), T1071 (C2 protocol), T1041 (exfiltration over C2). Also know: Initial Access ≠ Execution ≠ Persistence — tactics are the WHY, techniques are the HOW."
+  }
+}

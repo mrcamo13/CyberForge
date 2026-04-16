@@ -1,0 +1,61 @@
+{
+  "pass_threshold": 4,
+  "xp_on_pass": 50,
+  "questions": [
+    {
+      "id": "pt01",
+      "question": "What does a Caesar cipher do?",
+      "options": [
+        "Encrypts data using a public/private key pair",
+        "Shifts each letter a fixed number of positions in the alphabet",
+        "Converts text to binary representation",
+        "Hashes a password for secure storage"
+      ],
+      "correct_index": 1
+    },
+    {
+      "id": "pt02",
+      "question": "What does Base64 encoding do?",
+      "options": [
+        "Encrypts data so it cannot be read without a key",
+        "Compresses data to reduce file size",
+        "Converts binary data into ASCII text for safe transport",
+        "Hashes data to verify file integrity"
+      ],
+      "correct_index": 2
+    },
+    {
+      "id": "pt03",
+      "question": "When a port scan shows a port as \"open\", what does that mean?",
+      "options": [
+        "A firewall is actively blocking traffic on that port",
+        "A service is listening and accepting connections on that port",
+        "The host is offline and not responding to probes",
+        "The port has been flagged by an intrusion detection system"
+      ],
+      "correct_index": 1
+    },
+    {
+      "id": "pt04",
+      "question": "What does an MD5 hash produce?",
+      "options": [
+        "An encrypted version of the original data, reversible with a key",
+        "A compressed archive of the original input",
+        "A fixed-length digest that uniquely represents the input",
+        "A Base64-encoded copy of the original input"
+      ],
+      "correct_index": 2
+    },
+    {
+      "id": "pt05",
+      "question": "In a web server access log, what does HTTP status 200 mean?",
+      "options": [
+        "The requested resource was permanently redirected",
+        "The client was forbidden from accessing the resource",
+        "The request was successful and content was returned",
+        "The server encountered an internal processing error"
+      ],
+      "correct_index": 2
+    }
+  ]
+}

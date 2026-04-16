@@ -1,0 +1,28 @@
+{
+  "id": "case03",
+  "title": "Scan Report",
+  "track": "blue",
+  "cert_objective": "CySA+ CS0-003 Domain 2 — Vulnerability Management",
+  "xp_base": 150,
+  "difficulty": 2,
+  "tools_type": "vuln_scorer",
+  "challenge_data": "nginx 1.24.0 port 8080 CVE-FAKE-2024 CVSS 9.8 unauthenticated RCE",
+  "scenario": "AEGIS TERMINAL v1.0 — VERIDIAN SYSTEMS SOC\n\nINCOMING ALERT — VULNERABILITY MANAGEMENT TEAM\nPRIORITY: CRITICAL\nANALYST: YOU\n\nThe weekly vulnerability scan of the staging server at\n203.0.113.47 has flagged multiple findings. The VM team\nneeds the highest-priority finding identified for immediate\npatching.\n\nSCAN RESULTS — 203.0.113.47:\n\nFinding 1: OpenSSH 8.9p1 (port 22)\n  CVE-FAKE-2022-001 | CVSS 5.3 | Medium\n  Info disclosure — version banner exposed\n\nFinding 2: nginx 1.24.0 (port 8080)\n  CVE-FAKE-2024-099 | CVSS 9.8 | Critical\n  Unauthenticated Remote Code Execution\n\nFinding 3: MySQL (port 3306) — filtered\n  No findings (port filtered, not reachable)\n\nWhich finding should be patched first?",
+  "challenge": "What is the CVE ID of the highest-priority finding that should be patched first?",
+  "valid_answers": ["cve-fake-2024-099", "cve-fake-2024"],
+  "hints": [
+    "Hint 1: Go to https://www.first.org/cvss/calculator/3.1\n        Read 'Base Score Metrics' — CVSS scores range from 0.0 to 10.0.\n        Critical = 9.0-10.0. High = 7.0-8.9. The highest score = highest\n        priority. Type 'tools' to run the vulnerability scorer.",
+    "Hint 2: In a real SOC you would sort findings by CVSS score descending:\n        sort -t'|' -k3 -rn vuln_report.txt\n        The finding with the highest CVSS score and 'Critical' severity\n        should be patched first, especially if it allows unauthenticated access.",
+    "Hint 3: Type 'tools' in the game. The vulnerability scorer ranks\n        all findings by priority. The top-ranked finding is your answer.\n        Look at both CVSS score and exploitability.",
+    "Hint 4: SPOILER — CVE-FAKE-2024-099 on nginx 1.24.0 has CVSS 9.8\n        (Critical) and allows unauthenticated RCE. This is the highest\n        priority — it is remotely exploitable with no authentication required.\n        Type: CVE-FAKE-2024-099"
+  ],
+  "learn": "Vulnerability management is the continuous process of identifying,\nclassifying, prioritizing, and remediating security weaknesses.\n\nCVSS (Common Vulnerability Scoring System) scores 0.0-10.0:\n  Critical: 9.0-10.0 — patch immediately\n  High:     7.0-8.9  — patch within 30 days\n  Medium:   4.0-6.9  — patch within 90 days\n  Low:      0.1-3.9  — patch at next maintenance window\n\nPrioritization factors beyond CVSS:\n  Exploitability — is there a public exploit available?\n  Authentication — unauthenticated vulnerabilities are higher risk\n  Asset criticality — is this a production or staging system?\n  Network exposure — is the port internet-facing?\n\nCySA+ Domain 2 tests whether you can read a scan report and identify\nthe correct remediation priority — not just the highest CVSS number,\nbut the finding most likely to be exploited in your environment.",
+  "tools": "Scores and ranks all vulnerability findings by priority using CVSS score and exploitability factors.",
+  "debrief": {
+    "summary": "You identified CVE-FAKE-2024-099 as the highest-priority finding — a Critical CVSS 9.8 unauthenticated RCE in nginx 1.24.0. This is the vulnerability the attacker used to gain initial access to the staging server. Patching this immediately closes the entry point.",
+    "real_world": "Vulnerability prioritization is a daily task for security teams. A scanner may return hundreds of findings — the analyst must identify which ones represent real, exploitable risk in their environment. CVSS 9.x Critical findings with unauthenticated RCE always go to the top of the queue.",
+    "next_step": "Practice with real tools:\nTryHackMe: 'Vulnerability Management' room\nhttps://tryhackme.com/room/vulnerabilitymanagementkj",
+    "cert_link": "CySA+ CS0-003 Domain 2 — Vulnerability Management:\n'Given a scenario, analyze output from vulnerability assessment tools and prioritize findings for remediation.'",
+    "exam_tip": "On the exam, vulnerability prioritization questions often give you a list of findings and ask which should be addressed first. Always prioritize by: (1) CVSS score, (2) unauthenticated vs authenticated exploit, (3) network-accessible vs local-only, (4) production vs non-production asset. An unauthenticated Critical on an internet-facing service always wins."
+  }
+}
