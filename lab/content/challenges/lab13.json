@@ -1,0 +1,25 @@
+{
+  "id": "lab13",
+  "title": "Log Correlator",
+  "difficulty": 3,
+  "xp_base": 200,
+  "fixtures": ["attacker_auth.log", "attacker_web.log"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 13 -- LOG CORRELATOR\nDifficulty: *** (Advanced)\n\nThe security team has auth logs and web access logs from the same\ntimeframe. Your task: find IPs that appear in BOTH files.\nThese are likely attackers who probed the web server AND attempted\nSSH login -- a clear multi-stage attack pattern.\n\nFiles: workspace/attacker_auth.log and workspace/attacker_web.log\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read attacker_auth.log and attacker_web.log. Find IPs that appear in BOTH files. Print them sorted alphabetically, one per line.",
+  "starter_code": "# lab13 -- Log Correlator\n# Find IPs that appear in BOTH attacker_auth.log and attacker_web.log\n# Print them sorted alphabetically\n\nimport re\n\nIP_PATTERN = r\"\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b\"\n\ndef extract_ips(filename):\n    with open(filename, \"r\") as f:\n        content = f.read()\n    # TODO: use re.findall to extract IPs\n    # TODO: return as a set\n    pass\n\nauth_ips = extract_ips(\"attacker_auth.log\")\nweb_ips = extract_ips(\"attacker_web.log\")\n\n# TODO: find the intersection (IPs in both sets)\n# TODO: sort and print\n",
+  "expected_output": "10.0.0.7\n10.0.0.9\n203.0.113.2",
+  "hints": [
+    "Return a set from extract_ips:\n        return set(re.findall(IP_PATTERN, content))",
+    "Set intersection finds items in both sets:\n        both = auth_ips & web_ips\n        (or: auth_ips.intersection(web_ips))",
+    "Full solution:\n        auth_ips = set(re.findall(IP_PATTERN, open('attacker_auth.log').read()))\n        web_ips = set(re.findall(IP_PATTERN, open('attacker_web.log').read()))\n        for ip in sorted(auth_ips & web_ips):\n            print(ip)",
+    "SPOILER:\n        import re\n        P = r'\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b'\n        auth = set(re.findall(P, open('attacker_auth.log').read()))\n        web = set(re.findall(P, open('attacker_web.log').read()))\n        [print(ip) for ip in sorted(auth & web)]"
+  ],
+  "learn": "Python sets:\n  A set stores unique values with no duplicates.\n  set([1, 2, 2, 3]) => {1, 2, 3}\n  Sets support fast membership testing and set operations.\n\nSet operations:\n  Union:        a | b   -- all items in either set\n  Intersection: a & b   -- only items in BOTH sets\n  Difference:   a - b   -- items in a but not b\n  These operations are O(n) -- much faster than nested loops.\n\nLog correlation concept:\n  Finding the same IP in multiple log sources raises confidence\n  that activity is malicious. One SSH failure = noise.\n  SSH failures + web probing from same IP = likely attacker.\n  SIEMs (Splunk, Elastic, Sentinel) run correlation rules 24/7\n  doing exactly this across thousands of log sources.",
+  "debrief": {
+    "summary": "Found 3 IPs in both logs: 10.0.0.7, 10.0.0.9, and 203.0.113.2. These attackers both probed the web server AND attempted SSH login -- a clear multi-stage attack pattern. Your script just automated what a SIEM correlation rule does.",
+    "real_world": "Log correlation is the core function of a SIEM. Splunk, Elastic, and Microsoft Sentinel run correlation rules 24/7 looking for exactly this pattern -- the same IP appearing in multiple event sources. Your Python set intersection is conceptually identical.",
+    "next_step": "Extend your correlator:\n  1. Also find IPs unique to auth (SSH-only) vs web-only\n  2. Count how many times each correlated IP appears in each log\n  3. Add a third log source (firewall.log)",
+    "cert_link": "CySA+ CS0-003 Domain 1 -- Security Operations:\n  Log correlation and SIEM are heavily tested.\n  The entire threat detection framework depends on correlating events across sources.",
+    "exam_tip": "Log correlation = finding relationships between events in different data sources. SIEM correlation rules define what combinations of events constitute an alert. Know: SIEM, SOAR, EDR, and how they use correlation."
+  }
+}

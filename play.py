@@ -5,6 +5,8 @@ Single entry point for all CyberForge simulators.
 Usage:
     python play.py          — show game selector
     python play.py --dev    — pass dev flag through to selected game
+
+Double-click play.bat on Windows to launch without a terminal command.
 """
 
 import os
@@ -62,8 +64,9 @@ def main() -> None:
         _p(_CYAN,   "=" * 50)
         _p(_CYAN,   "  SELECT SIMULATOR")
         _p(_CYAN,   "=" * 50)
-        _p(_WHITE,  "  [1] CIPHER  — Red Team   (PenTest+)")
-        _p(_WHITE,  "  [2] AEGIS   — Blue Team  (CySA+)")
+        _p(_WHITE,  "  [1] CIPHER  -- Red Team   (PenTest+)")
+        _p(_WHITE,  "  [2] AEGIS   -- Blue Team  (CySA+)")
+        _p(_GREEN,  "  [3] LAB     -- Script Lab  (Python automation)")
         _p(_GRAY,   "  [0] Quit")
         _p(_CYAN,   "=" * 50)
 
@@ -73,12 +76,12 @@ def main() -> None:
             _p(_GRAY, "Goodbye.")
             sys.exit(0)
 
-        if choice in ("1", "2"):
-            target_dir = "cipher" if choice == "1" else "aegis"
+        if choice in ("1", "2", "3"):
+            target_dir = {"1": "cipher", "2": "aegis", "3": "lab"}[choice]
             target_main = os.path.join(HERE, target_dir, "main.py")
 
             if not os.path.exists(target_main):
-                _p(_YELLOW, f"Could not find {target_dir}/main.py — check your install.")
+                _p(_YELLOW, f"Could not find {target_dir}/main.py -- check your install.")
                 continue
 
             # Pass --dev through if set
@@ -88,11 +91,13 @@ def main() -> None:
                 sys.argv.remove("--dev")
 
             # Add the simulator's own directory to the path, then run it
-            sys.path.insert(0, os.path.join(HERE, target_dir))
+            sim_dir = os.path.join(HERE, target_dir)
+            if sim_dir not in sys.path:
+                sys.path.insert(0, sim_dir)
             runpy.run_path(target_main, run_name="__main__")
             return  # game exited cleanly; drop back to OS
 
-        _p(_YELLOW, "Enter 1, 2, or 0.")
+        _p(_YELLOW, "Enter 1, 2, 3, or 0.")
 
 
 if __name__ == "__main__":

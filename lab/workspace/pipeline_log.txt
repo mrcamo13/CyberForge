@@ -1,0 +1,15 @@
+[IDS] ALERT: suspicious traffic from 10.0.0.5 -- port sweep detected on segment
+[SIEM] INFO: internal host 10.0.0.256 attempted outbound connection (invalid, skipped)
+[IDS] WARN: external probe from 172.16.0.12 targeting port 443
+[FIREWALL] DENY: source 999.0.0.1 blocked by geo-filter rule (invalid octet)
+[IDS] ALERT: exfiltration attempt detected from 203.0.113.7 to external sink
+[SIEM] ERROR: parser failed on token not-an-ip in field src_ip
+[IDS] INFO: host 300.1.2.3 rejected -- octet out of range (invalid)
+[SIEM] DEBUG: partial address 192.168.1 found in payload, not a full IP
+[IDS] WARN: repeated connection attempts from 10.0.0.5 -- brute force pattern
+[FIREWALL] DENY: destination 10.0.0.256 unreachable (invalid, skipped)
+[SIEM] ALERT: correlation rule R42 triggered on 172.16.0.12 -- lateral movement
+[IDS] INFO: short notation 10.0 in user-agent string, ignored
+[SIEM] ALERT: C2 beacon confirmed from 203.0.113.7 -- severity CRITICAL
+[FIREWALL] LOG: egress traffic from 10.0.0.5 to threat-intel-flagged destination
+[IDS] DEBUG: validation skipped for malformed token 300.1.2.3 in raw log field

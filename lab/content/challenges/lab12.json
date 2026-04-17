@@ -1,0 +1,27 @@
+{
+  "id": "lab12",
+  "title": "Banner Grabber",
+  "difficulty": 3,
+  "xp_base": 200,
+  "fixtures": [],
+  "test_server_port": 7012,
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 12 -- BANNER GRABBER\nDifficulty: *** (Advanced)\n\nDuring a pentest, you need to identify running services by grabbing\ntheir banners. The game has started a test server on localhost\nport 7012 that simulates an SSH service greeting.\n\nConnect to it and capture the banner it sends.\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Connect to 127.0.0.1 port 7012 using a socket. Receive the banner the server sends. Print it (stripped of whitespace).",
+  "starter_code": "# lab12 -- Banner Grabber\n# Connect to 127.0.0.1:7012, receive the service banner, print it\n\nimport socket\n\nHOST = \"127.0.0.1\"\nPORT = 7012\n\n# TODO: create a TCP socket\n# TODO: connect to HOST:PORT\n# TODO: receive data (up to 1024 bytes)\n# TODO: decode and print (strip whitespace)\n",
+  "expected_output": "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6",
+  "hints": [
+    "Create and connect a socket:\n        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        s.connect((HOST, PORT))",
+    "Receive data:\n        data = s.recv(1024)\n        s.close()\n        print(data.decode().strip())",
+    "Full solution:\n        import socket\n        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        s.connect(('127.0.0.1', 7012))\n        data = s.recv(1024)\n        s.close()\n        print(data.decode().strip())",
+    "SPOILER:\n        import socket\n        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        s.settimeout(3)\n        s.connect(('127.0.0.1', 7012))\n        print(s.recv(1024).decode().strip())\n        s.close()"
+  ],
+  "learn": "Python sockets:\n  socket.socket(AF_INET, SOCK_STREAM) creates a TCP socket.\n  AF_INET = IPv4. SOCK_STREAM = TCP (reliable, ordered).\n  s.connect((host, port)) establishes the connection.\n  s.recv(1024) receives up to 1024 bytes -- returns bytes, not str.\n  Always close the socket when done.\n\nBanner grabbing:\n  Many services send a greeting on connect without needing a request:\n    SSH: SSH-2.0-OpenSSH_8.9p1\n    FTP: 220 vsftpd 3.0.3\n    SMTP: 220 mail.example.com ESMTP\n  HTTP requires sending a request first (GET / HTTP/1.0).\n\nWhy banners matter:\n  The version string reveals the exact software version.\n  Attackers use this to look up CVEs in NVD or Exploit-DB.\n  nmap -sV does banner grabbing to identify services.\n\nDefensive note:\n  Suppressing banners or returning fake ones is a valid hardening step.\n  Honeypots often return convincing-looking banners to attract attackers.",
+  "debrief": {
+    "summary": "Retrieved banner: SSH-2.0-OpenSSH_8.9p1 Ubuntu. This reveals the exact service, version, and OS. An attacker uses this to look up CVEs for that specific version. A defender uses this to audit which service versions are exposed.",
+    "real_world": "Banner grabbing is one of the first steps in both pentesting and vulnerability scanning. Nessus, OpenVAS, and nmap all grab banners. Defenders harden systems by suppressing banners or returning fake ones (honeypots).",
+    "next_step": "Try extending:\n  1. Grab banners from multiple ports (combine with lab05 scanner)\n  2. Send an HTTP request and read the Server: header\n  3. Look up the version in NVD (nvd.nist.gov) for known CVEs",
+    "cert_link": "PenTest+ PT0-003 Domain 2 -- Reconnaissance:\n  Service enumeration and version identification.\n  CySA+ CS0-003 -- Vulnerability assessment and asset discovery.",
+    "exam_tip": "Passive banner grabbing = just reading what the server sends. Active service detection = nmap -sV sends probes to elicit responses. Know the difference for PenTest+ questions."
+  },
+  "test_server_banner": "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "lab03",
+  "title": "Hash Checker",
+  "difficulty": 2,
+  "xp_base": 150,
+  "fixtures": ["suspicious.bin"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 03 -- HASH CHECKER\nDifficulty: ** (Intermediate)\n\nA suspicious file was found on an endpoint during the NIGHTWIRE\ninvestigation. The malware analyst has provided the known SHA-256\nhash of the Cobalt Strike beacon that NIGHTWIRE used.\n\nKnown bad hash:\n  aa3278193c16ca46977ba7a5b9218f08aa9f4aabe4f9e21ebde3d49b09c00402\n\nYour job: hash the file and determine if it matches.\n\nThe file is at: workspace/suspicious.bin\nWrite a script that prints MATCH or NO MATCH.",
+  "challenge": "Compute the SHA-256 hash of suspicious.bin.\nCompare it to: aa3278193c16ca46977ba7a5b9218f08aa9f4aabe4f9e21ebde3d49b09c00402\nPrint exactly: MATCH\nor exactly:    NO MATCH",
+  "starter_code": "# lab03 -- Hash Checker\n# Compute the SHA-256 hash of suspicious.bin and compare to the known bad hash.\n\nimport hashlib\n\nKNOWN_HASH = \"aa3278193c16ca46977ba7a5b9218f08aa9f4aabe4f9e21ebde3d49b09c00402\"\n\n# TODO: open suspicious.bin in binary mode (\"rb\")\n# TODO: read its contents\n# TODO: compute sha256 hash using hashlib\n# TODO: compare to KNOWN_HASH and print MATCH or NO MATCH\n",
+  "expected_output": "MATCH",
+  "hints": [
+    "Open the file in binary mode:\n        with open(\"suspicious.bin\", \"rb\") as f:\n            data = f.read()\n        Binary mode (\"rb\") is required for non-text files.",
+    "Compute the hash:\n        file_hash = hashlib.sha256(data).hexdigest()\n        hexdigest() returns the hash as a hex string.",
+    "Compare and print:\n        if file_hash == KNOWN_HASH:\n            print(\"MATCH\")\n        else:\n            print(\"NO MATCH\")",
+    "SPOILER -- Full solution:\n        import hashlib\n        KNOWN_HASH = \"aa3278193c16ca46977ba7a5b9218f08aa9f4aabe4f9e21ebde3d49b09c00402\"\n        with open(\"suspicious.bin\", \"rb\") as f:\n            data = f.read()\n        file_hash = hashlib.sha256(data).hexdigest()\n        print(\"MATCH\" if file_hash == KNOWN_HASH else \"NO MATCH\")"
+  ],
+  "learn": "Cryptographic hashing is used constantly in security for file integrity.\n\nhashlib -- Python's built-in crypto hash module:\n  import hashlib\n  hashlib.sha256(data).hexdigest()  ->  64-char hex string\n  hashlib.md5(data).hexdigest()     ->  32-char hex string (weaker)\n\nBinary file mode:\n  open(\"file.bin\", \"rb\")  -- \"r\" = read, \"b\" = binary\n  Always use \"rb\" for non-text files (executables, images, zips)\n  Text mode (\"r\") mangles binary data on Windows (line ending conversion)\n\nHash algorithms to know:\n  MD5    -- 128-bit, broken for security, still used for checksums\n  SHA-1  -- 160-bit, deprecated\n  SHA-256 -- 256-bit, current standard, use this\n  SHA-512 -- 512-bit, extra strong\n\nReal-world use:\n  VirusTotal checks file hashes against known malware databases.\n  SIEM rules trigger on known-bad hashes (IOC matching).\n  Software vendors publish SHA-256 hashes so you can verify downloads.",
+  "debrief": {
+    "summary": "The file hash matched the known Cobalt Strike beacon signature. This confirms the file found on the endpoint is the same malware used in the NIGHTWIRE attack. Hash matching is step one of malware triage -- it tells you instantly if a file is a known threat without running it.",
+    "real_world": "In a real investigation, you would submit the hash to VirusTotal (virustotal.com) and cross-reference it against threat intel platforms like MISP or OpenCTI. A MATCH on a known-bad hash is enough to escalate to incident response without further analysis.",
+    "next_step": "Extend your script: instead of one known hash, read a file of known-bad hashes (one per line) and check if suspicious.bin matches ANY of them. This is how a real hash-based IOC scanner works.",
+    "cert_link": "CySA+ CS0-003 Domain 3 -- Incident Response:\n  Hash-based IOC matching is a tested topic under malware analysis and evidence handling.",
+    "exam_tip": "On the exam: SHA-256 is the current standard hash for file integrity. MD5 and SHA-1 are deprecated for security use. Know that hashing is used for: malware identification, file integrity monitoring, chain of custody (evidence hasn't been tampered with), and password storage (with salt)."
+  }
+}

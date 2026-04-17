@@ -1,0 +1,39 @@
+{
+  "id": "lab14",
+  "title": "Argument Script",
+  "difficulty": 3,
+  "xp_base": 200,
+  "fixtures": ["access.log"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 14 -- ARGUMENT SCRIPT\nDifficulty: *** (Advanced)\n\nYou need to write a reusable grep tool in Python -- a script that\ntakes a filename and a keyword as command-line arguments and prints\nmatching lines. Write it to be called like:\n\n  python solution.py access.log 404\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Write a script that reads sys.argv[1] as the filename and sys.argv[2] as the search term. Print every line in the file that contains the search term. Strip trailing whitespace from each printed line.",
+  "starter_code": "# lab14 -- Argument Script\n# Usage: python solution.py <filename> <search_term>\n# Reads sys.argv[1] as filename, sys.argv[2] as search term\n# Prints every line containing the search term (strip trailing whitespace)\n\nimport sys\n\n# TODO: get filename from sys.argv[1]\n# TODO: get search_term from sys.argv[2]\n# TODO: open the file and print lines that contain the search_term\n",
+  "expected_output": "",
+  "test_cases": [
+    {
+      "description": "Filter 404 lines",
+      "args": ["access.log", "404"],
+      "fixtures": ["access.log"],
+      "expected_output": "203.0.113.2 - - [01/Apr/2026:08:01:45 +0000] \"GET /admin HTTP/1.1\" 404 512\n203.0.113.4 - - [01/Apr/2026:08:02:33 +0000] \"GET /secret.txt HTTP/1.1\" 404 512\n203.0.113.6 - - [01/Apr/2026:08:03:22 +0000] \"GET /.env HTTP/1.1\" 404 512\n203.0.113.8 - - [01/Apr/2026:08:04:10 +0000] \"GET /wp-admin HTTP/1.1\" 404 512\n203.0.113.10 - - [01/Apr/2026:08:05:01 +0000] \"GET /shell.php HTTP/1.1\" 404 512"
+    },
+    {
+      "description": "Filter 200 lines",
+      "args": ["access.log", "200"],
+      "fixtures": ["access.log"],
+      "expected_output": "203.0.113.1 - - [01/Apr/2026:08:01:12 +0000] \"GET /index.html HTTP/1.1\" 200 1024\n203.0.113.3 - - [01/Apr/2026:08:02:10 +0000] \"POST /login HTTP/1.1\" 200 256\n203.0.113.5 - - [01/Apr/2026:08:03:01 +0000] \"GET /favicon.ico HTTP/1.1\" 200 128\n203.0.113.7 - - [01/Apr/2026:08:03:55 +0000] \"GET /robots.txt HTTP/1.1\" 200 64\n203.0.113.9 - - [01/Apr/2026:08:04:44 +0000] \"GET /index.html HTTP/1.1\" 200 1024"
+    }
+  ],
+  "hints": [
+    "sys.argv is a list. sys.argv[0] = script name, sys.argv[1] = first argument:\n        filename = sys.argv[1]\n        term = sys.argv[2]",
+    "Open and search:\n        with open(filename, 'r') as f:\n            for line in f:\n                if term in line:\n                    print(line.strip())",
+    "Full solution:\n        import sys\n        filename = sys.argv[1]\n        term = sys.argv[2]\n        with open(filename, 'r') as f:\n            for line in f:\n                if term in line:\n                    print(line.strip())",
+    "SPOILER:\n        import sys\n        fn, term = sys.argv[1], sys.argv[2]\n        [print(l.strip()) for l in open(fn) if term in l]\n        This is exactly what grep does:\n          grep '404' access.log\n        You just wrote grep in Python."
+  ],
+  "learn": "sys.argv:\n  sys.argv is a list of command-line arguments.\n  sys.argv[0] = the script name itself\n  sys.argv[1] = first user argument\n  sys.argv[2] = second user argument\n  Always import sys at the top.\n\nWhy use arguments instead of hardcoded filenames:\n  Reusable scripts work on any file, any keyword.\n  They integrate with pipelines, cron jobs, and automation.\n  Hardcoded filenames = one-trick scripts. Args = tools.\n\nargparse (next level):\n  import argparse\n  parser = argparse.ArgumentParser()\n  parser.add_argument('filename')\n  parser.add_argument('term')\n  args = parser.parse_args()\n  Adds help text, validation, optional flags -- production quality.",
+  "debrief": {
+    "summary": "Your script works like grep -- reusable against any file with any keyword. Two test cases, both passed: 404 filter (5 lines) and 200 filter (5 lines). You just wrote a reusable CLI tool.",
+    "real_world": "Every security tool worth using is a CLI program with arguments. Learning sys.argv and argparse lets you write tools that integrate with pipelines, scheduled tasks, and automation frameworks.",
+    "next_step": "Level up your grep:\n  1. Add -i flag for case-insensitive search (check sys.argv for '-i')\n  2. Add line numbers to the output\n  3. Accept multiple search terms with OR logic\n  4. Use argparse for proper argument parsing",
+    "cert_link": "General scripting skill -- tested across PenTest+, CySA+, and Security+.\n  Automation and scripting are explicitly tested in modern cert exams.",
+    "exam_tip": "Security+ SY0-701 and CySA+ both include scripting questions. Know that sys.argv[0] is the script name, subsequent indices are user-provided arguments. argparse is the production-quality alternative."
+  }
+}

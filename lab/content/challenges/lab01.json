@@ -1,0 +1,25 @@
+{
+  "id": "lab01",
+  "title": "Log Parser",
+  "difficulty": 1,
+  "xp_base": 100,
+  "fixtures": ["access.log"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 01 -- LOG PARSER\nDifficulty: * (Beginner)\n\nYou are a SOC analyst. The web server at 203.0.113.47 has been\ngenerating errors all morning. Your manager wants a list of every\nrequest that returned a 404 Not Found status code.\n\nThe log file is at: workspace/access.log\nYour script must read it and print every line that contains a 404.\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read access.log and print every line that contains \" 404 \".\nOne line of output per matching log entry. No extra formatting.",
+  "starter_code": "# lab01 -- Log Parser\n# Read access.log and print every line that contains a 404 status code.\n\nwith open(\"access.log\", \"r\") as f:\n    for line in f:\n        # TODO: check if this line contains a 404\n        # TODO: if it does, print it (strip the trailing newline)\n        pass\n",
+  "expected_output": "203.0.113.2 - - [01/Apr/2026:08:01:45 +0000] \"GET /admin HTTP/1.1\" 404 512\n203.0.113.4 - - [01/Apr/2026:08:02:33 +0000] \"GET /secret.txt HTTP/1.1\" 404 512\n203.0.113.6 - - [01/Apr/2026:08:03:22 +0000] \"GET /.env HTTP/1.1\" 404 512\n203.0.113.8 - - [01/Apr/2026:08:04:10 +0000] \"GET /wp-admin HTTP/1.1\" 404 512\n203.0.113.10 - - [01/Apr/2026:08:05:01 +0000] \"GET /shell.php HTTP/1.1\" 404 512",
+  "hints": [
+    "The 'in' operator checks if a string contains a substring.\n        Try: if \" 404 \" in line",
+    "Use line.strip() to remove the trailing newline before printing.\n        Your loop body should be:\n          if \" 404 \" in line:\n              print(line.strip())",
+    "Full solution structure:\n        with open(\"access.log\", \"r\") as f:\n            for line in f:\n                if \" 404 \" in line:\n                    print(line.strip())",
+    "SPOILER -- Complete solution:\n        with open(\"access.log\", \"r\") as f:\n            for line in f:\n                if \" 404 \" in line:\n                    print(line.strip())"
+  ],
+  "learn": "File I/O and string searching are the foundation of log analysis.\n\nOpening a file in Python:\n  with open(\"filename.txt\", \"r\") as f:   # \"r\" = read mode\n      for line in f:                      # iterates line by line\n          print(line.strip())             # strip() removes \\n\n\nThe 'with' statement:\n  Automatically closes the file when the block ends -- even if an\n  error occurs. Always use 'with open()' instead of f = open().\n\nString membership test:\n  if \"404\" in line:    # True if \"404\" appears anywhere in line\n  if \" 404 \" in line:  # More specific -- requires spaces around it\n                        # Avoids matching \"4040\" or \"14040\"\n\nWhy SOC analysts care:\n  404 errors in bulk from one IP = directory enumeration attack.\n  An attacker is probing for hidden files (/.env, /wp-admin, /shell.php).\n  Your script just automated what grep does:\n    grep \" 404 \" access.log",
+  "debrief": {
+    "summary": "Your script found 5 404 errors -- all probing for sensitive files: /admin, /secret.txt, /.env, /wp-admin, and /shell.php. This is a classic reconnaissance pattern. An attacker is directory-busting the server looking for an entry point.",
+    "real_world": "In a real SOC, log parsing is automated by a SIEM (Splunk, Elastic). But analysts still write one-off Python scripts when they need a custom filter the SIEM doesn't support -- or when they're analyzing an exported log file offline. This exact script (read file, filter lines) is used daily.",
+    "next_step": "Try extending your script:\n  1. Count how many 404s came from each IP address\n  2. Print only the IPs with more than 2 404s\n  This is alert triage -- identifying the noisiest offenders.",
+    "cert_link": "CySA+ CS0-003 Domain 1 -- Security Operations:\n  Log analysis and SIEM correlation are tested in every exam version.",
+    "exam_tip": "On the CySA+ exam, log analysis questions give you log output and ask what it indicates. Knowing that bulk 404s from one IP = directory enumeration is a common question pattern."
+  }
+}

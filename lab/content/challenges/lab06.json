@@ -1,0 +1,25 @@
+{
+  "id": "lab06",
+  "title": "CSV Event Counter",
+  "difficulty": 2,
+  "xp_base": 150,
+  "fixtures": ["network_events.csv"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 06 -- CSV EVENT COUNTER\nDifficulty: ** (Intermediate)\n\nYou are a SOC analyst. Your manager just forwarded a CSV export\nfrom the SIEM covering the last hour of network events. She needs\nto know which source IPs generated the most events -- fast.\n\nThe file is at: workspace/network_events.csv\nYour script must parse it and rank the IPs by event count.\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read network_events.csv using the csv module. Count how many events each source_ip generated. Print each IP and count, sorted by count descending. Format: 'IP: count'",
+  "starter_code": "# lab06 -- CSV Event Counter\n# Count events per source IP from network_events.csv\n# Print results sorted by count (highest first)\n# Format: \"IP: count\"\n\nimport csv\n\ncounts = {}\n\nwith open(\"network_events.csv\", \"r\") as f:\n    reader = csv.DictReader(f)\n    for row in reader:\n        # TODO: get the source_ip from the row\n        # TODO: increment counts[source_ip]\n        pass\n\n# TODO: sort counts by value (descending) and print each \"IP: count\"\n",
+  "expected_output": "192.168.1.10: 8\n10.0.0.5: 5\n10.0.0.21: 3\n172.16.0.4: 2\n10.0.0.12: 1",
+  "hints": [
+    "Access a CSV column by name with DictReader:\n        for row in reader:\n            ip = row['source_ip']\n        Use counts.get(ip, 0) + 1 to increment safely.",
+    "Build the counts dict in the loop:\n        counts[ip] = counts.get(ip, 0) + 1\n        Then sort: sorted(counts.items(), key=lambda x: x[1], reverse=True)",
+    "Print loop:\n        for ip, count in sorted(counts.items(), key=lambda x: x[1], reverse=True):\n            print(f'{ip}: {count}')",
+    "SPOILER -- Full solution:\n        import csv\n        counts = {}\n        with open('network_events.csv', 'r') as f:\n            reader = csv.DictReader(f)\n            for row in reader:\n                ip = row['source_ip']\n                counts[ip] = counts.get(ip, 0) + 1\n        for ip, count in sorted(counts.items(), key=lambda x: x[1], reverse=True):\n            print(f'{ip}: {count}')"
+  ],
+  "learn": "csv.DictReader vs csv.reader:\n  csv.reader returns each row as a list -- you access columns by index.\n  csv.DictReader returns each row as a dict -- you access columns by name.\n  DictReader is almost always better: self-documenting, order-independent.\n\nDict counting pattern:\n  counts = {}\n  counts[key] = counts.get(key, 0) + 1\n  counts.get(key, 0) returns 0 if key doesn't exist yet -- safe increment.\n\nsorted() with key and reverse:\n  sorted(counts.items(), key=lambda x: x[1], reverse=True)\n  counts.items() returns (key, value) pairs.\n  key=lambda x: x[1] sorts by the value (count), not the key (IP).\n  reverse=True gives descending order.\n\nLambda functions:\n  lambda x: x[1] is an anonymous one-liner function.\n  Equivalent to: def get_second(x): return x[1]\n\nWhy SOC analysts use CSV exports:\n  SIEMs export data as CSV for offline processing, custom analysis,\n  and sharing with stakeholders. The counting pattern you wrote is\n  the foundation of threat quantification -- top talkers with high\n  event counts are the first IPs to investigate.",
+  "debrief": {
+    "summary": "Your script identified 192.168.1.10 as the top offender with 8 events -- a clear sign of automated attack activity. The CSV parsing and counting pattern you used is the foundation of threat quantification in any SOC.",
+    "real_world": "SIEM exports are often delivered as CSVs when analysts need to process data outside the platform. Python's csv module handles these reliably. The counting pattern you wrote is used in everything from alert triage to building dashboards.",
+    "next_step": "Extend your script:\n  1. Filter to only show IPs with count > 2\n  2. Also show the most common event_type per IP\n  3. Export results to a new CSV file using csv.writer",
+    "cert_link": "CySA+ CS0-003 Domain 1 -- Security Operations:\n  Log analysis and event correlation are core tested topics.",
+    "exam_tip": "CSV parsing questions on CySA+ often ask you to identify the top source of malicious events. Knowing how to count, sort, and filter structured data is key."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "lab15",
+  "title": "Full Pipeline",
+  "difficulty": 4,
+  "xp_base": 300,
+  "fixtures": ["pipeline_log.txt"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 15 -- FULL PIPELINE\nDifficulty: **** (Expert)\n\nYou've made it to the final challenge.\n\nA SIEM alert fired on pipeline_log.txt -- a raw log dump containing\nIP-like patterns mixed with invalid addresses and garbage data.\nYour task: build a full triage pipeline.\n\n  1. Extract all IP-like patterns with regex\n  2. Validate each (all four octets must be 0-255)\n  3. Deduplicate\n  4. For each unique valid IP (sorted), hash it with MD5\n  5. Print the IOC report: 'IP | MD5_HASH'\n\nFile: workspace/pipeline_log.txt\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read pipeline_log.txt. Extract all IP-like patterns with regex. Validate each (all four octets must be 0-255). For each VALID IP (unique, sorted), print: 'IP | MD5_HASH'.",
+  "starter_code": "# lab15 -- Full Pipeline\n# Read pipeline_log.txt\n# 1. Extract all IP-like patterns (regex)\n# 2. Validate each IP (octets 0-255)\n# 3. For each unique valid IP (sorted), hash with MD5\n# 4. Print: \"IP | MD5_HASH\"\n\nimport re\nimport hashlib\n\nIP_PATTERN = r\"\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b\"\n\ndef is_valid_ip(ip):\n    # TODO: split on '.', check each octet is 0-255\n    pass\n\ndef md5_hash(text):\n    # TODO: return the MD5 hex digest of text\n    pass\n\nwith open(\"pipeline_log.txt\", \"r\") as f:\n    content = f.read()\n\n# TODO: extract all IPs with re.findall\n# TODO: deduplicate\n# TODO: filter with is_valid_ip\n# TODO: sort and print each \"IP | md5_hash(IP)\"\n",
+  "expected_output": "10.0.0.5 | 0669df0f031fb83e345267a9679bbc6a\n172.16.0.12 | 16ccae3995ea5f1227a9efcfe8ec8e06\n203.0.113.7 | 68fecd3b63b272e813f600f1a4885e0c",
+  "hints": [
+    "Validate an IP:\n        parts = ip.split('.')\n        return len(parts) == 4 and all(0 <= int(p) <= 255 for p in parts)\n        Wrap in try/except for non-numeric parts.",
+    "MD5 hash a string:\n        hashlib.md5(text.encode()).hexdigest()",
+    "Pipeline:\n        all_ips = set(re.findall(IP_PATTERN, content))\n        valid = sorted(ip for ip in all_ips if is_valid_ip(ip))\n        for ip in valid:\n            print(f'{ip} | {md5_hash(ip)}')",
+    "SPOILER -- Full solution:\n        import re, hashlib\n        P = r'\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b'\n        def valid(ip):\n            try: return all(0<=int(x)<=255 for x in ip.split('.'))\n            except: return False\n        content = open('pipeline_log.txt').read()\n        ips = sorted(ip for ip in set(re.findall(P, content)) if valid(ip))\n        [print(f'{ip} | {hashlib.md5(ip.encode()).hexdigest()}') for ip in ips]"
+  ],
+  "learn": "The pipeline pattern:\n  Raw data -> Extract -> Validate -> Enrich -> Output\n  Each stage transforms the data into a cleaner, more useful form.\n  This is how SOAR platforms process every alert.\n\nIP validation:\n  Regex matches the shape (4 dot-separated groups of digits).\n  Validation checks the values (each octet 0-255).\n  Always validate after extraction -- regex is not a validator.\n\nIOC hashing:\n  Hashing an IP lets you share it pseudonymously.\n  Some threat intel platforms accept MD5-hashed IOCs for privacy.\n  Hashing is also used for deduplication across large datasets.\n\nPutting it all together:\n  File I/O (lab01) + Regex (lab07) + Sets (lab13) +\n  Validation (lab02) + Hashing (lab03) = Full pipeline.\n  Every skill from this lab has led to this moment.",
+  "debrief": {
+    "summary": "Pipeline complete. Three valid IPs extracted, validated, and hashed. This is the core loop of automated threat triage: ingest raw data, extract indicators, validate, enrich (hashing/lookup), output actionable results. You just built a mini-SOAR.",
+    "real_world": "SOAR platforms (Splunk SOAR, Palo Alto XSOAR) run Python playbooks that do exactly this -- receive an alert, extract IOCs, validate them, query threat feeds, and auto-block at the firewall. The logic is identical to your script.",
+    "next_step": "Build the full SOC pipeline:\n  1. Query VirusTotal API for each IP (requests library)\n  2. Add geolocation lookup (ipinfo.io API)\n  3. Write results to a JSON incident report\n  4. Send a Slack/Teams alert if any IP is HIGH severity",
+    "cert_link": "CySA+ CS0-003 Domain 1 -- Security Operations:\n  Automation, scripting, and SOAR are explicitly tested.\n  PenTest+ PT0-003 Domain 5 -- Reporting and Communication:\n  IOC documentation and reporting.",
+    "exam_tip": "SOAR = Security Orchestration, Automation, and Response. Key capability: automated playbooks triggered by SIEM alerts. CySA+ expects you to understand how SOAR reduces mean time to respond (MTTR). Your script IS a SOAR playbook."
+  }
+}

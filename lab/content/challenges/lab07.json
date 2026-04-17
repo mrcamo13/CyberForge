@@ -1,0 +1,25 @@
+{
+  "id": "lab07",
+  "title": "Regex IP Extractor",
+  "difficulty": 2,
+  "xp_base": 150,
+  "fixtures": ["raw_output.txt"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 07 -- REGEX IP EXTRACTOR\nDifficulty: ** (Intermediate)\n\nRaw tool output was dumped to a file after a network scan. The\noutput is messy -- IPs are buried in sentences, not one per line.\nYou need to extract every unique IPv4 address for further analysis.\n\nThe file is at: workspace/raw_output.txt\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read raw_output.txt. Use the re module to find all IPv4 addresses. Print each unique IP once, sorted alphabetically.",
+  "starter_code": "# lab07 -- Regex IP Extractor\n# Extract all unique IPv4 addresses from raw_output.txt\n# Print sorted alphabetically, one per line\n\nimport re\n\n# IPv4 pattern: four groups of 1-3 digits separated by dots\nIP_PATTERN = r\"\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b\"\n\nwith open(\"raw_output.txt\", \"r\") as f:\n    content = f.read()\n\n# TODO: use re.findall to extract all IPs\n# TODO: deduplicate (use a set)\n# TODO: sort and print\n",
+  "expected_output": "10.0.0.1\n10.0.0.2\n172.16.5.1\n192.168.0.254\n203.0.113.5",
+  "hints": [
+    "re.findall returns a list of all matches:\n        ips = re.findall(IP_PATTERN, content)\n        This may include duplicates.",
+    "Deduplicate with a set:\n        unique_ips = set(re.findall(IP_PATTERN, content))\n        Then sort: sorted(unique_ips)",
+    "Full solution:\n        ips = sorted(set(re.findall(IP_PATTERN, content)))\n        for ip in ips:\n            print(ip)",
+    "SPOILER:\n        import re\n        IP_PATTERN = r'\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b'\n        with open('raw_output.txt', 'r') as f:\n            content = f.read()\n        for ip in sorted(set(re.findall(IP_PATTERN, content))):\n            print(ip)"
+  ],
+  "learn": "re.findall():\n  Returns a list of all non-overlapping matches in a string.\n  If the pattern has a capture group, returns the group contents.\n  re.findall(r'\\d+', '1 fish 2 fish') => ['1', '2']\n\nRegex building blocks:\n  \\d      -- any digit (0-9)\n  \\d{1,3} -- 1 to 3 digits\n  \\.      -- literal dot (backslash escapes special meaning)\n  \\b      -- word boundary (prevents matching inside longer numbers)\n\nSets for deduplication:\n  set() removes duplicates automatically.\n  set(['a', 'b', 'a']) => {'a', 'b'}\n  sorted(set(...)) gives a deduplicated sorted list.\n\nWhy regex IP extraction matters:\n  Threat hunting means processing raw, unstructured output -- nmap\n  logs, IDS alerts, email headers. Re.findall is the standard tool\n  for pulling indicators out of noisy text.\n\nNote on this pattern:\n  \\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3} matches IP-shaped strings\n  but does NOT validate that octets are 0-255. That is lab15.\n  For quick extraction from trusted tool output, this is fine.",
+  "debrief": {
+    "summary": "Your regex extracted 5 unique IPs from unstructured tool output. This is threat hunting automation -- turning raw noisy output into a clean list for further analysis.",
+    "real_world": "Regex IP extraction is used everywhere: parsing Wireshark exports, nmap output, IDS alerts, email headers. Any time an analyst needs to pull indicators from unstructured text, re.findall is the tool.",
+    "next_step": "Upgrade your extractor:\n  1. Filter out private IPs (RFC 1918: 10.x, 172.16-31.x, 192.168.x)\n  2. Validate each IP (reject octets > 255)\n  3. Add a CIDR range check",
+    "cert_link": "CySA+ CS0-003 Domain 2 -- Vulnerability Management:\n  Threat hunting and IOC extraction are tested topics.",
+    "exam_tip": "Regex is tested in multiple cert exams. Know \\d (digit), \\w (word char), \\s (space), . (any char), * (0+), + (1+), ? (0 or 1), {n,m} (range)."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "player_name": "mc",
+  "created_at": "2026-04-17T00:57:25.596078+00:00",
+  "last_played": "2026-04-17T01:07:27.066919+00:00",
+  "total_time_played_seconds": 599,
+  "streak": {
+    "current": 0,
+    "longest": 0,
+    "last_played_date": "2026-04-17"
+  },
+  "xp": 25,
+  "badges": [
+    "first_solve"
+  ],
+  "completed": [
+    "lab01"
+  ],
+  "hints_used": {
+    "lab01": 3
+  },
+  "metrics": {
+    "lab01": {
+      "attempts": 1,
+      "time_spent_seconds": 599,
+      "hints_used": 3,
+      "completed": true
+    }
+  }
+}

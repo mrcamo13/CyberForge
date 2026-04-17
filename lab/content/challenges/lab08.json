@@ -1,0 +1,25 @@
+{
+  "id": "lab08",
+  "title": "JSON Threat Feed",
+  "difficulty": 2,
+  "xp_base": 150,
+  "fixtures": ["threats.json"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 08 -- JSON THREAT FEED\nDifficulty: ** (Intermediate)\n\nYour threat intel team shared a JSON feed of suspicious IPs\ncollected over the past 24 hours. You need to extract only the\nHIGH severity indicators and prepare them for firewall blocking.\n\nThe file is at: workspace/threats.json\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read threats.json. Find all entries where severity == \"HIGH\". Print those IPs sorted alphabetically.",
+  "starter_code": "# lab08 -- JSON Threat Feed\n# Read threats.json and extract HIGH severity IP indicators\n# Print them sorted alphabetically, one per line\n\nimport json\n\nwith open(\"threats.json\", \"r\") as f:\n    threats = json.load(f)\n\n# TODO: loop through threats\n# TODO: check if entry[\"severity\"] == \"HIGH\"\n# TODO: collect matching IPs, sort, print\n",
+  "expected_output": "45.33.32.156\n198.51.100.7\n203.0.113.99",
+  "hints": [
+    "json.load() returns the full structure. If the file is a list:\n        for entry in threats:\n            print(entry['ip'], entry['severity'])",
+    "Filter with a condition:\n        high_ips = []\n        for entry in threats:\n            if entry['severity'] == 'HIGH':\n                high_ips.append(entry['ip'])",
+    "List comprehension shorthand:\n        high_ips = [e['ip'] for e in threats if e['severity'] == 'HIGH']\n        for ip in sorted(high_ips):\n            print(ip)",
+    "SPOILER:\n        import json\n        with open('threats.json', 'r') as f:\n            threats = json.load(f)\n        for ip in sorted(e['ip'] for e in threats if e['severity'] == 'HIGH'):\n            print(ip)"
+  ],
+  "learn": "json.load() vs json.loads():\n  json.load(file_object)  -- reads from a file\n  json.loads(string)      -- parses a JSON string\n  Both return Python objects: dicts, lists, strings, numbers.\n\nNavigating JSON:\n  If the top level is a list: threats[0]['ip']\n  If the top level is a dict: data['threats'][0]['ip']\n  Always check the structure first with print(type(threats)).\n\nList comprehensions:\n  [expression for item in iterable if condition]\n  high_ips = [e['ip'] for e in threats if e['severity'] == 'HIGH']\n  Equivalent to a for loop with an if -- but one line.\n\nThreat intel feeds:\n  STIX (Structured Threat Information eXpression) is the standard\n  format -- delivered as JSON. Platforms: MISP, OpenCTI, VirusTotal,\n  AlienVault OTX all expose JSON APIs.\n  HIGH severity = active C2 server or confirmed exfil destination.\n  These IPs go to the firewall block list immediately.",
+  "debrief": {
+    "summary": "Your script filtered 3 HIGH severity indicators from the feed. These IPs represent confirmed threats -- C2 servers and exfil destinations. In a real environment, these would be blocked at the firewall within minutes of being identified.",
+    "real_world": "Threat intel feeds are delivered as JSON (STIX format). Platforms like MISP, OpenCTI, and commercial tools all expose JSON APIs. Python's json module is the standard way to consume them.",
+    "next_step": "Extend your script:\n  1. Also print the threat type and country for each HIGH entry\n  2. Export HIGH indicators to a firewall-block-list.txt\n  3. Filter for IPs from a specific country",
+    "cert_link": "CySA+ CS0-003 Domain 2 -- Threat Intelligence:\n  IOC identification and threat feed consumption are core tested skills.",
+    "exam_tip": "Know STIX (Structured Threat Information eXpression) and TAXII (protocol for sharing STIX data). JSON is the underlying format. CySA+ expects you to understand how threat intel is consumed and actioned."
+  }
+}

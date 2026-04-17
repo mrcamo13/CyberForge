@@ -1,0 +1,134 @@
+{
+  "version": "2.0",
+  "simulator": "lab",
+  "stages": [
+    {
+      "id": "stage1",
+      "title": "Foundation",
+      "description": "Core Python for security: file I/O, strings, hashing",
+      "challenges": [
+        "lab01",
+        "lab02",
+        "lab03",
+        "lab04",
+        "lab05"
+      ]
+    },
+    {
+      "id": "stage2",
+      "title": "Intermediate",
+      "description": "CSV, regex, JSON, ciphers, hash cracking",
+      "challenges": [
+        "lab06",
+        "lab07",
+        "lab08",
+        "lab09",
+        "lab10"
+      ]
+    },
+    {
+      "id": "stage3",
+      "title": "Advanced",
+      "description": "Binary ops, networking, log correlation, CLI tools, full pipelines",
+      "challenges": [
+        "lab11",
+        "lab12",
+        "lab13",
+        "lab14",
+        "lab15"
+      ]
+    }
+  ],
+  "challenges": [
+    {
+      "id": "lab01",
+      "title": "Log Parser",
+      "difficulty": 1,
+      "stage": "stage1"
+    },
+    {
+      "id": "lab02",
+      "title": "IP Validator",
+      "difficulty": 1,
+      "stage": "stage1"
+    },
+    {
+      "id": "lab03",
+      "title": "Hash Checker",
+      "difficulty": 2,
+      "stage": "stage1"
+    },
+    {
+      "id": "lab04",
+      "title": "Base64 Coder",
+      "difficulty": 2,
+      "stage": "stage1"
+    },
+    {
+      "id": "lab05",
+      "title": "Port Scanner",
+      "difficulty": 3,
+      "stage": "stage1"
+    },
+    {
+      "id": "lab06",
+      "title": "CSV Event Counter",
+      "difficulty": 2,
+      "stage": "stage2"
+    },
+    {
+      "id": "lab07",
+      "title": "Regex IP Extractor",
+      "difficulty": 2,
+      "stage": "stage2"
+    },
+    {
+      "id": "lab08",
+      "title": "JSON Threat Feed",
+      "difficulty": 2,
+      "stage": "stage2"
+    },
+    {
+      "id": "lab09",
+      "title": "Caesar Cipher",
+      "difficulty": 2,
+      "stage": "stage2"
+    },
+    {
+      "id": "lab10",
+      "title": "Hash Cracker",
+      "difficulty": 2,
+      "stage": "stage2"
+    },
+    {
+      "id": "lab11",
+      "title": "XOR Decryptor",
+      "difficulty": 3,
+      "stage": "stage3"
+    },
+    {
+      "id": "lab12",
+      "title": "Banner Grabber",
+      "difficulty": 3,
+      "stage": "stage3"
+    },
+    {
+      "id": "lab13",
+      "title": "Log Correlator",
+      "difficulty": 3,
+      "stage": "stage3"
+    },
+    {
+      "id": "lab14",
+      "title": "Argument Script",
+      "difficulty": 3,
+      "stage": "stage3"
+    },
+    {
+      "id": "lab15",
+      "title": "Full Pipeline",
+      "difficulty": 4,
+      "stage": "stage3"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Starting nmap scan -- target host responded at 10.0.0.1 with ICMP echo reply.
+Probe sent to 10.0.0.2 on port 22; banner received: OpenSSH_8.9.
+Host 172.16.5.1 is up (0.0012s latency); ports 80,443 filtered.
+Netcat connection to 192.168.0.254:8080 established; service appears to be an HTTP proxy.
+Second ping attempt to 10.0.0.1 timed out -- retrying with reduced TTL.
+Final target 203.0.113.5 returned RST on port 23; service likely disabled.
+Scan complete: 5 hosts enumerated, results written to /tmp/nmap_out.xml.

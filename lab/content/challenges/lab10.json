@@ -1,0 +1,25 @@
+{
+  "id": "lab10",
+  "title": "Hash Cracker",
+  "difficulty": 2,
+  "xp_base": 175,
+  "fixtures": ["target_hashes.txt", "passwords.txt"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 10 -- HASH CRACKER\nDifficulty: ** (Intermediate+)\n\nForensics recovered 5 MD5 hashes from a breached system's\npassword database. Your team has a wordlist of common passwords.\nCrack as many hashes as you can using a dictionary attack.\n\nFiles are at: workspace/target_hashes.txt and workspace/passwords.txt\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read target_hashes.txt (5 MD5 hashes). Read passwords.txt (wordlist). For each hash, find the password that matches. Print: 'hash : password' for each.",
+  "starter_code": "# lab10 -- Hash Cracker (Wordlist Attack)\n# For each MD5 hash in target_hashes.txt, find the matching\n# password in passwords.txt using hashlib\n\nimport hashlib\n\n# Load target hashes\nwith open(\"target_hashes.txt\", \"r\") as f:\n    hashes = [line.strip() for line in f if line.strip()]\n\n# Load wordlist\nwith open(\"passwords.txt\", \"r\") as f:\n    wordlist = [line.strip() for line in f if line.strip()]\n\n# TODO: for each hash, try every password in the wordlist\n# TODO: hash the candidate with MD5 and compare\n# TODO: print \"hash : password\" when found\n",
+  "expected_output": "482c811da5d5b4bc6d497ffa98491e38 : password123\n21232f297a57a5a743894a0e4a801fc3 : admin\n0d107d09f5bbe40cade3de5c71e9e9b7 : letmein\nd8578edf8458ce06fbc5bb76a58c5ca4 : qwerty\n0571749e2ac330a7455809c6b0e7af90 : sunshine",
+  "hints": [
+    "Hash a candidate password with MD5:\n        import hashlib\n        candidate_hash = hashlib.md5(password.encode()).hexdigest()",
+    "Compare the hash:\n        if candidate_hash == target_hash:\n            print(f'{target_hash} : {password}')\n            break",
+    "Nested loop structure:\n        for target_hash in hashes:\n            for password in wordlist:\n                if hashlib.md5(password.encode()).hexdigest() == target_hash:\n                    print(f'{target_hash} : {password}')\n                    break",
+    "SPOILER -- Full solution:\n        import hashlib\n        with open('target_hashes.txt') as f:\n            hashes = [l.strip() for l in f if l.strip()]\n        with open('passwords.txt') as f:\n            wordlist = [l.strip() for l in f if l.strip()]\n        for h in hashes:\n            for pw in wordlist:\n                if hashlib.md5(pw.encode()).hexdigest() == h:\n                    print(f'{h} : {pw}')\n                    break"
+  ],
+  "learn": "hashlib.md5().hexdigest():\n  hashlib.md5(password.encode()).hexdigest()\n  .encode() converts a string to bytes (required for hashing).\n  .hexdigest() returns the hash as a hex string (32 chars for MD5).\n\nWhy hashing is one-way:\n  You cannot reverse an MD5 hash to get the original password.\n  But you CAN hash known passwords and compare -- that is what\n  dictionary attacks do. If the hash matches, you found the password.\n\nMD5 vs SHA-256:\n  MD5 is broken for cryptographic purposes (collision attacks exist).\n  SHA-256 is the current standard for integrity.\n  Neither should be used for password storage -- use bcrypt/argon2.\n\nReal tools:\n  Hashcat and John the Ripper do exactly this at massive scale --\n  billions of hashes per second with GPU acceleration.\n  The logic in your script is identical to hashcat's basic wordlist\n  mode (-a 0). The difference is only speed.",
+  "debrief": {
+    "summary": "All 5 hashes cracked. These were common passwords -- exactly what hashcat finds in seconds with a GPU. Password hashing without salting is the root cause of most credential database breaches.",
+    "real_world": "Real wordlist attacks use rockyou.txt (14 million passwords) and hashcat at billions of hashes per second. The logic in your script is identical to hashcat's basic wordlist mode (-a 0). Defenders salt passwords (add random data before hashing) to prevent this.",
+    "next_step": "Level up:\n  1. Add SHA-256 support (hashlib.sha256)\n  2. Try hashing 'password' + each number 0-9999 (rule-based attack)\n  3. Look up bcrypt -- understand why it defeats wordlist attacks",
+    "cert_link": "PenTest+ PT0-003 Domain 3 -- Attacks and Exploits:\n  Password attacks including wordlist and brute force are core.\n  CySA+ CS0-003 -- Credential attacks and defense.",
+    "exam_tip": "Know: MD5 is NOT cryptographically secure (collision attacks exist). SHA-256 is current standard. bcrypt/scrypt/argon2 are for password storage (slow by design). Salting prevents rainbow table attacks."
+  }
+}

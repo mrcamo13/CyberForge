@@ -1,0 +1,9 @@
+[
+  {"ip": "45.33.32.156",   "type": "C2",         "severity": "HIGH",   "country": "US"},
+  {"ip": "198.51.100.7",   "type": "scanner",    "severity": "HIGH",   "country": "RU"},
+  {"ip": "203.0.113.99",   "type": "exfil",      "severity": "HIGH",   "country": "CN"},
+  {"ip": "10.20.30.40",    "type": "bruteforce", "severity": "MEDIUM", "country": "DE"},
+  {"ip": "185.220.101.5",  "type": "tor_exit",   "severity": "MEDIUM", "country": "NL"},
+  {"ip": "91.108.4.200",   "type": "recon",      "severity": "LOW",    "country": "UA"},
+  {"ip": "104.21.14.88",   "type": "scanner",    "severity": "MEDIUM", "country": "FR"}
+]

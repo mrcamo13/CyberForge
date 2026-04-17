@@ -1,0 +1,25 @@
+{
+  "id": "lab04",
+  "title": "Base64 Coder",
+  "difficulty": 2,
+  "xp_base": 150,
+  "fixtures": ["encoded.txt"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 04 -- BASE64 DECODER\nDifficulty: ** (Intermediate)\n\nDuring the NIGHTWIRE forensic investigation, the disk image\nrevealed a script that was pulling commands from a remote server.\nThe commands were Base64-encoded to evade simple string detection.\n\nYou have extracted the encoded strings from memory.\nDecode them to reveal the attacker's commands.\n\nThe encoded strings are at: workspace/encoded.txt\nWrite a script that decodes and prints each one.",
+  "challenge": "Read encoded.txt (one Base64 string per line).\nDecode each string and print the plaintext.\nOne decoded string per line.",
+  "starter_code": "# lab04 -- Base64 Decoder\n# Read encoded.txt and decode each Base64 string.\n\nimport base64\n\nwith open(\"encoded.txt\", \"r\") as f:\n    for line in f:\n        encoded = line.strip()\n        # TODO: decode the base64 string\n        # Hint: base64.b64decode(encoded) returns bytes\n        # Hint: call .decode(\"utf-8\") to convert bytes to string\n        # TODO: print the decoded string\n        pass\n",
+  "expected_output": "whoami\nipconfig /all\nnet user admin P@ssword123 /add\npowershell -encodedcommand\ncmd /c whoami && net localgroup",
+  "hints": [
+    "base64.b64decode() takes a string and returns bytes:\n        decoded_bytes = base64.b64decode(encoded)\n        You then need to convert bytes to a string.",
+    "Convert bytes to string with .decode():\n        decoded_str = base64.b64decode(encoded).decode(\"utf-8\")\n        Then print(decoded_str)",
+    "Full loop body:\n        encoded = line.strip()\n        decoded = base64.b64decode(encoded).decode(\"utf-8\")\n        print(decoded)",
+    "SPOILER -- Complete solution:\n        import base64\n        with open(\"encoded.txt\", \"r\") as f:\n            for line in f:\n                encoded = line.strip()\n                print(base64.b64decode(encoded).decode(\"utf-8\"))"
+  ],
+  "learn": "Base64 is an encoding (not encryption) that represents binary data\nas ASCII text. It is reversible with no key.\n\nimport base64\n\nEncode:\n  base64.b64encode(b\"hello\")        ->  b'aGVsbG8='\n  base64.b64encode(b\"hello\").decode(\"utf-8\")  ->  'aGVsbG8='\n\nDecode:\n  base64.b64decode(\"aGVsbG8=\")      ->  b'hello'\n  base64.b64decode(\"aGVsbG8=\").decode(\"utf-8\")  ->  'hello'\n\nbytes vs str in Python 3:\n  b\"hello\"  -- bytes literal (raw bytes)\n  \"hello\"   -- str (unicode text)\n  .encode(\"utf-8\")  -- str -> bytes\n  .decode(\"utf-8\")  -- bytes -> str\n\nWhy attackers use Base64:\n  Simple string searches for \"whoami\" or \"net user\" would flag\n  a script immediately. Base64 encoding disguises the payload.\n  It is not encryption -- any analyst can decode it instantly.\n  On the CySA+ exam, spotting Base64 and knowing it is trivially\n  reversible is a tested skill.",
+  "debrief": {
+    "summary": "The decoded commands reveal the attacker's post-exploitation playbook: whoami (who am I running as), ipconfig /all (network recon), net user admin /add (creating a backdoor admin account), powershell -encodedcommand (launching an encoded PowerShell payload), and cmd /c whoami && net localgroup (checking group membership). This is a complete privilege escalation sequence.",
+    "real_world": "Base64-encoded commands in PowerShell are one of the most common living-off-the-land techniques. Defenders look for: long Base64 strings in process arguments, base64.b64decode in Python scripts, and [System.Convert]::FromBase64String in PowerShell. Your script is the manual version of what a SIEM alert rule does automatically.",
+    "next_step": "Try encoding your own strings with base64.b64encode() and decoding them back. Then try decoding a PowerShell -EncodedCommand string -- they use a variant called UTF-16LE: base64.b64decode(encoded).decode('utf-16-le')",
+    "cert_link": "CySA+ CS0-003 Domain 1 -- Security Operations:\n  Identifying and decoding obfuscated content is tested under malware analysis and threat hunting.",
+    "exam_tip": "On the exam: Base64 strings end in = or == (padding). They use A-Z, a-z, 0-9, +, /. If you see a long string of those characters in a script or log, it is almost certainly Base64. It is encoding, not encryption -- no key needed to reverse it."
+  }
+}

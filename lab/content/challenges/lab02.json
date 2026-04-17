@@ -1,0 +1,25 @@
+{
+  "id": "lab02",
+  "title": "IP Validator",
+  "difficulty": 1,
+  "xp_base": 100,
+  "fixtures": ["ip_list.txt"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 02 -- IP VALIDATOR\nDifficulty: * (Beginner)\n\nYour threat intel team received a feed of IP addresses to block.\nThe feed is messy -- it includes malformed entries, private IPs\nwritten incorrectly, and junk data mixed in.\n\nBefore importing into the firewall, you need to filter the list\nto only valid IPv4 addresses.\n\nThe list is at: workspace/ip_list.txt\nWrite a script that prints only the valid IPs.",
+  "challenge": "Read ip_list.txt (one entry per line). Print only valid IPv4 addresses.\nA valid IPv4 address has exactly 4 parts separated by dots,\neach part a number between 0 and 255 (inclusive).\nPrint valid IPs in the order they appear. One per line.",
+  "starter_code": "# lab02 -- IP Validator\n# Read ip_list.txt and print only valid IPv4 addresses.\n# A valid IP has exactly 4 parts, each between 0 and 255.\n\ndef is_valid_ip(address):\n    parts = address.strip().split(\".\")\n    # TODO: check there are exactly 4 parts\n    # TODO: check each part is a number between 0 and 255\n    # Hint: use int() to convert, and handle ValueError with try/except\n    return False  # replace this\n\nwith open(\"ip_list.txt\", \"r\") as f:\n    for line in f:\n        ip = line.strip()\n        if is_valid_ip(ip):\n            print(ip)\n",
+  "expected_output": "192.168.1.1\n172.16.0.1\n8.8.8.8\n1.2.3.4\n185.220.101.47\n203.0.113.99",
+  "hints": [
+    "Check the number of parts first:\n        if len(parts) != 4:\n            return False\n        Then loop through each part and check it is 0-255.",
+    "Use try/except to handle parts that are not numbers:\n        try:\n            num = int(part)\n        except ValueError:\n            return False\n        if num < 0 or num > 255:\n            return False",
+    "Complete is_valid_ip:\n        parts = address.strip().split(\".\")\n        if len(parts) != 4:\n            return False\n        for part in parts:\n            try:\n                num = int(part)\n            except ValueError:\n                return False\n            if num < 0 or num > 255:\n                return False\n        return True",
+    "SPOILER -- The key insight: split on dot, check length == 4,\n        convert each to int (catch ValueError), check 0 <= n <= 255.\n        Return True only if ALL checks pass."
+  ],
+  "learn": "String splitting and type conversion are core Python skills.\n\n.split(delimiter):\n  \"192.168.1.1\".split(\".\")  ->  [\"192\", \"168\", \"1\", \"1\"]\n  \"hello world\".split(\" \")  ->  [\"hello\", \"world\"]\n\nlen() -- count items in a list:\n  len([\"192\", \"168\", \"1\", \"1\"])  ->  4\n\nint() -- convert string to integer:\n  int(\"192\")   ->  192\n  int(\"abc\")   ->  raises ValueError -- must handle with try/except\n\ntry/except -- handle errors gracefully:\n  try:\n      num = int(part)\n  except ValueError:\n      return False   # not a number, invalid IP\n\nRange checking:\n  if num < 0 or num > 255:  ->  invalid octet\n\nWhy this matters in security:\n  Threat intel feeds are dirty. Before blocking IPs in a firewall,\n  you validate them -- a malformed entry could break the firewall rule\n  set or accidentally block legitimate traffic.",
+  "debrief": {
+    "summary": "Your script correctly identified 6 valid IPs from 12 entries. It rejected: 10.0.0.256 (octet > 255), MALWARE-C2-SERVER (not an IP), 999.999.999.999 (all octets invalid), 'not-an-ip' (no dots), 300.1.1.1 (first octet > 255), and 10.10.10 (only 3 octets).",
+    "real_world": "IP validation is used in: firewall rule automation, threat intel ingestion pipelines, log enrichment scripts, and blocklist management. Python's ipaddress module (stdlib) has a built-in validator -- but writing it from scratch teaches you what validation actually checks.",
+    "next_step": "Try this: import ipaddress and use ipaddress.ip_address(ip) in a try/except block. Compare the result to your manual validator. They should agree on all 12 entries.",
+    "cert_link": "CySA+ CS0-003 Domain 2 -- Vulnerability Management:\n  Understanding IP address structure and validation is foundational for network-based vulnerability scanning.",
+    "exam_tip": "IPv4 ranges to know: 0-255 per octet, 4 octets total, dot-separated. Private ranges: 10.x.x.x, 172.16-31.x.x, 192.168.x.x. These appear in network analysis questions."
+  }
+}

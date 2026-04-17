@@ -1,0 +1,26 @@
+{
+  "id": "lab05",
+  "title": "Port Scanner",
+  "difficulty": 3,
+  "xp_base": 200,
+  "fixtures": [],
+  "test_server_port": 7005,
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 05 -- PORT SCANNER\nDifficulty: *** (Intermediate+)\n\nYou are about to learn how nmap works under the hood.\n\nA TCP connect scan works by attempting to open a socket connection\nto each port. If the connection succeeds, the port is OPEN.\nIf it is refused or times out, the port is CLOSED.\n\nThe game has started a small test server on localhost port 7005.\nScan ports 7000 through 7010 on 127.0.0.1.\n\nWrite the scanner. No external libraries -- sockets only.",
+  "challenge": "Scan ports 7000-7010 on 127.0.0.1 using Python sockets.\nFor each port print exactly:\n  PORT 7000: CLOSED\n  PORT 7001: CLOSED\n  ...\n  PORT 7005: OPEN\n  ...\nPrint ports in order 7000 to 7010.",
+  "starter_code": "# lab05 -- Port Scanner\n# Scan ports 7000-7010 on localhost using sockets.\n# Print \"PORT XXXX: OPEN\" or \"PORT XXXX: CLOSED\" for each.\n\nimport socket\n\nHOST = \"127.0.0.1\"\nSTART_PORT = 7000\nEND_PORT = 7010\n\nfor port in range(START_PORT, END_PORT + 1):\n    # TODO: create a socket\n    # TODO: set a short timeout (0.5 seconds)\n    # TODO: try to connect to HOST:port\n    # TODO: if connection succeeds: print OPEN, close socket\n    # TODO: if connection fails (exception): print CLOSED\n    pass\n",
+  "expected_output": "PORT 7000: CLOSED\nPORT 7001: CLOSED\nPORT 7002: CLOSED\nPORT 7003: CLOSED\nPORT 7004: CLOSED\nPORT 7005: OPEN\nPORT 7006: CLOSED\nPORT 7007: CLOSED\nPORT 7008: CLOSED\nPORT 7009: CLOSED\nPORT 7010: CLOSED",
+  "hints": [
+    "Create a socket and set a timeout:\n        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        s.settimeout(0.5)\n        AF_INET = IPv4, SOCK_STREAM = TCP",
+    "Try to connect and handle the result:\n        try:\n            s.connect((HOST, port))\n            print(f\"PORT {port}: OPEN\")\n            s.close()\n        except (socket.timeout, ConnectionRefusedError, OSError):\n            print(f\"PORT {port}: CLOSED\")",
+    "Put it together in the loop:\n        for port in range(START_PORT, END_PORT + 1):\n            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n            s.settimeout(0.5)\n            try:\n                s.connect((HOST, port))\n                print(f\"PORT {port}: OPEN\")\n                s.close()\n            except (socket.timeout, ConnectionRefusedError, OSError):\n                print(f\"PORT {port}: CLOSED\")",
+    "SPOILER -- The full solution is hint 3. The key concepts:\n        socket() creates a TCP socket\n        settimeout() prevents hanging on closed ports\n        connect() raises an exception if the port is closed\n        catching the exception lets you print CLOSED and move on"
+  ],
+  "learn": "Sockets are the foundation of all network communication in Python.\n\nimport socket\n\nCreating a TCP socket:\n  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n  AF_INET     = IPv4 addresses\n  SOCK_STREAM = TCP (reliable, connection-oriented)\n  SOCK_DGRAM  = UDP (faster, no connection)\n\nSetting a timeout:\n  s.settimeout(0.5)   -- wait max 0.5 seconds for connection\n  Without this, closed ports can hang for 30+ seconds\n\nConnecting:\n  s.connect((\"127.0.0.1\", 80))\n  Raises ConnectionRefusedError if port is closed\n  Raises socket.timeout if no response within timeout\n\nf-strings (Python 3.6+):\n  port = 8080\n  print(f\"PORT {port}: OPEN\")   ->  \"PORT 8080: OPEN\"\n\nHow nmap does it:\n  nmap -sT (TCP connect scan) does EXACTLY what your script does:\n  for each port, open a socket, try to connect, record the result.\n  The difference: nmap is parallelized (thousands of ports at once)\n  and can do stealth scans (SYN scan = half-open connection).",
+  "debrief": {
+    "summary": "Your scanner correctly identified port 7005 as OPEN and all others as CLOSED. This is a TCP connect scan -- the same technique nmap -sT uses. You just wrote the core logic of one of the most important tools in both red team and blue team work.",
+    "real_world": "Port scanners are used by: attackers (reconnaissance), pentesters (scoping), and defenders (asset discovery, finding rogue services). Understanding socket-level scanning helps you interpret nmap output, write custom network automation, and understand why certain firewall rules exist.",
+    "next_step": "Upgrade your scanner:\n  1. Scan a wider range (1-1024) -- these are the well-known ports\n  2. Look up the service name: socket.getservbyport(port, 'tcp')\n  3. Only print OPEN ports (skip the CLOSED output)\n  4. Try scanning multiple hosts",
+    "cert_link": "PenTest+ PT0-003 Domain 2 -- Reconnaissance:\n  TCP connect scanning and port enumeration are core tested skills.\n  CySA+ CS0-003 Domain 1 -- Understanding scanning techniques\n  helps analysts interpret attacker recon activity in logs.",
+    "exam_tip": "Know the difference: TCP connect scan (full 3-way handshake, logged by target) vs SYN scan (half-open, stealthier, requires raw sockets/root). nmap defaults to SYN scan when run as root. Your Python socket script does a TCP connect scan."
+  }
+}

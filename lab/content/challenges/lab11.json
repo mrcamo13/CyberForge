@@ -1,0 +1,25 @@
+{
+  "id": "lab11",
+  "title": "XOR Decryptor",
+  "difficulty": 3,
+  "xp_base": 200,
+  "fixtures": ["secret.xor"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 11 -- XOR DECRYPTOR\nDifficulty: *** (Advanced)\n\nMalware analysis found a binary blob stored in a registry key.\nStaticanalysis suggests single-byte XOR encryption with key 0x42.\nDecrypt the blob to reveal the hidden payload message.\n\nThe file is at: workspace/secret.xor\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read secret.xor in binary mode. XOR each byte with 0x42. Convert result to ASCII text and print it.",
+  "starter_code": "# lab11 -- XOR Decryptor\n# secret.xor contains a message encrypted with single-byte XOR key 0x42\n# Read as binary, XOR each byte with 0x42, print the result as ASCII\n\nKEY = 0x42\n\nwith open(\"secret.xor\", \"rb\") as f:\n    encrypted = f.read()\n\n# TODO: XOR each byte with KEY\n# TODO: convert the result to a string and print\n",
+  "expected_output": "PAYLOAD ACTIVE: 192.168.1.100",
+  "hints": [
+    "Iterate over bytes:\n        for byte in encrypted:\n            decrypted_byte = byte ^ KEY\n        In Python 3, iterating a bytes object gives integers.",
+    "Build the decrypted bytes:\n        decrypted = bytes([b ^ KEY for b in encrypted])\n        Then decode: decrypted.decode('ascii')",
+    "Full solution:\n        KEY = 0x42\n        with open('secret.xor', 'rb') as f:\n            encrypted = f.read()\n        print(bytes([b ^ KEY for b in encrypted]).decode('ascii'))",
+    "SPOILER -- XOR is its own inverse:\n        KEY = 0x42\n        with open('secret.xor', 'rb') as f:\n            data = f.read()\n        print(bytes([b ^ KEY for b in data]).decode())\n        XOR the ciphertext again with the same key = plaintext."
+  ],
+  "learn": "Binary file reading:\n  open('file', 'rb') opens in binary (read-binary) mode.\n  Returns a bytes object, not a string.\n  Iterating bytes gives integers (0-255), not characters.\n\nbytes vs str in Python 3:\n  str   = text, Unicode, human-readable\n  bytes = raw binary data, sequences of integers 0-255\n  bytes([72, 101, 108, 108, 111]) => b'Hello'\n  b'Hello'.decode('ascii') => 'Hello'\n\nXOR operator (^):\n  5 ^ 3 = 6  (binary: 101 XOR 011 = 110)\n  XOR is self-inverse: if A XOR KEY = C, then C XOR KEY = A.\n  This is why XOR is used for encryption -- same operation for\n  both encrypt and decrypt.\n\nSingle-byte XOR weakness:\n  Only 256 possible keys (0x00-0xFF).\n  Brute-force all 256 in milliseconds.\n  Single-byte XOR is obfuscation, not real encryption.\n  Used in malware because it's fast and defeats basic string scanning.",
+  "debrief": {
+    "summary": "Decrypted: PAYLOAD ACTIVE: 192.168.1.100. Single-byte XOR is the most common obfuscation technique in malware. It's trivially breakable but still used because it's fast to implement and defeats basic string scanning.",
+    "real_world": "Malware reverse engineers encounter XOR obfuscation constantly. Tools like FLOSS (FireEye) automatically detect and decode XOR strings in PE files. Understanding XOR at the byte level is essential for malware analysis and CTF reversing challenges.",
+    "next_step": "Go deeper:\n  1. Brute-force the key (try all 256 values, find the one that produces printable ASCII)\n  2. Implement multi-byte XOR (key = b'\\x42\\x13')\n  3. Try XOR with a repeating key (Vigenere at the byte level)",
+    "cert_link": "PenTest+ PT0-003 Domain 3 -- Attacks and Exploits:\n  Encoding, encryption, and obfuscation techniques.\n  CySA+ CS0-003 -- Malware analysis and reverse engineering.",
+    "exam_tip": "XOR properties: A XOR A = 0. A XOR 0 = A. XOR is commutative and associative. If you XOR plaintext with key you get ciphertext. XOR ciphertext with key = plaintext. This self-inverse property is what makes it useful for encryption."
+  }
+}

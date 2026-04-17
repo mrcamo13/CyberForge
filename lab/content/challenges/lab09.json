@@ -1,0 +1,25 @@
+{
+  "id": "lab09",
+  "title": "Caesar Cipher Decoder",
+  "difficulty": 2,
+  "xp_base": 150,
+  "fixtures": ["encoded_message.txt"],
+  "scenario": "LAB TERMINAL v1.0 -- PYTHON SCRIPT LAB\n\nCHALLENGE 09 -- CAESAR CIPHER DECODER\nDifficulty: ** (Intermediate)\n\nMalware analysis recovered an encoded string from a config file\ndropped by the threat actor. Your team suspects ROT13 based on\nthe character distribution. Decode it and identify the C2 address.\n\nThe file is at: workspace/encoded_message.txt\n\nOpen workspace/solution.py in your editor, write your solution,\nthen type 'run' to test it.",
+  "challenge": "Read encoded_message.txt. Apply ROT13 to decode the message. Print the decoded text.",
+  "starter_code": "# lab09 -- Caesar Cipher Decoder\n# Read encoded_message.txt and decode it using ROT13\n# ROT13: rotate each letter by 13 positions (A->N, B->O, ..., Z->M)\n# Numbers and symbols stay the same\n\ndef rot13(text):\n    result = []\n    for char in text:\n        if char.isalpha():\n            # TODO: determine the base (A or a)\n            # TODO: shift by 13, wrap around with modulo 26\n            # TODO: append decoded char\n            pass\n        else:\n            result.append(char)\n    return \"\".join(result)\n\nwith open(\"encoded_message.txt\", \"r\") as f:\n    encoded = f.read().strip()\n\nprint(rot13(encoded))\n",
+  "expected_output": "THE ATTACKER IS AT 192.168.55.23 EXFIL CONFIRMED",
+  "hints": [
+    "ROT13 shifts each letter by 13. For uppercase:\n        base = ord('A')\n        decoded = chr((ord(char) - base + 13) % 26 + base)",
+    "Handle both cases:\n        if char.isupper():\n            base = ord('A')\n        else:\n            base = ord('a')\n        result.append(chr((ord(char) - base + 13) % 26 + base))",
+    "Full rot13 function:\n        def rot13(text):\n            result = []\n            for char in text:\n                if char.isalpha():\n                    base = ord('A') if char.isupper() else ord('a')\n                    result.append(chr((ord(char) - base + 13) % 26 + base))\n                else:\n                    result.append(char)\n            return ''.join(result)",
+    "SPOILER -- Python actually has ROT13 built in:\n        import codecs\n        print(codecs.decode(encoded, 'rot_13'))\n        But writing it manually teaches you ord() and chr() which are used everywhere in CTFs."
+  ],
+  "learn": "ord() and chr():\n  ord('A') = 65  -- converts a character to its ASCII integer\n  chr(65)  = 'A' -- converts an integer back to a character\n  These two functions are foundational for all cipher work.\n\nModulo arithmetic for wrapping:\n  (ord(char) - base + 13) % 26 + base\n  Subtract base (65 for uppercase) to get 0-25 range.\n  Add the shift (13 for ROT13).\n  Modulo 26 wraps around: Z + 13 wraps back to M.\n  Add base back to get the ASCII value.\n\nCaesar ciphers:\n  ROT13 = Caesar cipher with shift 13.\n  ROT13 is self-inverse: encode twice = original text.\n  Any shift amount works the same way -- just change 13 to the key.\n\nReal-world use:\n  ROT13 is used for spoiler hiding on forums (Reddit, etc.).\n  Threat actors use it for weak string obfuscation in malware.\n  Understanding cipher math is foundational for all CTF crypto work.",
+  "debrief": {
+    "summary": "Decoded: THE ATTACKER IS AT 192.168.55.23 EXFIL CONFIRMED. ROT13 is the simplest substitution cipher. While trivial to break, it still appears in real incident response -- threat actors sometimes use it to obfuscate strings in malware.",
+    "real_world": "ROT13 and Caesar ciphers appear in: malware string obfuscation, CTF challenges, config file obfuscation (weak). Understanding cipher math -- ord(), chr(), modulo -- is foundational for all crypto work.",
+    "next_step": "Try extending:\n  1. Brute-force all 26 shifts and print each (frequency analysis)\n  2. Implement a Vigenere cipher (keyword-based Caesar)\n  3. Try decoding with shift=3, shift=7 -- see what makes sense",
+    "cert_link": "PenTest+ PT0-003 Domain 3 -- Attacks and Exploits:\n  Encoding and obfuscation techniques are tested.\n  CySA+ CS0-003 -- Malware analysis includes recognizing obfuscation.",
+    "exam_tip": "Exams test: what is ROT13? (shift 13, self-inverse). What is a Caesar cipher? (monoalphabetic substitution, shift N). How do you break it? (brute force 26 shifts, or frequency analysis)."
+  }
+}
