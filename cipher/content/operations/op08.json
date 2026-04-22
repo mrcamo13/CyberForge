@@ -18,6 +18,75 @@
   ],
   "learn": "Privilege escalation means moving from a low-privilege account to a\nhigher-privilege one — typically from a service account to root.\n\nSUID (Set User ID) is a Linux file permission flag. When set on a\nbinary, the binary executes with the file owner's permissions (often\nroot) regardless of who runs it.\n\nFinding SUID binaries:\n  find / -perm -4000 -type f 2>/dev/null\n\nIf a SUID binary is in GTFOBins (gtfobins.github.io), it can likely\nbe used to spawn a root shell or read privileged files.\n\nExample — python3 with SUID set:\n  python3 -c 'import os; os.execl(\"/bin/sh\", \"sh\", \"-p\")'\n  This spawns /bin/sh running as root.\n\nOther common privesc vectors:\n  sudo misconfigurations  — sudo -l shows what you can run as root\n  writable cron jobs      — scripts run by root that you can modify\n  weak file permissions   — config files writable by low-priv users\n  kernel exploits         — unpatched kernel vulnerabilities\n\nPrivilege escalation is a core post-exploitation skill covered\nheavily in PenTest+ Domain 3 and every real engagement report.",
   "tools": "Scans the target directory for binaries with the SUID bit set and flags any that appear in GTFOBins.",
+  "steps": [
+    {
+      "question": "You have a shell as www-data (low privilege). Before scanning for SUID binaries, determine the scan path stated in the mission briefing. What directory should you scan?",
+      "valid_answers": ["/usr/bin", "usr/bin"],
+      "hints": [
+        "The SCAN PATH is explicitly stated in the GHOST transmission. Read the mission briefing carefully.",
+        "On Linux systems, /usr/bin contains most user-installed binaries and commands. It is a common location for misconfigured SUID binaries.",
+        "The path follows standard Linux filesystem hierarchy: /usr/bin is separate from /bin (core system binaries) and /sbin (superuser binaries).",
+        "SPOILER — The scan path is /usr/bin, as stated in the mission briefing. Type: /usr/bin"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "/bin", "response": "/bin contains core system binaries, but the mission specifies a different directory. Re-read the GHOST transmission for the exact SCAN PATH."},
+        {"pattern": "/sbin", "response": "/sbin holds superuser binaries, but that is not the path specified. Check the GHOST transmission for the target scan directory."},
+        {"pattern": "/usr", "response": "Close — but the mission specifies a subdirectory inside /usr. Include the full path from the GHOST briefing."}
+      ]
+    },
+    {
+      "question": "Run the SUID scanner on /usr/bin. What Linux permission bit, when set on a binary, causes it to execute with the file owner's privileges (often root) instead of the caller's privileges?",
+      "valid_answers": ["suid", "setuid", "set uid", "set user id", "s bit", "4000", "-4000"],
+      "hints": [
+        "This permission bit is referenced in the mission briefing and is what you are scanning for. Its name combines \"set\" with the user identity concept.",
+        "In ls -l output, this bit appears as an 's' in the owner execute position: -rwsr-xr-x. The 's' replaces the normal 'x' execute bit.",
+        "The find command to locate these binaries is: find /usr/bin -perm -4000 -type f — the octal permission value 4000 is the numeric representation.",
+        "SPOILER — It is the SUID (Set User ID) bit. Type: suid"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "sgid", "response": "SGID (Set Group ID) runs a binary with the file's group permissions. SUID does the same but for the user/owner — that is what this scan targets."},
+        {"pattern": "sticky", "response": "The sticky bit prevents file deletion by non-owners. The privilege escalation bit here runs binaries as the file owner — a different permission flag."},
+        {"pattern": "chmod", "response": "chmod is the command used to change permissions, not the permission itself. Type the name of the specific permission bit that enables owner-level execution."}
+      ]
+    },
+    {
+      "question": "The SUID scan of /usr/bin returns results. Which binary has a dangerous SUID misconfiguration that is listed on GTFOBins as exploitable for privilege escalation?",
+      "valid_answers": ["python3", "python3.10", "python"],
+      "hints": [
+        "Type 'tools' to run the SUID scanner. It lists all SUID binaries in /usr/bin and flags any that appear in GTFOBins.",
+        "Go to gtfobins.github.io and filter by SUID. Look for a scripting language interpreter in the results — interpreters are especially dangerous with SUID set.",
+        "The misconfigured binary is a scripting language interpreter commonly pre-installed on Linux systems for automation and development work.",
+        "SPOILER — python3.10 has the SUID bit set. GTFOBins documents how to exploit it. Type: python3"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "bash", "response": "bash with SUID is exploitable, but it is not the binary found in this scan. Check the scanner output for the actual result."},
+        {"pattern": "sudo", "response": "sudo manages privilege escalation through configuration — it is not a SUID binary in the traditional sense. Check the scan output."},
+        {"pattern": "find", "response": "find with SUID is a classic GTFOBins entry, but it is not what the scanner finds in this case. Run 'tools' to see the actual result."}
+      ]
+    },
+    {
+      "question": "Exploit the misconfigured python3 SUID binary to escalate from www-data to root. What one-liner command spawns a root shell using this binary?",
+      "valid_answers": [
+        "python3 -c 'import os; os.execl(\"/bin/sh\", \"sh\", \"-p\")'",
+        "python3 -c \"import os; os.execl('/bin/sh', 'sh', '-p')\"",
+        "python3 -c 'import os; os.setuid(0); os.system(\"/bin/sh\")'",
+        "python3 -c 'import os; os.setuid(0); os.system(\"bash\")'",
+        "import os; os.execl",
+        "os.execl"
+      ],
+      "hints": [
+        "Go to gtfobins.github.io, search for python3, and click the SUID section. The exploit command is documented there.",
+        "Python's os module provides direct access to system calls including execl (execute a program) and setuid (set the user ID). With SUID set, these calls run as root.",
+        "The command uses python3's -c flag to run inline code. It imports the os module, then calls execl to spawn /bin/sh with the -p flag (preserve privileges).",
+        "SPOILER — python3 -c 'import os; os.execl(\"/bin/sh\", \"sh\", \"-p\")' — this spawns a root shell because python3 runs as root via SUID. Type the full command."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "sudo", "response": "sudo requires knowing the current user's password and having sudo rights configured. This exploit uses the SUID bit on python3 directly — no sudo needed."},
+        {"pattern": "su root", "response": "su requires root's password. The SUID exploit bypasses authentication entirely by running python3 as root through the file permission bit."},
+        {"pattern": "python3 --shell", "response": "python3 has no --shell flag. The exploit uses the -c flag to run inline Python code that calls os.execl to spawn a shell."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You identified python3.10 with the SUID bit misconfigured on\nNexusCorp's server and escalated privileges to root. Mission complete.\nFrom Caesar cipher to root shell — recon, enumeration, credential\nattacks, web application exploitation, and privilege escalation.\nThe NexusCorp infiltration is finished.",
     "real_world": "Privilege escalation findings are critical severity in every real\npentest report. SUID misconfigurations are common on systems where\nadmins install interpreters (Python, Perl, Ruby) without checking\nthe permission implications. GTFOBins is the go-to reference for\nexploiting these in real engagements.",

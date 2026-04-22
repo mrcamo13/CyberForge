@@ -1,0 +1,25 @@
+{
+  "player_name": "Mike",
+  "created_at": "2026-04-21T12:28:33.542535+00:00",
+  "last_played": "2026-04-21T12:29:14.489671+00:00",
+  "total_time_played_seconds": 39,
+  "streak": {
+    "current": 0,
+    "longest": 0,
+    "last_played_date": "2026-04-21"
+  },
+  "xp": 0,
+  "badges": [],
+  "completed": [],
+  "hints_used": {},
+  "metrics": {
+    "lab01": {
+      "attempts": 0,
+      "time_spent_seconds": 39,
+      "hints_used": 0,
+      "completed": false,
+      "best_time_seconds": 0
+    }
+  },
+  "solutions": {}
+}

@@ -1,0 +1,70 @@
+{
+  "id": "case17",
+  "title": "Data Haul",
+  "stage": "stage4",
+  "difficulty": 3,
+  "xp_base": 200,
+  "tools_type": "pcap_analyzer",
+  "scenario": "Modern ransomware operators practice 'double extortion' — before encrypting the victim's data, they exfiltrate sensitive files and threaten to publish them unless a ransom is paid. Network flow data captured during the Meridian Financial Group incident has been analyzed to quantify the data theft. Your findings will inform the breach notification assessment and determine whether regulatory reporting obligations are triggered. Determine how many megabytes of data were exfiltrated.",
+  "challenge": "How many megabytes of data were exfiltrated? (Round to nearest whole number)",
+  "challenge_data": "NETWORK FLOW ANALYSIS REPORT\n==============================\nCase     : CF-2026-0401-RANSOMWARE\nCapture  : 2026-03-31 22:30:00 to 2026-04-01 01:00:00 UTC\nSources  : NetFlow v9 from CORE-SW-01 + Full PCAP from TAP-DMZLINK-01\nAnalyst  : D. Kim\n\nINTERNAL TO EXTERNAL FLOWS — SUSPICIOUS\n=========================================\n\nFLOW 001 [EXFILTRATION CONFIRMED]\n  Source      : 10.0.0.50 (FILE-SRV-01)\n  Destination : 185.220.101.47:443\n  Protocol    : TCP/HTTPS (TLS 1.3 — content encrypted, cannot inspect)\n  Start Time  : 2026-03-31 22:31:04 UTC\n  End Time    : 2026-03-31 23:18:26 UTC\n  Duration    : 47 min 22 sec\n  Bytes Sent  : 156,311,552 bytes\n  Bytes Recvd : 18,432 bytes  (server acknowledgements only)\n  Sessions    : 1 sustained connection\n  Avg Thput   : 439 KB/s\n  Verdict     : EXFILTRATION — destination is known C2 IP, volume anomalous\n\nFLOW 002 [EXFILTRATION CONFIRMED]\n  Source      : 10.0.0.51 (FILE-SRV-02)\n  Destination : 185.220.101.47:443\n  Protocol    : TCP/HTTPS (TLS 1.3 — content encrypted)\n  Start Time  : 2026-03-31 23:18:33 UTC\n  End Time    : 2026-03-31 23:49:41 UTC\n  Duration    : 31 min 08 sec\n  Bytes Sent  : 87,031,808 bytes\n  Bytes Recvd : 12,288 bytes\n  Sessions    : 1 sustained connection\n  Avg Thput   : 466 KB/s\n  Verdict     : EXFILTRATION — destination is known C2 IP, volume anomalous\n\nFLOW 003 [EXFILTRATION CONFIRMED]\n  Source      : 10.0.0.10 (DC-01)\n  Destination : 45.33.32.156:443\n  Protocol    : TCP/HTTPS (TLS 1.3 — content encrypted)\n  Start Time  : 2026-04-01 00:55:12 UTC\n  End Time    : 2026-04-01 01:00:03 UTC\n  Duration    : 4 min 51 sec\n  Bytes Sent  : 31,457,280 bytes\n  Bytes Recvd : 4,096 bytes\n  Sessions    : 1 sustained connection\n  Avg Thput   : 1,082 KB/s\n  Verdict     : EXFILTRATION — destination matches phishing origin IP, volume anomalous\n\nSUMMARY\n========\n  Total Bytes Exfiltrated : 274,800,640 bytes\n  Converted to Megabytes  : 274,800,640 ÷ 1,048,576 = 262.1 MB\n  Converted to Gigabytes  : 0.256 GB\n  Time Window             : 22:31 to 01:00 (2 hours 29 minutes)\n  Destination IPs         : 185.220.101.47 (primary C2), 45.33.32.156 (phishing origin)\n\nINBOUND FROM EXTERNAL IPs (tools received)\n  185.220.101.47 → WKSTN-047: 4.2 MB (exfiltration tooling + ransomware payload)\n\nNOTE: All exfiltration used HTTPS (port 443/TLS 1.3). Without SSL inspection at the proxy,\ncontent was not inspected by DLP controls. Volume-based anomaly detection is the only\ndetection avenue without SSL inspection.",
+  "valid_answers": ["262", "262 mb", "262.1", "262.1 mb", "approximately 262 mb", "about 262 megabytes", "262 megabytes", "262.1 megabytes"],
+  "steps": [
+    {
+      "question": "How many separate exfiltration flows were confirmed in the network capture?",
+      "valid_answers": ["3", "three", "3 flows", "three flows", "3 separate flows", "three confirmed flows"],
+      "hints": [
+        "The report labels each exfiltration flow with a numbered header (FLOW 001, FLOW 002, etc.) and a verdict. Count the flows marked 'EXFILTRATION CONFIRMED'.",
+        "Each FLOW section has a 'Verdict' line. Count how many verdicts read 'EXFILTRATION CONFIRMED'.",
+        "The report shows FLOW 001 (FILE-SRV-01 to 185.220.101.47), FLOW 002 (FILE-SRV-02 to 185.220.101.47), and FLOW 003 (DC-01 to 45.33.32.156) — all marked EXFILTRATION CONFIRMED.",
+        "There are 3 confirmed exfiltration flows. FLOW 001 from FILE-SRV-01, FLOW 002 from FILE-SRV-02, and FLOW 003 from DC-01. All three terminated at attacker-controlled C2 IP addresses."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "2", "response": "Look at all FLOW sections — there is a third flow from a different source server to a different C2 IP. Count flows marked EXFILTRATION CONFIRMED."},
+        {"pattern": "1", "response": "There is more than one exfiltration flow — multiple servers were used as exfiltration sources. Count all FLOW sections with the EXFILTRATION CONFIRMED verdict."}
+      ]
+    },
+    {
+      "question": "What is the total number of bytes exfiltrated across all three flows?",
+      "valid_answers": ["274800640", "274,800,640", "274,800,640 bytes", "274800640 bytes", "274.8 million bytes"],
+      "hints": [
+        "The SUMMARY section at the bottom of the report adds up the three flows. Look for the 'Total Bytes Exfiltrated' line.",
+        "Add the Bytes Sent from each flow: FLOW 001 (156,311,552) + FLOW 002 (87,031,808) + FLOW 003 (31,457,280). Or look at the pre-calculated total in the SUMMARY.",
+        "The SUMMARY reads 'Total Bytes Exfiltrated: 274,800,640 bytes'. This is the sum of all three confirmed exfiltration flows.",
+        "The total is 274,800,640 bytes. The SUMMARY section has this pre-calculated: 156,311,552 + 87,031,808 + 31,457,280 = 274,800,640 bytes."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "156", "response": "156,311,552 bytes is only FLOW 001 from FILE-SRV-01. Add the other two flows together or look at the SUMMARY total."},
+        {"pattern": "87", "response": "87,031,808 bytes is only FLOW 002. The question asks for the total across all three flows — see the SUMMARY section."}
+      ]
+    },
+    {
+      "question": "How many megabytes of data were exfiltrated? (Round to nearest whole number)",
+      "valid_answers": ["262", "262 mb", "262.1", "262.1 mb", "approximately 262 mb", "about 262 megabytes", "262 megabytes", "262.1 megabytes"],
+      "hints": [
+        "The report shows three separate exfiltration flows with byte counts. Look at the SUMMARY section at the bottom for the total already calculated.",
+        "The summary shows 'Total Bytes Exfiltrated: 274,800,640 bytes' and the conversion: 274,800,640 ÷ 1,048,576 = 262.1 MB.",
+        "There are 1,048,576 bytes in one megabyte (1024 × 1024). The summary has already done this calculation for you: 274,800,640 bytes = 262.1 MB.",
+        "The total exfiltrated data is 262.1 MB, which rounds to 262 MB. The three flows sent 149.1 MB + 83.0 MB + 30.0 MB respectively to two different C2 IP addresses over approximately 2.5 hours."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "274", "response": "274 is the byte count in millions — but megabytes are calculated differently. 1 MB = 1,048,576 bytes (not 1,000,000). The SUMMARY section shows the correct MB conversion."},
+        {"pattern": "0.256", "response": "0.256 is the gigabyte figure shown in the summary. The question asks for megabytes — use the MB figure from the same SUMMARY section."}
+      ]
+    }
+  ],
+  "hints": [
+    "The report shows three separate exfiltration flows with byte counts. Look at the SUMMARY section at the bottom for the total already calculated.",
+    "The summary shows 'Total Bytes Exfiltrated: 274,800,640 bytes' and the conversion: 274,800,640 ÷ 1,048,576 = 262.1 MB.",
+    "There are 1,048,576 bytes in one megabyte (1024 × 1024). The summary has already done this calculation for you: 274,800,640 bytes = 262.1 MB.",
+    "The total exfiltrated data is 262.1 MB, which rounds to 262 MB. The three flows sent 149.1 MB + 83.0 MB + 30.0 MB respectively to two different C2 IP addresses over approximately 2.5 hours."
+  ],
+  "learn": "Network flow analysis is critical for quantifying data exfiltration in ransomware incidents — both for understanding the scope of the breach and for triggering the correct regulatory reporting requirements.\n\nNetFlow vs Full PCAP:\n- NetFlow (v5/v9/IPFIX): Metadata-only: source IP, destination IP, port, protocol, byte/packet counts, timestamps. Generated by routers and switches at line speed with minimal storage requirements. Cannot see content.\n- Full PCAP (Packet Capture): Captures every byte of every packet. Can see content (when unencrypted). Very large storage requirements. Generated by network taps (TAPs) or SPAN ports.\n- In this case, HTTPS/TLS 1.3 encryption means even with full PCAP, the content is unreadable without SSL inspection.\n\nSSL/TLS inspection (SSL bump / SSL intercept):\nOrganizations with SSL inspection at their proxy can decrypt HTTPS traffic for DLP inspection. Without it, the only detection for HTTPS exfiltration is anomaly-based:\n- Volume anomaly: Unusually large outbound transfers\n- Destination anomaly: Known bad IPs, high-risk country TLDs, non-business domains\n- Time anomaly: Large transfers at 3 AM\n- Sustained connection: Single TCP session lasting 47 minutes at constant throughput\n\nDouble extortion explained:\nModern ransomware gangs (LockBit, BlackCat/ALPHV, Cl0p, Play, etc.) routinely exfiltrate data before encrypting it:\n1. Exfiltrate sensitive data to attacker-controlled infrastructure\n2. Encrypt all files on victim network\n3. Demand ransom for decryption key\n4. ALSO demand separate payment to not publish the stolen data on leak sites\n5. If victim has backups and restores, they still must pay or face data exposure\n\nThis is why backups alone no longer fully solve ransomware — even with perfect backups, victims face regulatory penalties (GDPR, HIPAA, SEC) and reputational damage from published data.\n\nBreach notification triggers:\n- GDPR: 72-hour notification to supervisory authority if personal data of EU residents is affected\n- HIPAA: 60-day notification if >500 individuals affected; media notification required in affected states\n- SEC: Material cybersecurity incidents must be reported within 4 business days (Rule 10b-5)\n- State breach notification laws: Vary by state, typically 30-90 days\n\n262 MB of data could contain thousands of personal records, making notification almost certainly required depending on the data classification of files on FILE-SRV-01, FILE-SRV-02, and DC-01.",
+  "debrief": {
+    "summary": "Approximately 262 MB of data was exfiltrated from three servers (FILE-SRV-01, FILE-SRV-02, and DC-01) across three HTTPS flows to two external C2 IPs over a 2.5-hour window. All exfiltration used TLS 1.3 encryption on port 443, bypassing the organization's content inspection controls.",
+    "real_world": "Double extortion means organizations cannot simply restore from backup and consider the incident resolved — the stolen data represents a regulatory breach notification obligation and a potential leak site publication threat. Breach notification counsel must be engaged immediately.",
+    "next_step": "Identify the specific files stored on each affected server to determine the data classification of what was exfiltrated, engage breach notification legal counsel, and begin required regulatory notifications (GDPR, HIPAA, SEC, state laws as applicable).",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCIR",
+    "exam_tip": "Know double extortion: attackers exfiltrate BEFORE encrypting so backups don't prevent payment. HTTPS exfiltration (port 443) evades DLP without SSL inspection. 1 MB = 1,048,576 bytes. Know breach notification timelines: GDPR 72 hours, HIPAA 60 days, SEC 4 business days."
+  }
+}

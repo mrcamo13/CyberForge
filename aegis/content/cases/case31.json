@@ -18,6 +18,66 @@
   ],
   "tools": "Classifies each metric as [EXECUTIVE] (outcome-focused, risk posture) or [OPERATIONAL] (process-focused, team activities) and outputs a filtered executive dashboard with count.",
   "learn": "Reporting and communication is the bridge between technical security work and\nbusiness decision-making. The wrong metrics in the wrong report wastes executive\nattention and obscures what matters.\n\nThe core distinction:\n\nEXECUTIVE metrics (outcome-focused):\n  Answer: 'Are we safer? What is our risk posture?'\n  Audience: board of directors, C-suite, CISO\n  Examples:\n    overall_risk_reduction        -- 'We reduced risk by 23% this quarter'\n    patch_compliance_rate         -- '78% of critical systems are fully patched'\n    critical_vulnerabilities_open -- '12 critical vulnerabilities remain open'\n    sla_adherence_rate            -- 'We met our response SLA 33% of the time'\n\nOPERATIONAL metrics (process-focused):\n  Answer: 'How is the team performing? Are processes working?'\n  Audience: security team leads, SOC managers\n  Examples:\n    mean_time_to_detect      -- operational efficiency of detection processes\n    total_alerts_processed   -- team workload and alert volume\n    average_scan_cycle_time  -- vulnerability management process speed\n    firewall_rules_reviewed  -- security engineering activity volume\n\nReporting principles:\n  1. Know your audience -- tailor depth and terminology\n  2. Lead with outcomes -- what changed, not what you did\n  3. Benchmark -- '189h MTTD' is meaningless; '189h vs 500h industry average' is not\n  4. Action-oriented -- every metric should connect to a decision or action\n  5. Trend over time -- a single snapshot is less useful than direction of travel",
+  "steps": [
+    {
+      "question": "Which of the 8 metrics directly answers 'Are we safer this quarter?' — name one executive-appropriate metric.",
+      "valid_answers": ["overall_risk_reduction", "risk reduction", "patch_compliance_rate", "patch compliance", "critical_vulnerabilities_open", "critical vulnerabilities", "sla_adherence_rate", "sla adherence"],
+      "hints": [
+        "Executive metrics answer 'What is our risk posture?' They are outcome-focused — the result of security work, not the activity.",
+        "Look at the 8 metrics and ask: can a board member make a budget or strategic decision from this number?",
+        "Outcome-focused examples: overall_risk_reduction (23%), patch_compliance_rate (78%), critical_vulnerabilities_open (12), sla_adherence_rate (33%).",
+        "Any of these four are executive metrics: overall_risk_reduction, patch_compliance_rate, critical_vulnerabilities_open, sla_adherence_rate."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "total_alerts", "response": "Alert volume (1,247) is an operational metric — it tells you how much work the team processed, not whether the organization is safer."},
+        {"pattern": "firewall_rules", "response": "Rules reviewed (847) measures security engineering activity — an operational metric, not an outcome the board cares about."},
+        {"pattern": "mean_time", "response": "MTTD (189 hours) is an operational efficiency metric for security managers — it's not outcome-focused enough for the executive dashboard as-is."}
+      ]
+    },
+    {
+      "question": "How many of the 8 metrics are classified as OPERATIONAL (process-focused, for the security team — not the board)?",
+      "valid_answers": ["4", "four"],
+      "hints": [
+        "Operational metrics answer 'How is the team performing? How much work is being done?' They measure activities, not outcomes.",
+        "Go through each metric: mean_time_to_detect, total_alerts_processed, average_scan_cycle_time, firewall_rules_reviewed — all measure team activities.",
+        "Overall_risk_reduction, patch_compliance_rate, critical_vulnerabilities_open, sla_adherence_rate are outcome metrics = executive. The remaining 4 are operational.",
+        "4 metrics are operational: MTTD (detection process speed), total alerts processed (workload), average scan cycle time (process speed), firewall rules reviewed (activity count)."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "3", "response": "Count again: MTTD, total_alerts_processed, average_scan_cycle_time, and firewall_rules_reviewed are all operational. That is 4 operational metrics."},
+        {"pattern": "5", "response": "sla_adherence_rate is an outcome metric (are we meeting commitments?) and belongs on the executive dashboard. The operational count is 4."}
+      ]
+    },
+    {
+      "question": "How many of the 8 metrics are appropriate for the executive-level dashboard?",
+      "valid_answers": ["4", "four"],
+      "hints": [
+        "Executive metrics are outcome-focused: they answer 'Are we safer? What is our risk posture?' and help the board make strategic decisions.",
+        "Type 'tools' to classify all 8 metrics. The dashboard filter labels each as [EXECUTIVE] or [OPERATIONAL].",
+        "The 4 executive metrics are: overall_risk_reduction, patch_compliance_rate, critical_vulnerabilities_open, and sla_adherence_rate.",
+        "Exactly 4 of the 8 metrics belong on the executive dashboard. The other 4 (MTTD, alert count, scan cycle time, rules reviewed) are operational."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "8", "response": "Not all metrics belong on an executive dashboard. Operational metrics (alert counts, process times, activity volumes) overwhelm and confuse board-level audiences."},
+        {"pattern": "5", "response": "MTTD (189 hours) is an operational metric — meaningful to security managers but not executive-appropriate without translation to business impact."},
+        {"pattern": "3", "response": "sla_adherence_rate (33%) is executive-appropriate — it directly shows whether the team is meeting its response commitments. Count it in. Total is 4."}
+      ]
+    },
+    {
+      "question": "The CISO wants to open the board presentation with the most compelling outcome metric. Which single metric best demonstrates the strategic value of Operation IRONCLAD?",
+      "valid_answers": ["overall_risk_reduction", "risk reduction", "23 percent", "23%"],
+      "hints": [
+        "Board members care most about: did our security investment make us safer? Which metric directly answers that question with a percentage?",
+        "The learn section says: 'Lead with outcomes — what changed, not what you did.' Which metric measures what changed?",
+        "overall_risk_reduction (23%) directly states the security program reduced organizational risk by nearly a quarter this quarter.",
+        "overall_risk_reduction at 23% is the strongest opening metric — it translates security work into a business outcome the board immediately understands."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "patch_compliance", "response": "Patch compliance (78%) is important but it describes a control state, not an outcome. Risk reduction directly answers 'are we safer?'"},
+        {"pattern": "sla", "response": "SLA adherence at 33% is actually a concerning number — leading with it puts the board on the defensive. Open with risk reduction first."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "Four metrics belong on the executive dashboard: overall_risk_reduction (23%), patch_compliance_rate (78%), critical_vulnerabilities_open (12), and sla_adherence_rate (33%). The other four -- MTTD, total alerts processed, scan cycle time, and firewall rules reviewed -- are operational metrics that answer 'how is the team working' rather than 'are we safer.' The board presentation should lead with risk reduction and compliance posture.",
     "real_world": "CISOs who speak in operational metrics lose their audience and their budget. The CISO who says 'We processed 1,247 alerts this quarter' loses to the one who says 'We detected threats 5x faster than industry average, reducing our exposure window from 21 days to 4 days.' The underlying data is the same -- the framing is everything.",

@@ -16,6 +16,46 @@
     "Type 'tools' in the game. The IOC hunter searches each log line\nfor any of the three IOC strings and marks matches. Count the\n[MATCH] lines — that is your answer.",
     "SPOILER — Three log lines match:\nLine 1: 'deploymaster' in sshd accepted password line\nLine 2: 'deploymaster' in sudo command line\nLine 5: '/tmp/.x' in cron execution line\nType: 3"
   ],
+  "steps": [
+    {
+      "question": "The IOC feed contains three indicators: 185.220.101.45, deploymaster, and /tmp/.x. How many of the five log lines contain the string 'deploymaster'?",
+      "valid_answers": ["2", "two"],
+      "hints": [
+        "Search each log line for the exact string 'deploymaster'",
+        "Line 1 (sshd accepted password): does it contain 'deploymaster'? Yes.",
+        "Line 2 (sudo command): does it contain 'deploymaster'? Yes. Check lines 3, 4, 5 too.",
+        "Lines 1 and 2 both contain 'deploymaster'. Lines 3, 4, and 5 do not."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Which log line contains the IOC '/tmp/.x'?",
+      "valid_answers": ["line 5", "cron line", "cron log", "the cron entry", "5"],
+      "hints": [
+        "Search for the string '/tmp/.x' in each of the five log lines",
+        "Lines 1-4 don't contain '/tmp/.x'. Check line 5.",
+        "Line 5 is a cron log entry: cron[1301]: (root) CMD (/tmp/.x)",
+        "The cron log line (line 5) is the one containing '/tmp/.x' — revealing attacker persistence via scheduled job."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "185.220.101.45", "response": "The IP 185.220.101.45 is in the IOC feed, but search these specific log lines — does it appear in any of them?"}
+      ]
+    },
+    {
+      "question": "Counting all log lines that contain at least one IOC (185.220.101.45, deploymaster, or /tmp/.x), how many distinct log entries match?",
+      "valid_answers": ["3", "three"],
+      "hints": [
+        "Count unique matching lines — a line only counts once even if it matches multiple IOCs",
+        "Lines matching 'deploymaster': lines 1 and 2. Lines matching '/tmp/.x': line 5. Lines matching '185.220.101.45': check each.",
+        "The IP 185.220.101.45 does not appear in any of the five log lines (it was in network flow data, not auth logs).",
+        "Total distinct matching lines: 2 (deploymaster) + 1 (/tmp/.x) + 0 (IP not in these logs) = 3. Type: 3"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "5", "response": "Not all 5 lines match. Only count lines that contain at least one of the three IOC strings."},
+        {"pattern": "4", "response": "Check carefully — 'deploymaster' appears in 2 lines, '/tmp/.x' in 1 line, and the C2 IP doesn't appear in these log lines at all."}
+      ]
+    }
+  ],
   "learn": "Threat intelligence IOC correlation is how SOC analysts connect\nattacker artifacts to their own environment. An IOC (Indicator of\nCompromise) is evidence of a threat actor — IPs, domains, usernames,\nfile hashes, or file paths extracted from malware analysis or\nincident reports.\n\nIOC correlation workflow:\n  1. Receive IOC feed (from ISAC, vendor, internal IR team)\n  2. Search logs, EDR telemetry, and network captures for matches\n  3. Each match is a potential true positive — investigate further\n  4. Confirmed matches escalate to incident tickets\n\nTypes of IOCs:\n  Network IOCs   — IP addresses, domains, URLs (check firewall/proxy logs)\n  Host IOCs      — File hashes, paths, registry keys (check EDR)\n  Account IOCs   — Usernames, credentials (check auth logs)\n  Behavioral IOCs — Command patterns (check auditd, syslog)\n\nIOC correlation appears in CySA+ Domain 1 threat intelligence objectives.\nThe exam tests whether you know which log source to check for each IOC type.",
   "tools": "Searches each log entry for any IOC from the feed and reports matches with the matching indicator highlighted.",
   "debrief": {

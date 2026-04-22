@@ -1,0 +1,70 @@
+{
+  "id": "case09",
+  "title": "Code in the Shadows",
+  "stage": "stage2",
+  "difficulty": 3,
+  "xp_base": 150,
+  "tools_type": "mem_analyzer",
+  "scenario": "Further memory analysis of the compromised workstation has been initiated. The Volatility malfind plugin scans all processes for memory regions that have suspicious characteristics — specifically executable memory that is not backed by a file on disk. This technique, combined with the presence of PE headers, reveals code injection. Your task is to identify which legitimate Windows process has been compromised via code injection.",
+  "challenge": "Which legitimate process has injected malicious code?",
+  "challenge_data": "$ python3 vol.py -f meridian-wkstn047.mem windows.malfind\nVolatility 3 Framework 2.7.0\nProgress:  100.00\n\n--- False Positive Examples ---\n\nPID:    3104  Process: chrome.exe\nStart VPN: 0x7f3b10000000  End: 0x7f3b10004000\nVad Tag: VadS  Protection: PAGE_EXECUTE_READ\nHexdump:\n0x7f3b10000000  48 83 ec 28 e8 27 00 00  00 48 83 c4 28 c3 00 00  |H..('....H..(...|\n(Note: No MZ header — this is JIT-compiled code from V8 JavaScript engine. Benign.)\n\nPID:    1892  Process: RuntimeBroker.exe\nStart VPN: 0x7ffe8a200000  End: 0x7ffe8a204000\nVad Tag: VadS  Protection: PAGE_EXECUTE_READWRITE\nHexdump:\n0x7ffe8a200000  48 89 5c 24 08 48 89 74  24 10 57 48 83 ec 20 41  |H.\\$.H.t$.WH.. A|\n(Note: Legitimate .NET CLR JIT region. No MZ header. Benign.)\n\n--- Suspicious Finding ---\n\nPID:     892  Process: svchost.exe\nStart VPN: 0x7ff8a0000000  End: 0x7ff8a0004000\nVad Tag: VadS  Protection: PAGE_EXECUTE_READWRITE\nHexdump:\n0x7ff8a0000000  4d 5a 90 00 03 00 00 00  04 00 00 00 ff ff 00 00  |MZ..............|\n0x7ff8a0000010  b8 00 00 00 00 00 00 00  40 00 00 00 00 00 00 00  |........@.......|\n0x7ff8a0000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|\n0x7ff8a0000030  00 00 00 00 00 00 00 00  00 00 00 00 e0 00 00 00  |................|\n0x7ff8a0000040  0e 1f ba 0e 00 b4 09 cd  21 b8 01 4c cd 21 54 68  |........!..L.!Th|\n0x7ff8a0000050  69 73 20 70 72 6f 67 72  61 6d 20 63 61 6e 6e 6f  |is program canno|\n\nFlags: PAGE_EXECUTE_READWRITE region contains MZ/PE header\nDisk-Backed: NO (this memory region has no corresponding module on disk)\nParent PID: 616 (services.exe) — process ancestry appears legitimate\nInjection Type: Possible reflective PE injection or process hollowing\n\nANALYSIS SUMMARY\n================\nProcesses with PAGE_EXECUTE_READWRITE regions: 3\nProcesses with PE headers in non-module memory: 1\nHigh-confidence injection: svchost.exe (PID 892)",
+  "valid_answers": ["svchost.exe", "svchost", "svchost.exe pid 892", "pid 892", "svchost pid 892"],
+  "steps": [
+    {
+      "question": "How many processes in the malfind output have PAGE_EXECUTE_READWRITE memory regions?",
+      "valid_answers": ["3", "three", "three processes", "3 processes"],
+      "hints": [
+        "Read the ANALYSIS SUMMARY section at the bottom of the malfind output — it lists a count.",
+        "The output includes two sections: 'False Positive Examples' and 'Suspicious Finding'. Count the total distinct processes shown across both sections.",
+        "The ANALYSIS SUMMARY states 'Processes with PAGE_EXECUTE_READWRITE regions: 3' — chrome.exe, RuntimeBroker.exe, and svchost.exe all appear.",
+        "The answer is 3. The summary explicitly reads: 'Processes with PAGE_EXECUTE_READWRITE regions: 3'."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "1", "response": "Only the suspicious finding is highlighted, but the output includes false positive examples too — count all processes shown."},
+        {"pattern": "2", "response": "Check again — there are two false-positive processes and one suspicious one, making three total."}
+      ]
+    },
+    {
+      "question": "What makes the svchost.exe entry different from the chrome.exe and RuntimeBroker.exe entries?",
+      "valid_answers": ["mz header", "pe header", "4d 5a", "mz magic bytes", "pe magic bytes", "it has an mz header", "it contains a pe header", "mz pe header in memory"],
+      "hints": [
+        "Both false-positive processes and the suspicious svchost.exe have PAGE_EXECUTE_READWRITE regions. Something else distinguishes the svchost entry — look at the hexdump.",
+        "The notes for chrome.exe and RuntimeBroker.exe both say 'No MZ header'. Look at the first two bytes of svchost.exe's hexdump.",
+        "The hexdump for svchost.exe starts with '4d 5a' — those are the ASCII bytes for 'MZ', the magic bytes that mark the beginning of a Windows PE (Portable Executable) file.",
+        "svchost.exe has an MZ/PE header (bytes 4D 5A) at the start of its non-disk-backed memory region. The other two processes do not — they are JIT-compiled code without PE headers, which is why they are benign."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "rwx", "response": "PAGE_EXECUTE_READWRITE is present in all three processes — that alone doesn't distinguish svchost.exe. Look at the hexdump content."},
+        {"pattern": "disk", "response": "Correct direction — it's not backed by a file on disk. But the analysis notes also identify a specific header that seals the verdict. Look at the hexdump."}
+      ]
+    },
+    {
+      "question": "Which legitimate Windows process has injected malicious code, according to the malfind analysis?",
+      "valid_answers": ["svchost.exe", "svchost", "svchost.exe pid 892", "pid 892", "svchost pid 892"],
+      "hints": [
+        "Look under the '--- Suspicious Finding ---' section header in the malfind output. It names a specific process.",
+        "The suspicious process has PID 892. What is its name shown in the 'Process:' field?",
+        "The ANALYSIS SUMMARY at the bottom states 'High-confidence injection: svchost.exe (PID 892)'.",
+        "The answer is svchost.exe (PID 892). It has PAGE_EXECUTE_READWRITE protection, an MZ/PE header at 0x7ff8a0000000, no disk-backed VAD entry, and parent ancestry through services.exe — a classic reflective PE injection into a legitimate Windows process."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "chrome", "response": "chrome.exe is explicitly labeled a false positive — its non-file-backed RWX memory is JIT-compiled JavaScript from the V8 engine, with no MZ header."},
+        {"pattern": "runtimebroker", "response": "RuntimeBroker.exe is also labeled a false positive — its RWX region is a legitimate .NET CLR JIT region with no MZ header."}
+      ]
+    }
+  ],
+  "hints": [
+    "The malfind plugin flags memory regions that are executable and writable — which normal process memory should not be. Read the output and focus on which process has the most suspicious finding.",
+    "Two of the three results are marked as benign false positives (JIT-compiled code from Chrome and .NET). The third result is the suspicious one — look for which process has an MZ header in its non-module memory.",
+    "PAGE_EXECUTE_READWRITE combined with an MZ (4D 5A) header at the start of a non-file-backed memory region is the classic signature of an injected PE file. Which process shows this combination?",
+    "svchost.exe (PID 892) has a PAGE_EXECUTE_READWRITE memory region at 0x7ff8a0000000 that begins with MZ (4D 5A) — the PE file magic bytes — and is not backed by any file on disk. This is a textbook code injection finding."
+  ],
+  "learn": "Process injection (MITRE ATT&CK T1055) is a family of techniques where attackers inject malicious code into the memory space of a legitimate process. This achieves two goals: the malicious code runs under the identity and trust of a legitimate process (evading security tools that whitelist known-good processes), and the injected code inherits the target process's network connections and privileges.\n\nThe malfind plugin logic:\nmalfind identifies suspicious memory regions by looking for the combination of:\n1. PAGE_EXECUTE_READWRITE (RWX) protection flags — memory that is both writable AND executable is suspicious. Legitimate code is typically mapped as read-only executable (PAGE_EXECUTE_READ). Writable executable memory suggests code was written there at runtime.\n2. No VAD (Virtual Address Descriptor) entry linked to a file on disk — legitimate loaded modules have disk-backed VAD entries.\n3. PE header (MZ signature) at the start of the region — indicates a full PE file has been loaded reflectively into memory.\n\nFalse positives are common:\n- JIT compilation (Java, .NET CLR, Chrome V8) creates executable memory at runtime. These will show as RWX regions but have no MZ header.\n- Some legitimate software uses RWX memory for performance reasons.\n- Always confirm by checking for MZ header AND disk-backed status.\n\nCommon injection techniques:\n- CreateRemoteThread: Allocate memory in target, write shellcode/PE, create thread to execute it\n- Reflective DLL Injection: Self-loading PE that maps itself into memory without Windows loader assistance\n- Process Hollowing: Start a legitimate process in suspended state, replace its memory with malicious PE\n- APC Injection: Queue an Asynchronous Procedure Call to a target thread\n- Thread Hijacking: Suspend a target thread, modify its instruction pointer, resume\n\nWhy target svchost.exe:\n- Runs as SYSTEM or as a privileged account\n- Has legitimate network connections (expected behavior)\n- Multiple instances make it harder to spot an anomalous one\n- Security tools often whitelist svchost.exe network activity\n\nResponse: When malfind confirms injection, dump the injected region using 'windows.dumpfiles' and submit to sandbox analysis. Correlate the injected code's network activity with the windows.netstat output.",
+  "debrief": {
+    "summary": "Volatility's malfind plugin identified an injected PE file inside svchost.exe (PID 892). The memory region at 0x7ff8a0000000 has PAGE_EXECUTE_READWRITE protection, begins with the MZ PE header, and has no corresponding file on disk — all hallmarks of reflective PE injection into a legitimate Windows process.",
+    "real_world": "Code injection into svchost.exe is a standard technique used by sophisticated threat actors to run malicious code under a trusted process identity, inheriting its privileges and network reputation. EDR solutions detect this via behavioral monitoring of memory allocation patterns and process cross-memory write operations.",
+    "next_step": "Dump the injected memory region using vol windows.dumpfiles, compute its hash and submit to VirusTotal, then perform static and dynamic analysis in a sandbox to understand its full capabilities.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCFA, GCFE",
+    "exam_tip": "PAGE_EXECUTE_READWRITE + MZ header in a non-disk-backed memory region = strong indicator of injected code. MITRE ATT&CK T1055. malfind has false positives (JIT compilers use RWX memory) — always confirm with MZ header and disk-backed status check."
+  }
+}

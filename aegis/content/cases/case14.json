@@ -18,6 +18,46 @@
     "Type 'tools' in the game. The SIEM correlator evaluates each event\n        against all rules and lists every alert that fired with its severity.\n        Find the alert with the highest severity level.",
     "SPOILER — Event 22:14:07 (auth_success, source=external, user=root)\n        matches R002 (CRITICAL). Root login from an external source is the\n        most severe event in the log. Type: critical"
   ],
+  "steps": [
+    {
+      "question": "Look at the four correlation rules. Which rule (R001-R004) would fire on the event: '22:14:07 syslog auth_success source=external user=root'?",
+      "valid_answers": ["r002", "rule r002", "r002 critical"],
+      "hints": [
+        "Correlation rules fire when ALL their conditions match a single event. Check each rule against this event.",
+        "R001 requires auth_failure — this event is auth_success, so R001 does not fire.",
+        "R002 requires: event_type=auth_success AND source=external AND details=root. Check the event: auth_success? yes. external? yes. root? yes.",
+        "R002 fires on this event. All three conditions match: auth_success, source=external, user=root."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "r001", "response": "R001 fires on auth_failure. This event is auth_success — R001 does not match."},
+        {"pattern": "r003", "response": "R003 fires on process_create with powershell. This is an auth_success event — R003 does not match."}
+      ]
+    },
+    {
+      "question": "R002 fires at the CRITICAL severity level. The other events in the log also trigger rules R001, R003, and R004. What is the severity level of the highest-priority SIEM alert?",
+      "valid_answers": ["critical", "critical severity"],
+      "hints": [
+        "SIEM alert severity levels from lowest to highest: LOW, MEDIUM, HIGH, CRITICAL",
+        "R001 fires at HIGH, R002 fires at CRITICAL, R003 fires at MEDIUM, R004 fires at HIGH",
+        "The highest severity among all fired alerts determines the queue priority",
+        "CRITICAL is the highest severity level — R002 firing at CRITICAL is the top-priority alert. Type: critical"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "high", "response": "HIGH is correct for R001 and R004, but there is a higher-severity alert in this queue — check R002."}
+      ]
+    },
+    {
+      "question": "The CRITICAL alert fired on event '22:14:07 syslog auth_success source=external user=root'. What does this event describe in plain language?",
+      "valid_answers": ["root login from external", "external root login", "root authenticated from outside", "external successful root login"],
+      "hints": [
+        "Break down the event fields: auth_success = successful login, source=external = from the internet, user=root = the root account",
+        "This is a successful login to the root account from an external (internet) source",
+        "In plain language: someone from outside the network successfully logged in as root",
+        "The CRITICAL alert describes a successful root login from an external IP — the NIGHTWIRE initial access."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "tools": "Evaluates each event against the active correlation rules and reports all alerts that fired with their severity levels.",
   "learn": "SIEM (Security Information and Event Management) correlation rules are how\nSOC analysts automate detection. A rule defines conditions — when all\nconditions match an incoming event, an alert fires.\n\nSIEM alert triage workflow:\n  1. Sort alert queue by severity (CRITICAL first)\n  2. Correlate related alerts into incidents (same source IP, same user)\n  3. Identify true positives vs false positives\n  4. Escalate confirmed incidents to incident tickets\n\nAlert severity levels (typical):\n  CRITICAL — requires immediate response (active exploitation, critical asset)\n  HIGH     — investigate within 1 hour (lateral movement, C2 communication)\n  MEDIUM   — investigate within 4 hours (reconnaissance, policy violation)\n  LOW      — investigate within 24 hours (informational, single failed login)\n\nFalse positive reduction:\n  Correlation rules reduce false positives by requiring multiple conditions.\n  Single-condition rules (any failed login) produce alert fatigue.\n  Multi-condition rules (root login from external IP) are more precise.\n\nThis scenario uses a rule-based SIEM. Modern SIEMs also use:\n  User and Entity Behavior Analytics (UEBA) — baseline + anomaly detection\n  Machine learning models — unsupervised pattern detection\n  Threat intel enrichment — automatic IOC matching",
   "debrief": {

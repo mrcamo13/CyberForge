@@ -1,6 +1,6 @@
 # CyberForge
 
-A terminal-based cybersecurity training simulator built for people studying for **CompTIA PenTest+** and **CySA+** exams. Learn by doing — every case is a real scenario with real tooling logic behind it.
+A terminal-based cybersecurity training simulator built for people studying for **CompTIA PenTest+**, **CySA+**, and **CHFI** exams. Learn by doing — every case is a real scenario you investigate step by step, the same way you would on the job.
 
 > Open source — in active development.
 
@@ -8,14 +8,16 @@ A terminal-based cybersecurity training simulator built for people studying for 
 
 ## What is it?
 
-CyberForge drops you into a simulated SOC/Red Team terminal and walks you through hands-on scenarios. Instead of flashcards, you run tools, analyze output, and answer the same kinds of questions that appear on the certification exams.
+CyberForge drops you into a simulated terminal and walks you through hands-on investigations. Instead of flashcards, you run tools, analyze output, and work through chained questions that build on each other — the same way real analysts actually work. Each case is a multi-step investigation, not a single question.
 
-Two simulators ship in one repo:
+Four simulators ship in one repo:
 
 | Simulator | Role | Exam |
 |-----------|------|------|
 | **CIPHER** | Red Team operator | CompTIA PenTest+ PT0-003 |
 | **AEGIS** | Blue Team SOC analyst | CompTIA CySA+ CS0-003 |
+| **LAB** | Python scripting for security | All certs (automation skills) |
+| **FORENSICS** | Digital forensics investigator | CHFI / GCFE / CySA+ Domain 4 |
 
 ---
 
@@ -35,8 +37,10 @@ python play.py
 Choose a simulator:
 
 ```
-[1] CIPHER  — Red Team   (PenTest+)
-[2] AEGIS   — Blue Team  (CySA+)
+[1] CIPHER    -- Red Team         (PenTest+)
+[2] AEGIS     -- Blue Team        (CySA+)
+[3] LAB       -- Script Lab       (Python automation)
+[4] FORENSICS -- Digital Forensics (DFIR / CHFI)
 ```
 
 ### Requirements
@@ -46,24 +50,61 @@ Choose a simulator:
 
 ---
 
+## How Investigations Work
+
+Every case in every simulator follows the same multi-step pattern:
+
+1. **Scenario** — a realistic incident brief, SOC ticket, or evidence receipt
+2. **Run the tool** — `grep`, `volatility`, `exiftool`, `nmap`, etc. to examine the evidence
+3. **Answer each step in sequence** — each correct answer unlocks the next question; you can't skip ahead
+4. **Wrong-answer nudges** — type a plausible wrong answer and you get specific feedback, not just "Incorrect"
+5. **Debrief** — after the final step: real-world context, cert exam tip, and next steps
+
+**Commands available in every case:**
+
+| Command | What it does |
+|---------|-------------|
+| `<tool>` | Run the forensic/analyst tool for this case |
+| `learn` | Read the concept explanation |
+| `hint` | Reveal the next hint for the current step (reduces XP) |
+| `note <text>` | Save a note for this case |
+| `notes` | View your saved notes |
+| `skip` | Skip this case |
+| `menu` | Save and return to the case list |
+| `quit` | Save and exit |
+
+**XP per step** depends on hints used on that step:
+
+| Hints used | XP multiplier |
+|------------|---------------|
+| 0 | 100% |
+| 1 | 75% |
+| 2 | 50% |
+| 3 | 25% |
+| 4 | 10% |
+
+Progress is saved between steps — you can quit mid-case and resume exactly where you left off.
+
+---
+
 ## CIPHER — Red Team (PenTest+)
 
-8 operations across 3 stages. You play as a Red Team operator running missions against a fictional target corp (NexusCorp).
+**8 operations**, each broken into 2–4 phases that mirror real pentest workflow: Recon → Foothold → Escalation → Exfil. You play as a Red Team operator running missions against NexusCorp.
 
 **Topics covered:**
-- Cryptography (Caesar cipher, Base64 encoding, MD5 hashing)
-- Network reconnaissance (port scanning with `nmap`)
-- Web application attacks (`sqlmap`, directory enumeration with `gobuster`)
+- Cryptography (Caesar cipher, Base64, MD5)
+- Network reconnaissance (`nmap` port scanning)
+- Web attacks (`sqlmap` SQL injection, `gobuster` directory enumeration)
 - Log analysis (`grep`)
-- Privilege escalation (SUID scanning with `find-suid`)
+- Privilege escalation (SUID scanning)
 
-**Exam domains:** PT0-003 Domain 1 (Planning), Domain 2 (Recon), Domain 3 (Attacks & Exploits)
+**Exam domains:** PT0-003 Domains 1–3 (Planning, Recon, Attacks & Exploits)
 
 ---
 
 ## AEGIS — Blue Team (CySA+)
 
-31 cases across 4 stages. You play as a SOC analyst at Veridian Systems responding to the NIGHTWIRE incident and the Operation IRONCLAD remediation program.
+**31 cases** across 4 stages. You play as a SOC analyst at Veridian Systems responding to the NIGHTWIRE incident and the Operation IRONCLAD remediation program.
 
 **Topics covered:**
 - Log analysis and SIEM correlation (`splunk`, `grep`)
@@ -78,33 +119,53 @@ Choose a simulator:
 
 ### Placement Test
 
-AEGIS includes a 5-question placement test. **Pass with 4/5 and Stage 1 is automatically skipped** — you jump straight to Stage 2 (Case 06). Useful if you already have baseline CySA+ knowledge and want to start on harder material.
+AEGIS includes a 5-question placement test. Pass with 4/5 and Stage 1 is automatically skipped — you jump straight to Stage 2. Useful if you already have baseline knowledge.
 
 ---
 
-## How Cases Work
+## LAB — Script Lab (Python automation)
 
-Each case follows the same structure:
+**15 challenges** across 3 stages. Write actual Python scripts to solve security tasks. The engine runs your code, validates the output, and gives feedback.
 
-1. **Scenario** — a realistic SOC ticket or incident brief
-2. **Challenge** — a specific question to answer
-3. **Commands you type:**
-   - `nmap` / `volatility` / `semgrep` / etc. — runs the simulated tool for this case
-   - `learn` — explains the concept behind the case
-   - `hint` — reveals a progressive hint (reduces XP earned)
-   - `note <text>` — saves a note for this case
-   - `skip` — skip the case and move on
-4. **Debrief** — after a correct answer: real-world context, exam tip, and a link to practice further
+**Topics covered:**
+- File I/O, string manipulation, hashing (Stage 1 — Foundation)
+- CSV parsing, regex, JSON, ciphers, hash cracking (Stage 2 — Intermediate)
+- Binary/XOR operations, socket programming, log correlation, CLI tools, full pipelines (Stage 3 — Advanced)
 
-XP earned per case depends on hints used:
+**Features:** Timed mode, solution replay, leaderboard across save files
 
-| Hints used | XP multiplier |
-|------------|---------------|
-| 0 | 100% |
-| 1 | 75% |
-| 2 | 50% |
-| 3 | 25% |
-| 4 | 10% |
+**Skills built:** The Python automation toolkit used by real security analysts — the same skills tested in scripting sections of security certs.
+
+---
+
+## FORENSICS — Digital Investigation (DFIR / CHFI)
+
+**20 cases** across 4 stages. You play as a DFIR investigator closing cases on the Meridian Financial Group breach — a connected narrative that runs across all 20 cases.
+
+**Stages:**
+
+| Stage | Topic | Cases |
+|-------|-------|-------|
+| 1 — File Forensics | Magic bytes, metadata, hash verification, hex analysis | 01–05 |
+| 2 — Memory Forensics | Volatility, process masquerade, C2 beacons, injected code | 06–10 |
+| 3 — Log & Artifact Analysis | Event logs, registry, browser history, email headers, prefetch | 11–15 |
+| 4 — Incident Response | Full IR: timelines, exfil analysis, lateral movement, attribution | 16–20 |
+
+**Forensic tools simulated:** `file`, `exiftool`, `sha256sum`, `hexdump`, `strings`, `volatility`, `timeline`, `eventlog`, `registry`, `browser`, `email-trace`, `wireshark`, `prefetch`, `threat-intel`
+
+**Exam domains:** CHFI v10, GCFE, CySA+ CS0-003 Domain 4
+
+---
+
+## Badges
+
+Each simulator has its own badge set. Examples:
+
+**AEGIS:** First Blood, No Hints, Ghost Protocol (5 hint-free cases), Halfway There, Iron Analyst, XP-1000
+
+**FORENSICS:** First Find, Clean Read (no hints), Clean Chain (5 hint-free), Senior Investigator (10 cases), Master Investigator (all 20), XP-1000
+
+**LAB:** First Solve, No Hints, Hint-Free 3, Lab Graduate (all 15)
 
 ---
 
@@ -119,53 +180,55 @@ cyberforge/
     engine/
     utils/
     content/cases/      <- 31 case JSON files
+    validate_content.py
   cipher/               <- Red Team simulator (PenTest+)
     main.py
     engine/
     utils/
     content/operations/ <- 8 operation JSON files
-  specs/                <- design documents per stage
-  docs/                 <- architecture and project docs
+    validate_content.py
+  lab/                  <- Script Lab (Python automation)
+    main.py
+    engine/
+    utils/
+    content/challenges/ <- 15 challenge JSON files
+    validate_content.py
+    tests/
+  forensics/            <- DFIR simulator (CHFI / CySA+)
+    main.py
+    engine/
+    utils/
+    content/cases/      <- 20 case JSON files
+    validate_content.py
+    tests/
 ```
 
 ---
 
 ## Adding Content
 
-Cases and operations are plain JSON files. To add a new case to AEGIS:
+Cases are plain JSON files. To add a new case:
 
-1. Create `aegis/content/cases/caseNN.json` following the schema in any existing case
-2. Add an entry to `aegis/content/registry.json`
-3. Run `python aegis/validate_content.py` to verify
+1. Create the JSON file in the appropriate `content/cases/` or `content/operations/` folder, following the schema of any existing case
+2. Add an entry to the simulator's `registry.json`
+3. Run `python validate_content.py` from inside the simulator folder to verify
 
-No code changes needed for new content.
+No code changes needed for new content. Multi-step cases use the `steps` array — see any existing case for the schema.
 
 ---
 
-## Badges
+## Content Count
 
-AEGIS awards badges as you progress:
-
-| Badge | Condition |
-|-------|-----------|
-| First Blood | Complete your first case |
-| No Hints | Solve any case without hints |
-| Ghost Protocol | 5 cases solved without hints |
-| Halfway There | 16 cases complete |
-| Iron Analyst | All 31 cases complete |
-| XP-1000 | Accumulate 1,000 XP |
+| Simulator | Cases / Ops | Steps | Wrong-answer Nudges |
+|-----------|------------|-------|---------------------|
+| CIPHER | 8 operations | 23 phases | 62 |
+| AEGIS | 31 cases | 93 steps | 107 |
+| LAB | 15 challenges | — | — |
+| FORENSICS | 20 cases | 59 steps | 119 |
+| **Total** | **74** | **175** | **288** |
 
 ---
 
 ## License
 
 MIT — free to use, fork, and build on.
-
----
-
-## Status
-
-Active development. Content and engine are both evolving.
-
-- CIPHER: 8 operations (PenTest+ Domains 1–3)
-- AEGIS: 31 cases (all 4 CySA+ domains)

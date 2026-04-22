@@ -1,0 +1,72 @@
+{
+  "id": "case16",
+  "title": "Patient Zero",
+  "stage": "stage4",
+  "difficulty": 3,
+  "xp_base": 200,
+  "tools_type": "timeline_builder",
+  "scenario": "A ransomware outbreak has crippled 14 servers at Meridian Financial Group. Your incident response team has been called in to determine how the attackers initially got in. A consolidated timeline of security events across all affected systems has been constructed using log2timeline/Plaso. Understanding the initial access vector is critical for immediate containment and for preventing a repeat incident. Analyze the timeline and identify how the attackers first gained access.",
+  "challenge": "What was the attacker's initial access vector?",
+  "challenge_data": "INCIDENT TIMELINE — CF-2026-0401-RANSOMWARE\n=============================================\nTool    : log2timeline / Plaso 20240101\nViewer  : Timesketch\nPeriod  : 2026-03-31 21:00 UTC to 2026-04-01 06:00 UTC\nSystems : All 15 hosts (1 workstation + 14 servers)\n\n2026-03-31 21:31:04 UTC  [FIREWALL-01]  Port scan detected: 185.220.101.47 scanning WKSTN-047 (ports 22,80,443,3389,5985)\n2026-03-31 21:32:17 UTC  [FIREWALL-01]  RDP (TCP/3389) connection ALLOWED: 185.220.101.47:54231 → WKSTN-047:3389\n                          Rule: ANY-TO-ANY-INTERNET (over-permissive rule — no geo-blocking)\n2026-03-31 21:33:45 UTC  [WKSTN-047]   EventID 4624: Successful RDP logon\n                          Account: j.park  Logon Type: 10 (RemoteInteractive)  Source: 185.220.101.47\n2026-03-31 21:34:02 UTC  [WKSTN-047]   EventID 4672: Special privileges assigned to j.park\n2026-03-31 21:41:33 UTC  [WKSTN-047]   New file written: C:\\Users\\Public\\svch0st.exe (147,456 bytes)\n2026-03-31 21:44:19 UTC  [WKSTN-047]   Prefetch: SVCH0ST.EXE first execution\n2026-03-31 21:44:31 UTC  [WKSTN-047]   Network: ESTABLISHED TCP 10.0.0.47:53012 → 185.220.101.47:4444 (C2)\n2026-03-31 21:45:03 UTC  [WKSTN-047]   Registry: WindowsUpdateHelper Run key created (persistence)\n2026-03-31 22:00:44 UTC  [NETWORK]     WKSTN-047 → FILE-SRV-01:445 (SMB — lateral movement begins)\n2026-03-31 22:14:33 UTC  [FILE-SRV-01] EventID 4624: svc_backup network logon from WKSTN-047\n2026-03-31 22:30:11 UTC  [FILE-SRV-01] Mass file access: 14,332 files read in under 4 minutes (staging)\n2026-03-31 22:31:04 UTC  [FIREWALL-01] Large outbound transfer: FILE-SRV-01 → 185.220.101.47:443 (149 MB)\n2026-04-01 01:13:22 UTC  [DC-01]       EventID 7045: PSEXESVC service installed (PsExec lateral movement)\n2026-04-01 01:15:22 UTC  [DC-01]       ADSyncTask.exe executed — LSASS memory dump (Mimikatz variant)\n2026-04-01 01:33:07 UTC  [MULTIPLE]    PsExec lateral movement: 12 additional servers compromised\n2026-04-01 03:19:55 UTC  [MULTIPLE]    README_DECRYPT.txt written to 14 servers\n2026-04-01 03:20:01 UTC  [MULTIPLE]    File encryption begins: .meridian extension appended to files\n2026-04-01 04:47:33 UTC  [SOC-ALERT]   Ransomware detected — incident declared, WKSTN-047 isolated\n\nTIME TO ENCRYPTION: 5 hours 48 minutes from initial access",
+  "valid_answers": ["rdp", "remote desktop", "remote desktop protocol", "rdp brute force", "rdp from external ip", "external rdp", "remote desktop protocol rdp", "rdp access", "open rdp"],
+  "steps": [
+    {
+      "question": "What external IP address was the source of the initial attack activity?",
+      "valid_answers": ["185.220.101.47", "ip 185.220.101.47", "the ip 185.220.101.47"],
+      "hints": [
+        "Look at the very first timeline event from FIREWALL-01. It records a port scan originating from an external IP address.",
+        "The first event at 21:31:04 UTC is a port scan detected on FIREWALL-01. The source IP of that scan is the attacker's external IP address.",
+        "The firewall log shows '185.220.101.47 scanning WKSTN-047 (ports 22,80,443,3389,5985)' — this is the source of the initial reconnaissance.",
+        "The attacker's external IP is 185.220.101.47. This same IP appears throughout the timeline: port scan, RDP connection, C2 communication, and data exfiltration destination — it is the attacker's infrastructure."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "10.0.0.47", "response": "10.0.0.47 is the internal IP address of WKSTN-047 — the victim machine, not the attacker. Look for the external IP in the firewall event at 21:31:04."},
+        {"pattern": "45.33.32.156", "response": "45.33.32.156 is a secondary C2 IP seen later in the attack, but the initial access came from a different external IP. Look at the very first timeline event."}
+      ]
+    },
+    {
+      "question": "What port did the attacker use to establish the initial connection, and what firewall rule allowed it through?",
+      "valid_answers": ["3389", "port 3389", "tcp 3389", "any-to-any-internet", "over-permissive rule", "3389 any to any internet rule"],
+      "hints": [
+        "The firewall log at 21:32:17 UTC shows a connection being ALLOWED from the external IP. Look at the port number in that entry.",
+        "The allowed connection entry shows 'TCP/3389' and includes the firewall rule name that permitted it. Port 3389 is the default port for a specific remote access protocol.",
+        "Port 3389 is RDP (Remote Desktop Protocol). The firewall allowed it via a rule named 'ANY-TO-ANY-INTERNET', described as an 'over-permissive rule — no geo-blocking'.",
+        "The attacker used port 3389 (RDP). The firewall rule 'ANY-TO-ANY-INTERNET' allowed the inbound connection from any internet IP with no geographic restrictions — a serious misconfiguration that enabled the attack."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "5985", "response": "Port 5985 (WinRM) was one of the ports scanned but was not the connection that succeeded. Look at the ALLOWED connection event at 21:32:17 and check the port."},
+        {"pattern": "22", "response": "Port 22 (SSH) was scanned but was not the successful connection. Find the firewall entry marked ALLOWED at 21:32:17 and note its port number."},
+        {"pattern": "443", "response": "Port 443 is HTTPS. While exfiltration used port 443 later, the initial access connection used a different port — look at the 21:32:17 ALLOWED event."}
+      ]
+    },
+    {
+      "question": "What was the attacker's initial access vector?",
+      "valid_answers": ["rdp", "remote desktop", "remote desktop protocol", "rdp brute force", "rdp from external ip", "external rdp", "remote desktop protocol rdp", "rdp access", "open rdp"],
+      "hints": [
+        "The timeline starts with events that occurred before the ransomware was deployed. Look at the very first events involving external IP 185.220.101.47 to see how the attacker first connected to the network.",
+        "There is a firewall log entry showing an ALLOWED inbound connection from an external IP to a specific port on a workstation. What port and service does this represent?",
+        "TCP port 3389 is the standard port for RDP (Remote Desktop Protocol). The firewall log shows an RDP connection from external IP 185.220.101.47 to WKSTN-047:3389 was allowed through, followed by a successful logon event.",
+        "The initial access vector is RDP. The attacker connected from 185.220.101.47 via RDP (port 3389) to WKSTN-047 at 21:32:17 UTC, successfully logged in as j.park at 21:33:45, and began the attack chain from there."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "phishing", "response": "Phishing is listed as a prior credential theft method (TA0001 T1566), but the actual network entry point used in this incident is shown in the firewall and event log entries at the start of the timeline."},
+        {"pattern": "vpn", "response": "VPN is not mentioned in the timeline. Look at the firewall entry at 21:32:17 — it shows a direct connection on port 3389 to the workstation."},
+        {"pattern": "ssh", "response": "SSH (port 22) was in the port scan but was not the connection that succeeded. The ALLOWED firewall entry at 21:32:17 shows a different port and protocol."}
+      ]
+    }
+  ],
+  "hints": [
+    "The timeline starts with events that occurred before the ransomware was deployed. Look at the very first events involving external IP 185.220.101.47 to see how the attacker first connected to the network.",
+    "There is a firewall log entry showing an ALLOWED inbound connection from an external IP to a specific port on a workstation. What port and service does this represent?",
+    "TCP port 3389 is the standard port for RDP (Remote Desktop Protocol). The firewall log shows an RDP connection from external IP 185.220.101.47 to WKSTN-047:3389 was allowed through, followed by a successful logon event.",
+    "The initial access vector is RDP. The attacker connected from 185.220.101.47 via RDP (port 3389) to WKSTN-047 at 21:32:17 UTC, successfully logged in as j.park at 21:33:45, and began the attack chain from there."
+  ],
+  "learn": "Timeline analysis is the core of digital incident response — it answers the fundamental questions of who, what, when, where, and how for a security incident. By aggregating logs from firewalls, Windows event logs, network flow data, and endpoint artifacts into a single chronological timeline, analysts can reconstruct exactly what happened and in what order.\n\nTimeline construction tools:\n- log2timeline / Plaso: Open-source tool that parses hundreds of artifact types (event logs, browser history, registry, file system metadata, network captures, etc.) and outputs a normalized timeline\n- Timesketch: Web-based collaborative timeline analysis platform that works with Plaso output\n- KAPE (Kroll Artifact Parser and Extractor): Windows-focused triage and collection tool that feeds into timeline workflows\n- Elastic SIEM / Splunk: Enterprise SIEM platforms that provide real-time timeline reconstruction\n\nRDP as a ransomware initial access vector:\nRDP (Remote Desktop Protocol, TCP/3389) is consistently the #1 initial access vector for ransomware gangs. Key risk factors:\n- Internet-exposed RDP without VPN or MFA is trivially exploitable\n- Credential stuffing: Attackers buy breached credentials from dark web markets and test them against RDP endpoints (validated by Shodan/Censys scanning for exposed 3389)\n- Brute force: Tools like Hydra or proprietary tools test millions of password combinations\n- MFA bypass: Some legacy RDP implementations don't support MFA\n\nRansomware kill chain (know this for CySA+):\n1. Initial Access (RDP) → 2. Establish Foothold (malware deployment) → 3. C2 Establishment → 4. Persistence → 5. Lateral Movement → 6. Privilege Escalation → 7. Data Exfiltration (double extortion) → 8. Encryption\n\nIn this case, the time from initial RDP access to encryption was 5 hours 48 minutes — typical for modern ransomware gangs that operate at rapid speed.\n\nPatient Zero identification: Finding the first compromised host (patient zero) is critical for:\n- Determining the root cause to prevent recurrence\n- Understanding the initial credentials used (j.park's RDP credentials)\n- Identifying the initial access IP for threat intelligence correlation\n- Legal and insurance claim purposes\n\nCISA and FBI report that organizations with MFA enabled for RDP see dramatically lower ransomware incident rates. Network segmentation and geo-blocking on RDP further reduce exposure.",
+  "debrief": {
+    "summary": "The ransomware outbreak began with an external RDP connection from 185.220.101.47 to WKSTN-047 at 21:32:17 UTC. The attacker successfully authenticated as j.park at 21:33:45 UTC via Logon Type 10 (RemoteInteractive/RDP), likely using credentials obtained through a prior phishing attack or credential dump. From this single workstation, the entire environment was compromised within 6 hours.",
+    "real_world": "RDP without MFA is the #1 ransomware initial access vector. CISA Advisory AA23-061A specifically warns about internet-exposed RDP as a critical risk. Organizations should require MFA for all remote access, implement network-level authentication (NLA), and restrict RDP access to VPN only.",
+    "next_step": "Immediately disable internet-facing RDP on all hosts, require MFA for all remote access and VPN connections, check whether j.park's credentials appear in HaveIBeenPwned or dark web databases, and reset all domain account passwords as a precaution.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCIR (GIAC Certified Incident Responder)",
+    "exam_tip": "Know the ransomware kill chain for CySA+: Initial Access → Establish Foothold → C2 → Lateral Movement → Privilege Escalation → Data Exfiltration → Encryption. RDP without MFA = #1 ransomware entry point. Logon Type 10 = RemoteInteractive = RDP."
+  }
+}

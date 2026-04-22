@@ -1,0 +1,70 @@
+{
+  "id": "case13",
+  "title": "Browser Confession",
+  "stage": "stage3",
+  "difficulty": 2,
+  "xp_base": 150,
+  "tools_type": "browser_analyzer",
+  "scenario": "An insider threat investigation has been opened against an employee suspected of stealing intellectual property before resigning. Browser artifacts from the suspect's workstation have been extracted and parsed using SQLite tools. The employee claims they never uploaded any company data to external services. The browser history tells a different story. Determine what cloud storage service was used to upload company data.",
+  "challenge": "What cloud storage service did the suspect use to exfiltrate data?",
+  "challenge_data": "BROWSER ARTIFACT ANALYSIS\n==========================\nBrowser  : Google Chrome 124.0.6367.91\nProfile  : Default\nSource   : C:\\Users\\j.park\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History\nExtracted: 2026-04-02 09:44:11 UTC\nTool     : hindsight v2024.03 + sqlite3\n\nURL HISTORY — Last 72 Hours (Significant Entries)\n---------------------------------------------------\n2026-03-30 09:14:22 UTC  https://mail.google.com/mail/u/0/#inbox\n2026-03-30 10:55:03 UTC  https://meridian-financial.sharepoint.com/sites/Finance\n2026-03-30 11:02:47 UTC  https://www.linkedin.com/feed/\n2026-03-30 14:33:05 UTC  https://drive.google.com/drive/my-drive\n2026-03-30 15:01:14 UTC  https://www.linkedin.com/in/jobs/recommended/\n\n2026-03-31 08:41:33 UTC  https://meridian-financial.sharepoint.com/sites/Finance/Shared%20Documents\n2026-03-31 08:44:02 UTC  https://meridian-financial.sharepoint.com/sites/Finance/Shared%20Documents/Q4_Revenue_Forecast.xlsx\n2026-03-31 08:45:12 UTC  https://www.dropbox.com/login\n2026-03-31 08:46:01 UTC  https://www.dropbox.com/home\n2026-03-31 09:01:44 UTC  https://www.dropbox.com/home?create_folder=true  [Folder Created: 'ConfidentialData']\n2026-03-31 09:12:44 UTC  https://www.dropbox.com/upload  [Upload Event]\n2026-03-31 09:13:02 UTC  https://www.dropbox.com/home/ConfidentialData  [Folder: ConfidentialData]\n2026-03-31 09:14:55 UTC  https://www.dropbox.com/upload  [Upload Event]\n2026-03-31 09:16:30 UTC  https://www.dropbox.com/upload  [Upload Event]\n2026-03-31 09:22:14 UTC  https://www.dropbox.com/home/ConfidentialData  [3 files visible in folder]\n\n2026-03-31 14:00:33 UTC  https://www.linkedin.com/jobs/\n2026-03-31 15:44:09 UTC  https://www.linkedin.com/jobs/view/3901234567\n2026-04-01 08:55:22 UTC  https://mail.google.com/mail/u/0/#inbox\n\nDOWNLOADS CORRELATION (Chrome Downloads DB)\n--------------------------------------------\n2026-03-31 08:44:02 UTC  Q4_Revenue_Forecast.xlsx    → local save → correlated with Dropbox upload 09:12:44\n2026-03-31 08:44:45 UTC  Client_List_2026.xlsx        → local save → correlated with Dropbox upload 09:14:55\n2026-03-31 08:45:03 UTC  Product_Roadmap_CONF.pptx    → local save → correlated with Dropbox upload 09:16:30\n\nFINDING: 3 confidential files downloaded from SharePoint then uploaded to external Dropbox account within 30 minutes.",
+  "valid_answers": ["dropbox", "drop box", "dropbox.com", "dropbox cloud storage", "the dropbox service"],
+  "steps": [
+    {
+      "question": "What internal company file storage system did the suspect access before visiting the external service?",
+      "valid_answers": ["sharepoint", "meridian sharepoint", "meridian-financial.sharepoint.com", "sharepoint.com", "the sharepoint site", "company sharepoint"],
+      "hints": [
+        "Look at the URLs in the browser history from March 31st morning (08:41-08:45 UTC). One URL is the company's own internal document storage system.",
+        "The URL format 'meridian-financial.sharepoint.com' indicates the company's Microsoft SharePoint instance — their authorized internal file storage.",
+        "The suspect accessed meridian-financial.sharepoint.com/sites/Finance/Shared%20Documents at 08:41 UTC, and specifically opened Q4_Revenue_Forecast.xlsx at 08:44 UTC.",
+        "The internal system is SharePoint (meridian-financial.sharepoint.com). The suspect accessed the Finance shared documents there, downloading three confidential files — then immediately visited an external cloud storage service."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "google drive", "response": "Google Drive appears in the March 30th history but was visited the day before — on March 31st, the suspect accessed a different internal company system first."},
+        {"pattern": "gmail", "response": "Gmail is in the history but is an email service, not the company's file storage. Look for the company-specific URL used to access Finance documents."}
+      ]
+    },
+    {
+      "question": "What folder name did the suspect create on the external cloud storage service?",
+      "valid_answers": ["confidentialdata", "confidential data", "the confidentialdata folder", "ConfidentialData"],
+      "hints": [
+        "One URL in the browser history includes a query parameter showing a folder was created. Look at the URLs from 09:01 to 09:22 UTC on March 31st.",
+        "The URL https://www.dropbox.com/home?create_folder=true is annotated with '[Folder Created: ...]' — look at what folder name appears in the annotation.",
+        "The entry at 09:01:44 UTC shows: 'https://www.dropbox.com/home?create_folder=true [Folder Created: \"ConfidentialData\"]'.",
+        "The suspect created a folder named 'ConfidentialData' in their Dropbox account. The subsequent upload events and URL 'https://www.dropbox.com/home/ConfidentialData' confirm three files were placed in this folder."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "finance", "response": "Finance is the name of the SharePoint directory — the external Dropbox folder the suspect created has a different, more telling name."},
+        {"pattern": "backup", "response": "That is a common name for a malicious exfiltration folder, but look at the specific folder name shown in the browser history annotation."}
+      ]
+    },
+    {
+      "question": "What cloud storage service did the suspect use to exfiltrate data?",
+      "valid_answers": ["dropbox", "drop box", "dropbox.com", "dropbox cloud storage", "the dropbox service"],
+      "hints": [
+        "Browser history records every URL the user visits. Look through the output for URLs that belong to a cloud storage or file sharing service — not an internal company system.",
+        "The internal SharePoint system (meridian-financial.sharepoint.com) is the authorized file storage. Look for a different cloud storage service that the user visited immediately after accessing SharePoint files.",
+        "Several consecutive URLs beginning with 'www.dropbox.com' appear in the history, including upload events and a folder named 'ConfidentialData' being created.",
+        "The browser history shows the suspect logged into Dropbox, created a folder named 'ConfidentialData', and uploaded 3 files — all within 30 minutes of downloading them from the internal SharePoint. The service is Dropbox."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "google drive", "response": "Google Drive appears in the March 30th history but there are no upload events there. The exfiltration happened on March 31st via a different service."},
+        {"pattern": "onedrive", "response": "OneDrive is not shown in the browser history. Look at the cloud storage service URLs that appear on March 31st between 08:45 and 09:22 UTC."}
+      ]
+    }
+  ],
+  "hints": [
+    "Browser history records every URL the user visits. Look through the output for URLs that belong to a cloud storage or file sharing service — not an internal company system.",
+    "The internal SharePoint system (meridian-financial.sharepoint.com) is the authorized file storage. Look for a different cloud storage service that the user visited immediately after accessing SharePoint files.",
+    "Several consecutive URLs beginning with 'www.dropbox.com' appear in the history, including upload events and a folder named 'ConfidentialData' being created.",
+    "The browser history shows the suspect logged into Dropbox, created a folder named 'ConfidentialData', and uploaded 3 files — all within 30 minutes of downloading them from the internal SharePoint. The service is Dropbox."
+  ],
+  "learn": "Browser forensics is a critical discipline within digital forensics and incident response, particularly for insider threat investigations and cases involving data exfiltration via web browsers. Modern browsers store rich local artifacts that can reconstruct detailed timelines of user activity.\n\nChrome artifact locations on Windows:\n- History: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History (SQLite DB)\n- Downloads: Same History database, downloads table\n- Cookies: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network\\Cookies\n- Cache: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache\\\n- Bookmarks: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks (JSON)\n- Login Data: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data (encrypted)\n- Web Data: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Web Data (autofill)\n- Extensions: C:\\Users\\[username]\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\\n\nFirefox artifact locations:\n- History/Bookmarks: C:\\Users\\[username]\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\[profile]\\places.sqlite\n- Downloads: places.sqlite (moz_annos table)\n- Cookies: C:\\Users\\[username]\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\[profile]\\cookies.sqlite\n\nMicrosoft Edge:\n- C:\\Users\\[username]\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\ (same structure as Chrome, both use Chromium)\n\nReading Chrome SQLite artifacts:\nChrome stores most data in SQLite databases. Analysts use sqlite3, DB Browser for SQLite, or specialized tools like:\n- Hindsight: Python-based Chrome/Edge artifact parser\n- BrowsingHistoryView (NirSoft): Parses all browsers automatically\n- KAPE with browser triage modules\n- Autopsy browser analyzer module\n\nInsider threat indicators in browser history:\n1. Accessing internal sensitive documents immediately before visiting external cloud storage\n2. Creating folders with names like 'ConfidentialData', 'Backup', 'Personal'\n3. Multiple upload events to personal cloud accounts\n4. Simultaneous LinkedIn job searching (common pre-resignation behavior)\n5. Correlation between download timestamps and upload timestamps\n\nDLP (Data Loss Prevention) solutions monitor web uploads in real-time and can block or alert on uploads to unauthorized cloud storage. Browser forensics serves as the post-hoc evidence collection when DLP either wasn't in place or was bypassed.",
+  "debrief": {
+    "summary": "Browser history confirms that j.park downloaded three confidential documents from the company's SharePoint Finance site on March 31st and uploaded them to a personal Dropbox account within 30 minutes. A folder named 'ConfidentialData' was created in the Dropbox account, strongly indicating deliberate and premeditated data theft.",
+    "real_world": "Browser forensics is the primary evidence source in insider threat investigations involving cloud data exfiltration. Investigators obtain a court order to compel Dropbox to preserve and produce the account contents, correlate upload timestamps with endpoint evidence, and use this for prosecution or civil litigation.",
+    "next_step": "Issue a preservation order to Dropbox for the account associated with j.park's personal email, obtain HR records to correlate with any PIP or resignation timeline, and engage legal counsel to assess grounds for civil or criminal action.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), CHFI v10 Module 9 (Investigating Web Application Attacks)",
+    "exam_tip": "Chrome stores history in a SQLite database at AppData\\Local\\Google\\Chrome\\User Data\\Default\\History. Know artifact locations for Chrome, Firefox, and Edge for CHFI and GCFE exams. Hindsight and BrowsingHistoryView are key tools. SQLite query: SELECT url, title, visit_count FROM urls ORDER BY last_visit_time DESC."
+  }
+}

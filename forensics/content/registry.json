@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "simulator": "forensics",
+  "total_cases": 20,
+  "stages": [
+    {
+      "id": "stage1",
+      "title": "File Forensics",
+      "description": "Magic bytes, metadata, hashing, and file artifact analysis",
+      "cases": ["case01", "case02", "case03", "case04", "case05"]
+    },
+    {
+      "id": "stage2",
+      "title": "Memory Forensics",
+      "description": "Volatility, process analysis, network connections, injected code",
+      "cases": ["case06", "case07", "case08", "case09", "case10"]
+    },
+    {
+      "id": "stage3",
+      "title": "Log & Artifact Analysis",
+      "description": "Event logs, registry, browser history, email headers, prefetch",
+      "cases": ["case11", "case12", "case13", "case14", "case15"]
+    },
+    {
+      "id": "stage4",
+      "title": "Incident Response",
+      "description": "Full IR: timelines, exfil analysis, lateral movement, attribution",
+      "cases": ["case16", "case17", "case18", "case19", "case20"]
+    }
+  ],
+  "cases": [
+    {"id": "case01", "title": "The Disguised File",        "difficulty": 1, "stage": "stage1"},
+    {"id": "case02", "title": "The Author's Secret",       "difficulty": 1, "stage": "stage1"},
+    {"id": "case03", "title": "Tampered Evidence?",        "difficulty": 1, "stage": "stage1"},
+    {"id": "case04", "title": "MZ Impostor",               "difficulty": 1, "stage": "stage1"},
+    {"id": "case05", "title": "GPS Witness",               "difficulty": 2, "stage": "stage1"},
+    {"id": "case06", "title": "Process Masquerade",        "difficulty": 2, "stage": "stage2"},
+    {"id": "case07", "title": "C2 Beacon",                 "difficulty": 2, "stage": "stage2"},
+    {"id": "case08", "title": "Strings of Evidence",       "difficulty": 2, "stage": "stage2"},
+    {"id": "case09", "title": "Code in the Shadows",       "difficulty": 3, "stage": "stage2"},
+    {"id": "case10", "title": "Ghost Commands",            "difficulty": 3, "stage": "stage2"},
+    {"id": "case11", "title": "The 3AM Login",             "difficulty": 2, "stage": "stage3"},
+    {"id": "case12", "title": "Backdoor in the Registry",  "difficulty": 2, "stage": "stage3"},
+    {"id": "case13", "title": "Browser Confession",        "difficulty": 2, "stage": "stage3"},
+    {"id": "case14", "title": "Phishing Origins",          "difficulty": 3, "stage": "stage3"},
+    {"id": "case15", "title": "Prefetch Confession",       "difficulty": 3, "stage": "stage3"},
+    {"id": "case16", "title": "Patient Zero",              "difficulty": 3, "stage": "stage4"},
+    {"id": "case17", "title": "Data Haul",                 "difficulty": 3, "stage": "stage4"},
+    {"id": "case18", "title": "Lateral Tracks",            "difficulty": 3, "stage": "stage4"},
+    {"id": "case19", "title": "Persistence Sweep",         "difficulty": 4, "stage": "stage4"},
+    {"id": "case20", "title": "Attribution Analysis",      "difficulty": 4, "stage": "stage4"}
+  ]
+}

@@ -16,6 +16,45 @@
     "Hint 3: Type 'tools' in the game. The vulnerability scorer ranks\n        all findings by priority. The top-ranked finding is your answer.\n        Look at both CVSS score and exploitability.",
     "Hint 4: SPOILER — CVE-FAKE-2024-099 on nginx 1.24.0 has CVSS 9.8\n        (Critical) and allows unauthenticated RCE. This is the highest\n        priority — it is remotely exploitable with no authentication required.\n        Type: CVE-FAKE-2024-099"
   ],
+  "steps": [
+    {
+      "question": "Review the scan results. What is the CVSS score of the highest-severity finding?",
+      "valid_answers": ["9.8", "cvss 9.8"],
+      "hints": [
+        "CVSS scores range from 0.0 to 10.0. Critical = 9.0-10.0. Look for the highest number.",
+        "There are two findings with CVEs. Compare their CVSS scores.",
+        "Finding 1 (OpenSSH) has CVSS 5.3 (Medium). Finding 2 (nginx) has CVSS 9.8 (Critical).",
+        "The highest CVSS score in the report is 9.8 — belonging to the nginx finding."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "5.3", "response": "CVSS 5.3 is Medium severity — that's the OpenSSH finding. Look for the Critical severity finding."}
+      ]
+    },
+    {
+      "question": "The highest-severity finding is an unauthenticated Remote Code Execution vulnerability in nginx 1.24.0. What is the CVE ID for this finding?",
+      "valid_answers": ["cve-fake-2024-099", "cve-fake-2024"],
+      "hints": [
+        "Find the nginx 1.24.0 finding in the scan results. It has a CVE ID listed.",
+        "The CVE format is CVE-YEAR-NUMBER. Look at Finding 2 in the scan output.",
+        "Finding 2 is labeled 'nginx 1.24.0 (port 8080)' with a CVE ID and CVSS 9.8.",
+        "The CVE ID for the nginx unauthenticated RCE finding is CVE-FAKE-2024-099."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "cve-fake-2022", "response": "That's the OpenSSH finding (CVSS 5.3, Medium). You need the Critical nginx finding."}
+      ]
+    },
+    {
+      "question": "Given it is a CVSS 9.8 Critical unauthenticated RCE on a running web service, what remediation action should be taken first?",
+      "valid_answers": ["patch", "patch nginx", "apply patch", "update nginx", "patching"],
+      "hints": [
+        "Critical CVSS scores (9.0-10.0) require immediate action. What is the standard first response?",
+        "Unauthenticated RCE means an attacker needs no credentials to exploit it — the fix is to remove the vulnerability",
+        "The vulnerability is in the nginx 1.24.0 software — what do you do when software has a known vulnerability?",
+        "The answer is to patch (update) nginx. Apply the patch immediately to close this Critical RCE entry point."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Vulnerability management is the continuous process of identifying,\nclassifying, prioritizing, and remediating security weaknesses.\n\nCVSS (Common Vulnerability Scoring System) scores 0.0-10.0:\n  Critical: 9.0-10.0 — patch immediately\n  High:     7.0-8.9  — patch within 30 days\n  Medium:   4.0-6.9  — patch within 90 days\n  Low:      0.1-3.9  — patch at next maintenance window\n\nPrioritization factors beyond CVSS:\n  Exploitability — is there a public exploit available?\n  Authentication — unauthenticated vulnerabilities are higher risk\n  Asset criticality — is this a production or staging system?\n  Network exposure — is the port internet-facing?\n\nCySA+ Domain 2 tests whether you can read a scan report and identify\nthe correct remediation priority — not just the highest CVSS number,\nbut the finding most likely to be exploited in your environment.",
   "tools": "Scores and ranks all vulnerability findings by priority using CVSS score and exploitability factors.",
   "debrief": {

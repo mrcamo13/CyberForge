@@ -18,6 +18,52 @@
   ],
   "learn": "Directory enumeration (also called dir busting or web fuzzing) probes\na web server for hidden paths by trying common directory and file names\nfrom a wordlist.\n\nThe tool sends requests like:\n  GET /admin HTTP/1.1\n  GET /backup HTTP/1.1\n  GET /config HTTP/1.1\n  ... (hundreds or thousands more)\n\nPaths that return 200 (found) or 301 (redirect) are flagged.\n\nCommon findings:\n  /backup       — backup archives, often downloadable\n  /admin        — admin panels not linked from the main site\n  /config       — configuration files accidentally served\n  /api          — undocumented API endpoints\n  /.git         — exposed version control repositories\n\nReal tools: gobuster, ffuf, dirb, feroxbuster.\nThis is a standard step in web application penetration testing and\nmaps directly to the \"enumeration\" phase of PenTest+ Domain 2.",
   "tools": "Runs a simulated directory scan on the target web server and shows all paths that returned a 200 or 301 status.",
+  "steps": [
+    {
+      "question": "Confirm the target for directory enumeration. What is the full base URL (including port) of the NexusCorp web server to enumerate?",
+      "valid_answers": ["http://203.0.113.47:8080", "203.0.113.47:8080", "203.0.113.47"],
+      "hints": [
+        "The target URL is stated in the GHOST transmission above. Look for the TARGET field in the mission briefing.",
+        "The URL follows the format http://IP:PORT — you identified this web server in a previous operation.",
+        "Recall from Operation 03: port 8080 was found open on host 203.0.113.47 running a web service.",
+        "SPOILER — The full target URL is http://203.0.113.47:8080. Type: http://203.0.113.47:8080"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "https", "response": "HTTPS would use port 443 or 8443. The service on this host is HTTP — check the mission briefing for the exact URL."},
+        {"pattern": "8080", "response": "The port is correct, but include the full URL with the IP address. Format: http://IP:PORT"}
+      ]
+    },
+    {
+      "question": "Run the directory enumeration scan against http://203.0.113.47:8080. How many paths return a successful HTTP status (200 or 301)?",
+      "valid_answers": ["3", "three"],
+      "hints": [
+        "Type 'tools' to run the simulated directory enumerator. Count the lines marked as 200 or 301 in the output.",
+        "Real command (requires gobuster): gobuster dir -u http://203.0.113.47:8080 -w /usr/share/wordlists/dirb/common.txt",
+        "The scan tries hundreds of common path names. Only paths that respond with 200 (found) or 301 (redirect) are flagged.",
+        "SPOILER — The scan finds 3 responsive paths on this server. Type: 3"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "0", "response": "The server has several exposed paths. Run the scan with 'tools' to see the results."},
+        {"pattern": "1", "response": "More than one path responds. Run the directory scan and count all 200 and 301 responses."},
+        {"pattern": "hundreds", "response": "Most paths get 404 and are ignored. The scan only reports paths that actually respond — run it to see the count."}
+      ]
+    },
+    {
+      "question": "What is the path of the hidden backup endpoint discovered during directory enumeration? (include the leading /)",
+      "valid_answers": ["/backup", "/backup/"],
+      "hints": [
+        "Type 'tools' to run the directory enumerator. Look for a path name that suggests stored backup data in the results.",
+        "In real engagements, backup directories are among the most valuable finds — they often contain database dumps, source code, or config files.",
+        "The scan lists paths alphabetically. One path specifically uses a common word for archived or stored copies of data.",
+        "SPOILER — The scan finds /backup returning HTTP 200. This is a misconfigured backup directory left publicly accessible. Type: /backup"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "/admin", "response": "/admin was discovered in a previous operation. This scan is looking for a different hidden path — one that contains backup data."},
+        {"pattern": "/config", "response": "Not this time. The misconfigured path in this operation is specifically a backup storage location. Run the scanner to see all results."},
+        {"pattern": "backup", "response": "Correct word — but the answer needs the full path starting with /. Include the leading slash."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You enumerated the NexusCorp web server and discovered /backup —\na directory left accessible on the server containing backup archives.\nDirectory enumeration is a standard recon step that reveals paths the\napplication never intended to expose publicly.",
     "real_world": "Directory enumeration is one of the most consistently productive\nsteps in web application testing. Real pentesters find exposed backup\nfiles, configuration files, API endpoints, and admin panels this way.\nTools like gobuster and ffuf with large wordlists can find hundreds of\npaths in seconds.",

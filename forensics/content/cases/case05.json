@@ -1,0 +1,68 @@
+{
+  "id": "case05",
+  "title": "GPS Witness",
+  "stage": "stage1",
+  "difficulty": 2,
+  "xp_base": 125,
+  "tools_type": "metadata_reader",
+  "scenario": "A corporate espionage investigation involves an employee who claims they were working from their home office in Chicago on the day a proprietary file was exfiltrated. The suspect provided a photo they claim was taken at their home desk on that day as proof of their location. EXIF metadata embedded in the smartphone photo may tell a very different story. Analyze the image metadata and determine where the photo was actually taken.",
+  "challenge": "In what city was the photo actually taken?",
+  "challenge_data": "$ exiftool proof_of_location.jpg\nExifTool Version Number         : 12.76\nFile Name                       : proof_of_location.jpg\nDirectory                       : /evidence/case-2026-0314\nFile Size                       : 5.8 MB\nFile Type                       : JPEG\nMIME Type                       : image/jpeg\nExif Byte Order                 : Big-endian (Motorola, MM)\nImage Width                     : 4032\nImage Height                    : 3024\nColor Components                : 3\nY Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)\nCamera Model Name               : iPhone 14 Pro\nLens Info                       : 1.570000172-9mm f/1.8-2.8\nLens Model                      : iPhone 14 Pro back triple camera 6.86mm f/1.78\nSoftware                        : 16.3.1\nOrientation                     : Horizontal (normal)\nX Resolution                    : 72\nY Resolution                    : 72\nDate/Time Original              : 2026:04:01 11:23:47\nCreate Date                     : 2026:04:01 11:23:47\nDigitized Date                  : 2026:04:01 11:23:47\nFlash                           : Off, Did not fire\nFocal Length                    : 6.9 mm\nColor Space                     : sRGB\nExif Image Width                : 4032\nExif Image Height               : 3024\nSub Sec Time Original           : 047\nGPS Latitude Ref                : North\nGPS Latitude                    : 37 deg 46' 26.40\" N\nGPS Longitude Ref               : West\nGPS Longitude                   : 122 deg 25' 9.60\" W\nGPS Altitude Ref                : Above Sea Level\nGPS Altitude                    : 15.2 m Above Sea Level\nGPS Speed Ref                   : km/h\nGPS Speed                       : 0.0\nGPS Img Direction Ref           : True North\nGPS Img Direction               : 247.3\nGPS Date/Time                   : 2026:04:01 18:23:47 UTC\nGPS Horizontal Positioning Error: 5 m\n\nDerived Location (reverse geocode):\n  Coordinates : 37.7740, -122.4193\n  City        : San Francisco\n  State       : California\n  Country     : United States\n  Postal Code : 94107",
+  "valid_answers": ["san francisco", "sf", "san francisco california", "san francisco ca", "san francisco, ca", "san francisco, california"],
+  "hints": [
+    "Smartphone photos embed GPS coordinates in the EXIF metadata. Look through the output for GPS-related fields.",
+    "You will find GPS Latitude and GPS Longitude values. These coordinates identify a specific location on Earth. Look for a field that has already converted these to a city name.",
+    "The output contains a 'Derived Location' section that shows a reverse geocoded address. This converts the raw GPS coordinates to a readable location.",
+    "The 'Derived Location' section clearly shows City: San Francisco, State: California. The photo was taken in San Francisco, not Chicago as the suspect claimed."
+  ],
+  "steps": [
+    {
+      "question": "What GPS coordinates (latitude and longitude in decimal) are embedded in the photo's EXIF metadata?",
+      "valid_answers": ["37.7740, -122.4193", "37.7740 -122.4193", "37.774 -122.4193", "37.7740 north 122.4193 west", "37 deg 46 26.40 n 122 deg 25 9.60 w"],
+      "hints": [
+        "GPS data is stored in the EXIF fields. Look for fields with 'GPS Latitude' and 'GPS Longitude' in the output.",
+        "You will see GPS Latitude as degrees-minutes-seconds format, and a 'Derived Location' section that converts it to decimal.",
+        "The 'Derived Location' section shows 'Coordinates:' in decimal format, which is easier to read.",
+        "The Derived Location section shows: Coordinates: 37.7740, -122.4193 — north latitude and west longitude (negative = west)."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "chicago", "response": "Chicago is at approximately 41.88, -87.63 — look at the GPS coordinates actually embedded in this photo."},
+        {"pattern": "41", "response": "That latitude range is closer to Chicago or New York. The GPS in this photo has a different latitude value."}
+      ]
+    },
+    {
+      "question": "What city do those GPS coordinates correspond to — where was the photo actually taken?",
+      "valid_answers": ["san francisco", "sf", "san francisco california", "san francisco ca", "san francisco, ca", "san francisco, california"],
+      "hints": [
+        "The coordinates 37.7740, -122.4193 identify a specific city on the US West Coast. A reverse geocode lookup is shown in the output.",
+        "The 'Derived Location' section at the bottom of the ExifTool output has already reverse geocoded the coordinates for you.",
+        "Look at the 'City' field within the Derived Location section.",
+        "The Derived Location section shows City: San Francisco, State: California — directly contradicting the suspect's claim of being in Chicago."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "chicago", "response": "The suspect claims Chicago, but the GPS coordinates embedded by the iPhone tell a different story. Check the Derived Location section."},
+        {"pattern": "los angeles", "response": "Los Angeles is at approximately 34.05, -118.24. These coordinates are further north — check the Derived Location section."},
+        {"pattern": "new york", "response": "New York is on the East Coast at approximately 40.71, -74.01. These coordinates are West Coast — check the Derived Location."}
+      ]
+    },
+    {
+      "question": "What camera model was used to take this photo, as shown in the EXIF metadata?",
+      "valid_answers": ["iphone 14 pro", "apple iphone 14 pro", "iphone 14"],
+      "hints": [
+        "Camera metadata is embedded in every smartphone photo. Look for the 'Camera Model Name' field in the ExifTool output.",
+        "The Camera Model Name field appears near the top of the ExifTool output, after the file size information.",
+        "Smartphone photos include the specific device model in EXIF — this can corroborate or contradict claims about who took the photo.",
+        "The 'Camera Model Name' field reads: iPhone 14 Pro — this tells investigators what device took the photo."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
+  "learn": "EXIF (Exchangeable Image File Format) is a standard for storing metadata in image files, particularly JPEG and TIFF. Modern smartphones automatically embed a rich set of metadata including GPS coordinates, camera model, timestamp, and lens information when a photo is taken — unless location services are explicitly disabled.\n\nGPS data in EXIF is stored in degrees-minutes-seconds (DMS) format:\n- 37 deg 46' 26.40\" N = 37.7740 decimal degrees north latitude\n- 122 deg 25' 9.60\" W = -122.4193 decimal degrees west longitude\n\nThese coordinates resolve to San Francisco's SoMa (South of Market) neighborhood — far from Chicago.\n\nForensic significance of EXIF GPS data:\n1. Alibi verification or destruction — as in this case\n2. Placing suspects at crime scenes\n3. Confirming or denying meeting locations\n4. Tracking movement patterns across multiple photos\n5. Correlating with other location data (cell tower records, credit card transactions)\n\nReverse geocoding converts raw coordinates (latitude/longitude) to human-readable addresses. Tools include Google Maps API, OpenStreetMap's Nominatim, and ExifTool's built-in geolocation feature.\n\nKey EXIF timestamp fields:\n- Date/Time Original: When the shutter was pressed (device local time)\n- GPS Date/Time: UTC timestamp from GPS satellite — more reliable than device clock\n- In this case, GPS Date/Time 18:23:47 UTC = 11:23:47 PDT (UTC-7), confirming San Francisco time zone\n\nHow suspects try to defeat this:\n- Disable Location Services on their phone (prevents GPS embedding)\n- Use a camera without GPS\n- Strip EXIF data before sharing (ExifTool -all=, iOS shortcuts, MAT2)\n- Set a false GPS location via jailbroken device\n\nAdmissibility: EXIF GPS data has been admitted as evidence in numerous court cases. It is typically corroborated with cell tower records (CSLI), credit card transactions, and surveillance footage. A single source is rarely sufficient for prosecution — but it is powerful for building an investigative picture.\n\nOn iOS, Location Services can be disabled per-app (Settings → Privacy → Location Services → Camera). When disabled, no GPS data is embedded. The absence of GPS data in a suspect's photos during a relevant time period can itself be suspicious.",
+  "debrief": {
+    "summary": "EXIF GPS metadata embedded in the photo by the suspect's iPhone 14 Pro places the image at coordinates 37.7740, -122.4193, which reverse geocodes to San Francisco, California — directly contradicting the suspect's claim of being in Chicago at the time of the breach.",
+    "real_world": "EXIF GPS data has been used in real criminal cases to place suspects at crime scenes, contradict alibis, and corroborate witness testimony. It is most powerful when corroborated by cell tower records (CSLI data obtained via court order) and financial transaction records from the same location.",
+    "next_step": "Issue a preservation order for the suspect's cell carrier records to obtain cell site location information (CSLI) for April 1st, and request security camera footage from locations near the GPS coordinates to visually confirm the suspect's presence in San Francisco.",
+    "cert_link": "CHFI v10 Module 8 (Investigating Corporate Espionage Cases), GCFE",
+    "exam_tip": "EXIF GPS uses degrees-minutes-seconds format. GPS Date/Time is UTC from satellites and more reliable than the device clock. EXIF can be stripped with ExifTool -all= or MAT2. Know the difference between Date/Time Original (local time, device) and GPS Date/Time (UTC, satellite)."
+  }
+}

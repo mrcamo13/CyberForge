@@ -16,6 +16,44 @@
     "Type 'tools' in the game. The traffic analyzer flags connections\nwith a consistent interval and payload as [BEACON]. The flagged\ndestination IP is your answer.",
     "SPOILER — 185.220.101.45 on port 4444 receives 4 connections at\nexactly 30-second intervals with exactly 128 bytes each. This is\ntextbook C2 beaconing. Type: 185.220.101.45"
   ],
+  "steps": [
+    {
+      "question": "Look at the network flow data. Which destination IP appears in multiple connections at a consistent interval?",
+      "valid_answers": ["185.220.101.45"],
+      "hints": [
+        "Count how many times each destination IP appears in the flow table",
+        "Beaconing means the same IP is contacted repeatedly at regular time intervals — look for repeated entries",
+        "185.220.101.45 appears 4 times. Other IPs appear only once each.",
+        "The destination 185.220.101.45 on port 4444 is contacted 4 times in this capture."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "203.0.113.47", "response": "That is Veridian's own server (local asset). C2 traffic goes to an external attacker IP."},
+        {"pattern": "8.8.8.8", "response": "8.8.8.8 is Google's DNS server — a single DNS query, not a beaconing pattern."}
+      ]
+    },
+    {
+      "question": "What is the interval in seconds between each connection to 185.220.101.45?",
+      "valid_answers": ["30", "30 seconds", "30s"],
+      "hints": [
+        "Look at the timestamps for the connections to 185.220.101.45: 03:15:30, 03:16:00, 03:16:30, 03:17:30",
+        "Calculate the difference between consecutive timestamps",
+        "03:15:30 to 03:16:00 = 30 seconds. 03:16:00 to 03:16:30 = 30 seconds. All the same.",
+        "Each connection to 185.220.101.45 occurs exactly 30 seconds after the previous one."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Based on the repeated connections at a consistent 30-second interval with 128 bytes each, what is the external IP address acting as the C2 server?",
+      "valid_answers": ["185.220.101.45"],
+      "hints": [
+        "C2 beaconing is defined by: same destination IP, consistent interval, consistent payload size",
+        "Only one IP in the flow table meets all three criteria: repeated, consistent interval, consistent bytes",
+        "185.220.101.45 port 4444 receives connections every 30 seconds with exactly 128 bytes each time",
+        "The C2 server IP is 185.220.101.45. Type: 185.220.101.45"
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Command and Control (C2) beaconing is how malware maintains contact with\nan attacker's server after initial compromise. The malware calls home at\nregular intervals to receive commands and send results.\n\nBeaconing indicators:\n  Consistent interval   — exact same number of seconds between connections\n  Consistent payload    — same byte count each time (heartbeat packet)\n  Unusual port          — non-standard ports (4444, 1337, 9001 are common)\n  Non-business hours    — C2 traffic often runs 24/7 regardless of time\n  External destination  — connections leaving the network perimeter\n\nHow to detect in a SOC:\n  1. Baseline normal traffic for each internal host\n  2. Alert on connections with < 60s interval to the same external IP\n  3. Investigate any non-standard port with repeated connections\n  4. Cross-reference destination IP with threat intel feeds\n\nThis technique maps to MITRE ATT&CK T1071 — Application Layer Protocol\n(Command and Control tactic). CySA+ Domain 1 tests network traffic analysis\nas a core SOC analyst skill.",
   "tools": "Analyzes network connection records and flags beaconing patterns (consistent interval + consistent payload size).",
   "debrief": {

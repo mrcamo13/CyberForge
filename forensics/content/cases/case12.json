@@ -1,0 +1,69 @@
+{
+  "id": "case12",
+  "title": "Backdoor in the Registry",
+  "stage": "stage3",
+  "difficulty": 2,
+  "xp_base": 150,
+  "tools_type": "registry_analyzer",
+  "scenario": "The malicious binary (svch0st.exe) has been removed from the compromised workstation, but the security team suspects a persistence mechanism remains. Registry Run keys are among the most common places malware hides to ensure it restarts after every reboot. An export of the Run registry keys from WKSTN-047 has been analyzed. Identify the malicious persistence entry.",
+  "challenge": "What is the name of the malicious registry value used for persistence?",
+  "challenge_data": "REGISTRY ANALYSIS REPORT\n=========================\nTool     : RegRipper v3.0 + manual export\nHost     : WKSTN-047\nDate     : 2026-04-02 10:14:33 UTC\nAnalyst  : J. Rivera\n\n--------------------------------------------------------\nHive     : HKEY_CURRENT_USER\nKey      : Software\\Microsoft\\Windows\\CurrentVersion\\Run\nLast Modified: 2026-04-01 03:19:55 UTC\n\nValues:\n  Name : OneDriveSetup\n  Type : REG_SZ\n  Data : C:\\Program Files\\Microsoft OneDrive\\Update\\OneDriveSetup.exe\n  Note : [CLEAN] Legitimate Microsoft OneDrive updater\n\n  Name : WindowsUpdateHelper\n  Type : REG_SZ\n  Data : C:\\Windows\\Temp\\update.dat /silent /persist\n  Note : [SUSPICIOUS] Executable in Temp folder, deceptive name, /silent flag\n\n  Name : ctfmon\n  Type : REG_SZ\n  Data : C:\\Windows\\System32\\ctfmon.exe\n  Note : [CLEAN] Legitimate language/keyboard monitor service\n\n--------------------------------------------------------\nHive     : HKEY_LOCAL_MACHINE\nKey      : SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\nLast Modified: 2026-03-28 14:22:10 UTC\n\nValues:\n  Name : SecurityHealth\n  Type : REG_SZ\n  Data : %windir%\\system32\\SecurityHealthSystray.exe\n  Note : [CLEAN] Legitimate Windows Security health systray app\n\n  Name : MicrosoftEdgeAutoLaunch_16A7C8\n  Type : REG_SZ\n  Data : \"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\"\n  Note : [CLEAN] Legitimate Microsoft Edge browser startup\n\n--------------------------------------------------------\nADDITIONAL CHECKS:\n  Startup Folder (User)  : C:\\Users\\j.park\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\\n  Startup Folder (Common): C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\\n  Scheduled Tasks        : (see case19 for full list)\n  WMI Subscriptions      : (see case19 for full list)\n\nKey Last Modified Timestamp Analysis:\n  HKCU\\Run modified at 03:19:55 UTC — correlates with attacker activity window",
+  "valid_answers": ["windowsupdatehelper", "windows update helper", "windowsupdatehelper value", "the windowsupdatehelper key", "WindowsUpdateHelper"],
+  "steps": [
+    {
+      "question": "Which registry hive contains the suspicious Run key entry — HKCU or HKLM?",
+      "valid_answers": ["hkcu", "hkey_current_user", "hkcu hive", "hkey current user", "current user hive"],
+      "hints": [
+        "The report analyzes two registry hives: HKCU (HKEY_CURRENT_USER) and HKLM (HKEY_LOCAL_MACHINE). Check which hive was last modified during the attacker's active session.",
+        "The report shows 'Last Modified' timestamps for each hive's Run key. The attacker's activity was at approximately 03:19 UTC — which hive's timestamp matches?",
+        "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run shows 'Last Modified: 2026-04-01 03:19:55 UTC' — directly within the attacker's session window. HKLM was last modified on 2026-03-28, before the attack.",
+        "The suspicious entry is in HKCU (HKEY_CURRENT_USER). Writing to HKCU requires no administrator rights, and the 03:19:55 UTC modification timestamp correlates exactly with the attacker's active session identified in event logs."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "hklm", "response": "HKLM was last modified on 2026-03-28 — before the attack. Look at the HKCU hive's Last Modified timestamp and compare it to the attacker's activity window."}
+      ]
+    },
+    {
+      "question": "What is the data value (executable path) of the malicious registry entry?",
+      "valid_answers": ["c:\\windows\\temp\\update.dat", "windows\\temp\\update.dat", "update.dat", "c:\\windows\\temp\\update.dat /silent /persist", "temp\\update.dat"],
+      "hints": [
+        "The HKCU Run key has three values. One of them is marked [SUSPICIOUS]. Look at the 'Data' field for that suspicious entry.",
+        "Legitimate Windows components run from C:\\Windows\\System32\\ or %ProgramFiles%. An executable in C:\\Windows\\Temp\\ is a major red flag.",
+        "The suspicious value named 'WindowsUpdateHelper' has Data: C:\\Windows\\Temp\\update.dat /silent /persist. The Temp folder is a common malware staging location.",
+        "The malicious executable path is C:\\Windows\\Temp\\update.dat with /silent /persist flags. This is the same update.dat file identified in the console history as the staged exfiltration payload."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "onedrive", "response": "The OneDriveSetup entry points to the legitimate Microsoft OneDrive path in Program Files — it is marked [CLEAN]. Look for the [SUSPICIOUS] entry."},
+        {"pattern": "ctfmon", "response": "ctfmon.exe is a legitimate Windows language/keyboard monitor in System32 — it is marked [CLEAN]. Look for the [SUSPICIOUS] entry instead."}
+      ]
+    },
+    {
+      "question": "What is the name of the malicious registry value used for persistence?",
+      "valid_answers": ["windowsupdatehelper", "windows update helper", "windowsupdatehelper value", "the windowsupdatehelper key", "WindowsUpdateHelper"],
+      "hints": [
+        "Registry Run keys are used to automatically launch programs when a user logs in. The analyst has flagged one of the values in the output. Look for the one marked SUSPICIOUS.",
+        "Three indicators of a malicious registry value are: the executable path is in a Temp folder (where malware typically stages), the name sounds official but doesn't match a known Windows component, and it uses /silent flags to run without user interaction.",
+        "The value named 'WindowsUpdateHelper' points to C:\\Windows\\Temp\\update.dat — not a typical path for a legitimate update helper. Legitimate Windows Update components run from C:\\Windows\\System32\\ or C:\\Windows\\SoftwareDistribution\\.",
+        "The malicious registry persistence value is 'WindowsUpdateHelper'. It runs update.dat from C:\\Windows\\Temp\\ with /silent /persist flags. This was created at 03:19:55 UTC, perfectly correlating with the attacker's active session identified in the event logs."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "onedrive", "response": "OneDriveSetup is marked [CLEAN] — it is a legitimate Microsoft entry. The malicious entry has a deceptively generic name suggesting Windows Update functionality."},
+        {"pattern": "ctfmon", "response": "ctfmon is marked [CLEAN] — it is a legitimate Windows component. Look for the value whose executable path is in C:\\Windows\\Temp\\ rather than System32."}
+      ]
+    }
+  ],
+  "hints": [
+    "Registry Run keys are used to automatically launch programs when a user logs in. The analyst has flagged one of the values in the output. Look for the one marked SUSPICIOUS.",
+    "Three indicators of a malicious registry value are: the executable path is in a Temp folder (where malware typically stages), the name sounds official but doesn't match a known Windows component, and it uses /silent flags to run without user interaction.",
+    "The value named 'WindowsUpdateHelper' points to C:\\Windows\\Temp\\update.dat — not a typical path for a legitimate update helper. Legitimate Windows Update components run from C:\\Windows\\System32\\ or C:\\Windows\\SoftwareDistribution\\.",
+    "The malicious registry persistence value is 'WindowsUpdateHelper'. It runs update.dat from C:\\Windows\\Temp\\ with /silent /persist flags. This was created at 03:19:55 UTC, perfectly correlating with the attacker's active session identified in the event logs."
+  ],
+  "learn": "Registry Run keys are one of the most frequently used persistence techniques in malware (MITRE ATT&CK T1547.001 — Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder). These keys tell Windows to automatically execute specified programs when a user logs in.\n\nKey persistence registry locations:\n- HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run — runs for the current user at logon\n- HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce — runs once then deletes itself\n- HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run — runs for ALL users at logon (requires admin)\n- HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce — runs once for all users\n- HKLM\\SYSTEM\\CurrentControlSet\\Services — service persistence\n\nHKCU vs HKLM scope:\n- HKCU (HKEY_CURRENT_USER): Only affects the currently logged-in user. Malware using HKCU doesn't need admin rights — any user can write here.\n- HKLM (HKEY_LOCAL_MACHINE): Affects all users. Requires administrator privileges to write. More persistent.\n\nRed flags for malicious Run key entries:\n1. Executable path in Temp, AppData, ProgramData, or Public folders (not System32 or Program Files)\n2. Value name that sounds legitimate but the binary path doesn't match (WindowsUpdateHelper pointing to Temp\\update.dat)\n3. Command line switches like /silent, /persist, /noshow\n4. Key Last Modified timestamp during a known attack window\n5. The binary referenced doesn't exist or its hash is unknown\n6. Name matches a known Windows component but path is wrong\n\nDetection tools:\n- Sysinternals Autoruns: The gold standard for persistence analysis. Checks Run keys, services, scheduled tasks, startup folders, WMI subscriptions, browser extensions, and dozens more locations. Automatically highlights unsigned or VirusTotal-flagged entries.\n- RegRipper: Forensic tool that extracts and parses registry hive artifacts from disk images\n- Velociraptor / KAPE: Used for enterprise-scale persistence hunting\n\nRegistry timestamps: The 'Last Modified' timestamp on a registry key records when the key or any of its values was last changed. This is forensically significant — a Run key modified at 03:19 during an attacker's session is direct evidence of malware installation.",
+  "debrief": {
+    "summary": "The 'WindowsUpdateHelper' registry value in HKCU\\...\\Run is a malicious persistence mechanism pointing to C:\\Windows\\Temp\\update.dat, the same file identified as the staged malware payload. It was created at 03:19:55 UTC, within the attacker's active session window, using /silent /persist flags to survive reboots without user interaction.",
+    "real_world": "Registry Run key persistence is detected automatically by EDR solutions and SIEM correlation rules that alert on new Run key entries, especially when the target binary is in a Temp directory. Enterprise forensics teams use tools like Autoruns across all endpoints to hunt for unknown persistence entries.",
+    "next_step": "Delete the WindowsUpdateHelper registry value and remove update.dat from C:\\Windows\\Temp\\, then run Autoruns on all 14 affected servers to hunt for the same persistence mechanism across the entire environment.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCFE",
+    "exam_tip": "Registry Run key paths: HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (current user, no admin required) and HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run (all users, admin required). Sysinternals Autoruns is the primary tool for comprehensive Windows persistence analysis — know it for CHFI and GCFE exams."
+  }
+}

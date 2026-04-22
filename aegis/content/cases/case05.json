@@ -16,6 +16,46 @@
     "Hint 3: Type 'tools' in the game. The IR reference table shows\n        all phases with their defining actions. Match the status\n        report items to the correct phase.",
     "Hint 4: SPOILER — Removing attacker tools and artifacts is the\n        definition of Eradication. The server is isolated (Containment\n        done) and tools are being removed (Eradication in progress).\n        Type: eradication"
   ],
+  "steps": [
+    {
+      "question": "The status report states: 'Attacker tools and artifacts removed from filesystem.' Which NIST SP 800-61 IR phase does removing attacker tools correspond to?",
+      "valid_answers": ["eradication", "eradication phase"],
+      "hints": [
+        "NIST SP 800-61 defines four phases: Preparation, Detection/Analysis, Containment/Eradication/Recovery, Post-Incident",
+        "Removing malware and attacker tools is a distinct action within the third phase — what is the specific sub-phase?",
+        "Containment = isolate (already done). Recovery = restore backups. Eradication = remove the threat.",
+        "Removing attacker artifacts from the filesystem is by definition Eradication."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "containment", "response": "Containment was already done — the server was isolated from the network. Removing tools is the NEXT phase."},
+        {"pattern": "recovery", "response": "Recovery restores systems to normal operation from clean backups. Removing attacker tools happens before that."}
+      ]
+    },
+    {
+      "question": "The server is isolated (Containment done) and attacker tools are being removed (Eradication in progress). Backups are verified intact. What is the NEXT phase after Eradication completes?",
+      "valid_answers": ["recovery", "recovery phase"],
+      "hints": [
+        "NIST SP 800-61 lists the phases in order — what comes after Eradication?",
+        "After removing the threat, the next goal is to restore the system to normal operation",
+        "The backups have been verified as clean and intact — that detail is a hint about what happens next",
+        "After Eradication, the phase is Recovery: restoring from clean backups and returning to production."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "post-incident", "response": "Post-Incident Activity (lessons learned) comes after Recovery. The system hasn't been restored yet."}
+      ]
+    },
+    {
+      "question": "Given the current status (tools removed, server isolated, backups verified), what IR lifecycle phase is the team currently in?",
+      "valid_answers": ["eradication", "eradication and recovery"],
+      "hints": [
+        "Map each status item: server isolated = Containment (done), tools removed = this is the current phase",
+        "Containment is complete. Eradication is in progress. Recovery is next.",
+        "The defining action happening right now is removing attacker tools — that names the phase.",
+        "The current phase is Eradication. Type: eradication"
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "The Incident Response lifecycle (NIST SP 800-61) has four phases:\n\n1. PREPARATION\n   Build IR capabilities before an incident occurs.\n   Actions: policies, playbooks, tools, training.\n\n2. DETECTION AND ANALYSIS\n   Identify and confirm an incident has occurred.\n   Actions: alert triage, log analysis, IOC identification,\n   scope determination, severity classification.\n\n3. CONTAINMENT, ERADICATION, AND RECOVERY\n   Stop the damage, remove the attacker, restore operations.\n   - Containment: isolate affected systems (disconnect network)\n   - Eradication: remove malware, tools, and attacker persistence\n   - Recovery: restore from clean backups, verify integrity,\n     return to production\n\n4. POST-INCIDENT ACTIVITY\n   Learn from the incident to prevent recurrence.\n   Actions: lessons learned, report writing, IOC sharing,\n   control improvements.\n\nCySA+ Domain 3 tests your ability to identify the correct IR phase\ngiven a scenario and to know which actions belong to which phase.\nEradication ≠ Containment ≠ Recovery — the exam will test the\ndifferences between all three.",
   "tools": "Displays the NIST SP 800-61 IR lifecycle phases with key actions for each phase.",
   "debrief": {

@@ -19,6 +19,47 @@
     "Type 'tools' in the game. The hunt analyzer scores each evidence item\n        and calculates: confidence = SUPPORTS / (SUPPORTS + REFUTES) x 100.\n        Count the SUPPORTS and REFUTES items, then calculate.",
     "SPOILER — 3 items SUPPORT (powershell -enc, certutil -decode, registry Run),\n        2 items REFUTE (svchost normal, explorer normal parent), 2 are NEUTRAL.\n        Confidence = 3 / (3 + 2) x 100 = 60%. Type: 60"
   ],
+  "steps": [
+    {
+      "question": "The hunt hypothesis is that NIGHTWIRE uses living-off-the-land (LOLBAS) techniques. How many evidence items SUPPORT this hypothesis? (Consider: powershell -enc, certutil -decode, svchost normal, network to C2, /tmp/update.sh, registry Run modified, explorer normal parent)",
+      "valid_answers": ["3", "three"],
+      "hints": [
+        "LOLBAS = abusing legitimate Windows tools. Items that show built-in Windows tools used maliciously SUPPORT the hypothesis.",
+        "powershell -enc = encoded command (classic LOLBAS). certutil -decode = file transfer via CA tool (LOLBAS). svchost normal = not LOLBAS (normal process).",
+        "registry Run key modified = persistence via LOLBAS pattern. /tmp/update.sh = Linux artifact (neutral). explorer normal parent = normal (refutes).",
+        "SUPPORTS: powershell -enc, certutil -decode, registry Run = 3 items. Type: 3"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "4", "response": "The network connection to 185.220.101.45 is C2 traffic but is neutral for the LOLBAS hypothesis — C2 doesn't require LOLBAS. Count only the LOLBAS-specific indicators."},
+        {"pattern": "2", "response": "You may have missed one — certutil -decode is a classic LOLBAS technique (abusing the built-in CA utility for file transfer). That counts as SUPPORTS."}
+      ]
+    },
+    {
+      "question": "How many evidence items REFUTE the hypothesis (suggest NIGHTWIRE is NOT using LOLBAS)?",
+      "valid_answers": ["2", "two"],
+      "hints": [
+        "REFUTING items are those that show normal, expected system behavior — not LOLBAS abuse",
+        "svchost.exe -k netsvcs = completely normal Windows service behavior. Does this support or refute LOLBAS?",
+        "explorer.exe with parent=userinit.exe = normal Windows process tree. Does this support or refute LOLBAS?",
+        "REFUTES: svchost normal (2 items: svchost normal, explorer normal parent) = 2 items. Type: 2"
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Using the formula: confidence = SUPPORTS / (SUPPORTS + REFUTES) × 100, what is the hunt confidence score as a percentage?",
+      "valid_answers": ["60", "60%", "60 percent"],
+      "hints": [
+        "Formula: confidence = SUPPORTS / (SUPPORTS + REFUTES) × 100. Neutral items are excluded.",
+        "SUPPORTS = 3, REFUTES = 2. Plug into the formula: 3 / (3 + 2) × 100",
+        "3 / 5 = 0.6. Multiply by 100 = 60.",
+        "Confidence score = 3 / (3 + 2) × 100 = 60%. Type: 60"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "43", "response": "Don't include neutral items in the denominator. The formula is SUPPORTS / (SUPPORTS + REFUTES) only — exclude the 2 neutral items."},
+        {"pattern": "75", "response": "Check your counts — 3 items support, 2 refute. 3 / (3+2) × 100 = 60%, not 75%."}
+      ]
+    }
+  ],
   "tools": "Evaluates each evidence item against the hunt hypothesis and calculates a confidence score based on supporting vs refuting evidence.",
   "learn": "Threat hunting is proactive — analysts form a hypothesis and look for evidence\nto confirm or refute it, rather than waiting for alerts to fire.\n\nThreat hunting methodology:\n  1. HYPOTHESIS   — Form a specific, testable statement about attacker behavior\n                    Good: \"Attacker is using certutil for file transfer\"\n                    Bad:  \"Something suspicious is happening\"\n  2. DATA SOURCES — Identify which logs/telemetry to examine\n  3. HUNT         — Search for evidence using queries, scripts, or tools\n  4. CLASSIFY     — For each finding: supports / refutes / neutral\n  5. CONFIDENCE   — Score = SUPPORTS / (SUPPORTS + REFUTES) x 100\n  6. ESCALATE     — High confidence -> escalate to incident response\n\nLiving-off-the-Land (LOLBAS) techniques — key indicators:\n  powershell -EncodedCommand  — Base64-encoded payload execution\n  certutil -decode / -urlcache — File download via built-in CA tool\n  wmic process call create    — Remote process creation\n  bitsadmin /transfer         — File transfer via BITS service\n  regsvr32 /s /u /i http://   — Signed binary proxy execution\n  mshta vbscript:             — Script execution via HTML Application host\n  schtasks /create            — Persistence via scheduled task\n  rundll32 javascript:        — Code execution via DLL loader\n\nLOLBAS detection is in CySA+ Domain 1 — hunting for these patterns in\nSysmon Event 1 (process create with command line) is the primary method.",
   "debrief": {

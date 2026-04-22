@@ -16,6 +16,34 @@
     "Type 'tools' in the game. The exec report reference table\nshows each section with its purpose and what belongs in it.\nMatch the recovery cost to the correct section.",
     "SPOILER — Recovery costs, operational downtime, and reputational\nimpact belong in the 'Business Impact' section. This section\ntranslates technical findings into business language for\nnon-technical executives. Type: business impact"
   ],
+  "steps": [
+    {
+      "question": "A standard executive incident report has named sections. List one section name you would expect to find in such a report.",
+      "valid_answers": ["executive summary", "timeline", "technical analysis", "business impact", "recommendations", "lessons learned"],
+      "hints": [
+        "Executive reports follow a predictable structure used across most organizations",
+        "Common sections include: Executive Summary, Timeline, Technical Analysis, Business Impact, Recommendations, Lessons Learned",
+        "Think about what a board member or CISO needs to see after an incident — the sections address those needs",
+        "Any of these are correct sections: Executive Summary, Timeline, Technical Analysis, Business Impact, Recommendations, Lessons Learned."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "The $45,000 recovery cost estimate belongs in one specific section of the executive incident report. Which section covers financial impact and business consequences of the incident?",
+      "valid_answers": ["business impact", "business impact analysis", "impact", "impact analysis"],
+      "hints": [
+        "Recovery costs are a business consequence — financial data belongs in the section that covers business-level effects",
+        "Technical findings (CVE, attack chain) go in 'Technical Analysis'. Costs and operational impact go elsewhere.",
+        "The section that translates technical findings into dollars, downtime, and reputational impact has a name with 'business' in it",
+        "Recovery costs belong in the 'Business Impact' section. Type: business impact"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "executive summary", "response": "The Executive Summary is a high-level overview. Specific dollar amounts and detailed costs go in the Business Impact section."},
+        {"pattern": "recommendations", "response": "Recommendations cover what to fix going forward. Past costs from the incident go in Business Impact."},
+        {"pattern": "technical", "response": "Technical Analysis covers CVEs, attack chains, and system details — not financial costs."}
+      ]
+    }
+  ],
   "learn": "Executive reporting is how security teams communicate incidents to leadership.\nExecutives need business context, not technical details — your job is to\ntranslate findings into terms that drive decisions.\n\nStandard executive incident report sections:\n\n1. EXECUTIVE SUMMARY\n   One page. What happened, when, how contained, current status.\n   Audience: CEO, board. No technical jargon.\n\n2. TIMELINE\n   Chronological sequence: when detected, when escalated, when contained.\n   Key dates and actions. Use timestamps.\n\n3. TECHNICAL ANALYSIS\n   Root cause, attack vector, affected systems. Technical details for IT/security\n   leadership. CVE IDs, affected software versions, attack chain.\n\n4. BUSINESS IMPACT\n   Financial cost (recovery, downtime, regulatory fines).\n   Operational impact (systems unavailable, SLA breaches).\n   Reputational impact (customer notification, press).\n   Data impact (records affected, PII involved).\n\n5. RECOMMENDATIONS\n   Prioritized list of controls to prevent recurrence.\n   Includes cost estimates and implementation timelines.\n\n6. LESSONS LEARNED\n   What worked, what didn't, gaps in detection/response.\n   Process improvements for the IR playbook.\n\nCySA+ Domain 4 tests whether you can structure, write, and deliver\nreports appropriate for the audience (technical vs executive).",
   "tools": "Displays the standard executive incident report structure with section descriptions and content guidance.",
   "debrief": {

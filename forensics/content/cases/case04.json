@@ -1,0 +1,56 @@
+{
+  "id": "case04",
+  "title": "MZ Impostor",
+  "stage": "stage1",
+  "difficulty": 1,
+  "xp_base": 100,
+  "tools_type": "hex_viewer",
+  "scenario": "An email attachment named 'invoice_Q1_2026.pdf' bypassed the company's spam filter and was opened by a user in the Finance department. The user's endpoint immediately triggered an EDR alert. The security team pulled the file and suspects the attachment is not actually a PDF. Analyze the file header to determine what type of file this really is.",
+  "challenge": "What type of file is invoice_Q1_2026.pdf actually?",
+  "challenge_data": "$ file invoice_Q1_2026.pdf\ninvoice_Q1_2026.pdf: PE32+ executable (console) x86-64, for MS Windows\n\n$ hexdump -C invoice_Q1_2026.pdf | head -8\n00000000  4d 5a 90 00 03 00 00 00  04 00 00 00 ff ff 00 00  |MZ..............|\n00000010  b8 00 00 00 00 00 00 00  40 00 00 00 00 00 00 00  |........@.......|\n00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|\n00000030  00 00 00 00 00 00 00 00  00 00 00 00 e0 00 00 00  |................|\n00000040  0e 1f ba 0e 00 b4 09 cd  21 b8 01 4c cd 21 54 68  |........!..L.!Th|\n00000050  69 73 20 70 72 6f 67 72  61 6d 20 63 61 6e 6e 6f  |is program canno|\n00000060  74 20 62 65 20 72 75 6e  20 69 6e 20 44 4f 53 20  |t be run in DOS |\n00000070  6d 6f 64 65 2e 0d 0d 0a  24 00 00 00 00 00 00 00  |mode....$.......|\n\n$ python3 -c \"import pefile; pe = pefile.PE('invoice_Q1_2026.pdf'); print(pe.dump_info())\" 2>/dev/null | head -20\n[IMAGE_DOS_HEADER]\nMagic:                         0x5A4D     MZ\ne_lfanew:                      0xE0\n\n[IMAGE_NT_HEADERS]\nSignature:                     0x4550     PE\n\n[IMAGE_FILE_HEADER]\nMachine:                       0x8664     IMAGE_FILE_MACHINE_AMD64\nTimeDateStamp:                 0x67E78BDF [Sat Mar 29 17:43:11 2026 UTC]\nNumberOfSections:              6\n\nFile Properties:\n  File Name  : invoice_Q1_2026.pdf\n  File Size  : 147,456 bytes (144 KB)\n  Entropy    : 7.82  (HIGH — probable packing or encryption)\n  Compiler   : Microsoft Visual C++ 2019\n  Imphash    : a3f7c291e8b2d4f6a1c3e5b7d9f2a4c6",
+  "valid_answers": ["windows executable", "executable", "exe", "pe32", "pe file", "portable executable", "pe32+", "windows exe", "pe executable", "windows pe"],
+  "hints": [
+    "The `file` command output is the first thing to read. It tells you directly what type of file this is, ignoring the .pdf extension entirely.",
+    "Look at the first two bytes in the hexdump: 4D 5A. Convert those from hex to ASCII characters — these two letters are the famous magic bytes of a specific file type.",
+    "4D 5A in ASCII is 'MZ' — the initials of Mark Zbikowski, the Microsoft engineer who designed this format. MZ is the magic signature for Windows executable files (PE format).",
+    "The `file` command says 'PE32+ executable (console) x86-64, for MS Windows'. The file is a Windows PE executable disguised as a PDF. The answer is: Windows executable (or exe, PE32, etc.)."
+  ],
+  "steps": [
+    {
+      "question": "What are the first two ASCII characters shown in the hexdump at offset 0x00 (the magic bytes)?",
+      "valid_answers": ["mz", "MZ", "4d 5a", "4d5a"],
+      "hints": [
+        "Look at the hexdump output. The rightmost column shows the ASCII representation of each byte.",
+        "On the very first line of the hexdump (offset 00000000), the first two readable characters are shown on the right side.",
+        "The hex values 4D and 5A each have an ASCII equivalent. Look at what the hexdump prints in the '|...|' section on the first line.",
+        "The first two bytes are 4D 5A, which display as 'MZ' in the ASCII column — the iconic Windows executable signature."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "pdf", "response": "A PDF would start with 25 50 44 46 (%PDF). Look at what is actually at offset 00000000 in the hexdump."},
+        {"pattern": "25", "response": "25 is the hex for % — the start of a PDF. But that is not what is at offset 0x00 here. Read the first hexdump line."}
+      ]
+    },
+    {
+      "question": "What type of file is invoice_Q1_2026.pdf actually? (Based on what the `file` command reports)",
+      "valid_answers": ["windows executable", "executable", "exe", "pe32", "pe file", "portable executable", "pe32+", "windows exe", "pe executable", "windows pe"],
+      "hints": [
+        "The `file` command ignores the .pdf extension and reads the magic bytes to determine the real type.",
+        "Look at the first line of output: the `file` command prints the result after the filename and colon.",
+        "The output says 'PE32+ executable (console) x86-64, for MS Windows' — what category of file is a PE32+ executable?",
+        "PE32+ stands for Portable Executable 32-bit Plus (64-bit). This is a Windows executable (.exe) file disguised with a .pdf extension."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "pdf", "response": "The file has a .pdf extension but the `file` command does not report it as a PDF. Read the `file` output carefully."},
+        {"pattern": "document", "response": "This is not a document file. The MZ magic bytes and the `file` command both point to a specific executable format."}
+      ]
+    }
+  ],
+  "learn": "The MZ header is one of the most important file signatures in Windows forensics. 'MZ' stands for Mark Zbikowski, the Microsoft engineer who designed the MS-DOS executable format — the ancestor of the modern Windows Portable Executable (PE) format. The two bytes 4D 5A appear at offset 0x00 in every valid Windows executable file, including .exe, .dll, .sys, .scr, and other PE format files.\n\nThe PE (Portable Executable) format structure:\n- Offset 0x00: MZ header (DOS stub header begins here)\n- Offset 0x3C: Pointer to the PE header (e_lfanew)\n- PE header begins with the signature 'PE\\0\\0' (50 45 00 00)\n- IMAGE_FILE_HEADER follows with machine type, section count, timestamp\n- IMAGE_OPTIONAL_HEADER contains entry point, image base, subsystem\n- Section table (.text, .data, .rsrc, .reloc, etc.)\n\nHigh entropy explained:\nEntropy measures randomness in data on a scale of 0-8 bits per byte. Normal compiled code typically has entropy of 5.0-6.5. Entropy above 7.0 strongly suggests the file is packed (compressed) or encrypted, which is common in malware to evade static analysis and AV signature detection. This file's entropy of 7.82 is a major red flag.\n\nCommon PE file magic bytes table:\n- 4D 5A (MZ) — Windows PE executable (.exe, .dll, .sys)\n- 7F 45 4C 46 — Linux ELF binary\n- CA FE BA BE — Java class file\n- FE ED FA CE / FE ED FA CF — macOS Mach-O binary\n\nThe double-extension trick: attackers name files 'document.pdf.exe' and rely on Windows hiding the known extension, making it appear as 'document.pdf'. Alternatively, they simply rename .exe to .pdf hoping the recipient or filter only checks the extension.\n\nTools for PE analysis include: PEview, CFF Explorer, PE-bear, pestudio, pefile (Python library), Detect-It-Easy (DIE), and Cutter. For dynamic analysis of suspicious PE files, use sandboxes like Any.run, Cuckoo, or Joe Sandbox.",
+  "debrief": {
+    "summary": "invoice_Q1_2026.pdf is actually a Windows PE32+ executable disguised with a .pdf extension. The MZ magic bytes at offset 0x00 and the `file` command output confirm this unambiguously. The high entropy of 7.82 suggests the executable payload is packed or encrypted to evade antivirus detection.",
+    "real_world": "Executable files disguised as PDFs are a classic phishing payload delivery technique. Modern email gateways and EDR solutions detect this by inspecting file headers, not just extensions — but some older or misconfigured filters rely solely on MIME type and extension, which attackers exploit.",
+    "next_step": "Submit the file to a sandboxed dynamic analysis environment (such as Any.run or Cuckoo Sandbox) to observe its runtime behavior, network connections, and dropped files without risking the production environment.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), PenTest+ PT0-003 Domain 3 (Attacks and Exploits)",
+    "exam_tip": "Memorize these magic bytes: MZ (4D 5A) = Windows PE executable. %PDF (25 50 44 46) = PDF. PK (50 4B) = ZIP/DOCX/XLSX/JAR. \\x7fELF = Linux ELF. D0 CF 11 E0 = OLE2 (Word/Excel). High entropy (>7.0) in a PE file = packed/encrypted malware."
+  }
+}

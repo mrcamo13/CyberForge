@@ -16,6 +16,46 @@
     "Type 'tools' in the game. The risk scorer calculates likelihood × impact,\nmaps to a rating band, and adds an urgency note if exploited=yes.\nThe rating itself comes from the score alone — read it in the output.",
     "SPOILER — 4 × 5 = 20. Score 20 falls in the CRITICAL band (19-25).\nThe 'actively exploited' flag confirms immediate action required.\nType: critical"
   ],
+  "steps": [
+    {
+      "question": "Using the 5x5 risk matrix formula (Risk Score = Likelihood × Impact), calculate the raw risk score. Likelihood is 4 and Impact is 5. What is the score?",
+      "valid_answers": ["20", "20 out of 25", "score 20"],
+      "hints": [
+        "The formula is simple multiplication: Likelihood × Impact",
+        "Likelihood = 4 (actively exploited in the wild), Impact = 5 (full root access on production)",
+        "4 × 5 = ?",
+        "4 × 5 = 20. The raw risk score is 20 out of a maximum of 25."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "9", "response": "Risk score uses multiplication (L × I), not addition (L + I). 4 × 5 = 20, not 4 + 5 = 9."},
+        {"pattern": "45", "response": "Check the formula: Likelihood (4) × Impact (5) = 20, not 45."}
+      ]
+    },
+    {
+      "question": "Using the standard 5x5 rating bands (1-6 LOW, 7-12 MEDIUM, 13-18 HIGH, 19-25 CRITICAL), which rating band does a score of 20 fall into?",
+      "valid_answers": ["critical", "critical risk"],
+      "hints": [
+        "Match the score of 20 against the rating bands: 1-6 LOW, 7-12 MEDIUM, 13-18 HIGH, 19-25 CRITICAL",
+        "Score 20 is greater than 19 and less than or equal to 25 — which band is that?",
+        "The CRITICAL band covers scores 19-25. Score 20 falls within this range.",
+        "Score 20 = CRITICAL risk rating. This aligns with immediate action required."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "high", "response": "HIGH covers scores 13-18. A score of 20 is above that range — check the CRITICAL band (19-25)."}
+      ]
+    },
+    {
+      "question": "Given this is a CRITICAL risk (score 20/25) that has been actively exploited in this incident, what is the risk RATING for the findings using the 5x5 matrix?",
+      "valid_answers": ["critical", "critical risk"],
+      "hints": [
+        "The rating is determined by the score band, not the CVSS score",
+        "Likelihood (4) × Impact (5) = 20. Check the 19-25 band.",
+        "The 'actively exploited' flag confirms the likelihood rating of 4 was appropriate",
+        "Risk Score 20/25 falls in the CRITICAL band (19-25). The rating is CRITICAL."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Risk scoring is how security teams communicate finding severity in business\nterms. Raw CVSS scores tell you about the vulnerability — risk scores\ntell you about the risk to YOUR specific environment.\n\nStandard 5×5 risk matrix:\n  Score = Likelihood (1-5) × Impact (1-5) = 1 to 25\n  LOW:      1-6   — accept, patch at next maintenance window\n  MEDIUM:   7-12  — mitigate within 90 days\n  HIGH:     13-18 — mitigate within 30 days\n  CRITICAL: 19-25 — mitigate immediately\n\nLikelihood factors:\n  1 = Theoretical only, no known exploits\n  3 = Public exploit exists, not widely used\n  5 = Actively exploited in the wild, trivial to exploit\n\nImpact factors:\n  1 = No business impact (test system, no data)\n  3 = Moderate (internal system, limited data)\n  5 = Severe (production, customer data, full system compromise)\n\nRisk vs CVSS:\n  CVSS scores the vulnerability in isolation.\n  Risk scores the vulnerability in your context.\n  A CVSS 9.8 on an air-gapped test system may be LOW risk.\n  A CVSS 5.3 on your primary customer database may be HIGH risk.",
   "tools": "Calculates risk score using likelihood × impact and maps to a rating band, adjusting for asset type and active exploitation.",
   "debrief": {

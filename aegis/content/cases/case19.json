@@ -24,6 +24,44 @@
     "Type 'tools' in the game. The chain of custody reference lists the\n        exact order of steps for physical evidence handling. The very first\n        step creates a verifiable fingerprint of the evidence.",
     "SPOILER — The first step is always to document the cryptographic hash\n        (SHA-256 or MD5) of the evidence BEFORE any analysis. This hash is the\n        integrity baseline — any change to the evidence would produce a different\n        hash, proving tampering. Type: hash"
   ],
+  "steps": [
+    {
+      "question": "Your colleague is about to plug in the USB drive and start analyzing it directly. Why is this a problem for chain of custody?",
+      "valid_answers": ["no hash", "unverified integrity", "no baseline", "not hashed first", "could alter evidence"],
+      "hints": [
+        "Chain of custody requires proving evidence was not modified during the investigation",
+        "If you analyze a device without recording its original state, how can you prove later that you didn't change it?",
+        "The problem is there is no integrity baseline yet — no way to prove the evidence is unaltered after analysis",
+        "Without a hash computed before analysis, you cannot prove the evidence was not modified. This breaks chain of custody."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "What must be documented FIRST when taking physical custody of the USB drive evidence, before any analysis begins?",
+      "valid_answers": ["hash", "hash value", "cryptographic hash", "sha256", "md5", "integrity hash", "evidence hash", "checksum"],
+      "hints": [
+        "The very first step when taking digital evidence into custody is to create a record of its exact original state",
+        "This record must be cryptographic — it creates a unique fingerprint that changes if even one bit is altered",
+        "The tool used produces a fixed-length output (like SHA-256 or MD5) that represents the original file contents",
+        "The first step is to compute a cryptographic hash (SHA-256 or MD5) of the evidence. Type: hash"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "photograph", "response": "Photographs document the physical scene, but for digital evidence, the first step is computing a cryptographic hash of the data."},
+        {"pattern": "write block", "response": "Write blockers are used when imaging a drive — but before even doing that, the hash must be documented."}
+      ]
+    },
+    {
+      "question": "After computing the hash, what device is used when imaging (copying) the USB drive to prevent accidental modification of the original evidence?",
+      "valid_answers": ["write blocker", "hardware write blocker", "forensic write blocker"],
+      "hints": [
+        "During forensic imaging, the disk is read. Without protection, some tools can inadvertently write to the drive.",
+        "A hardware device is placed between the evidence and the analysis computer to prevent writes to the original",
+        "This device 'blocks writes' — it is a standard tool in digital forensics that enforces read-only access",
+        "A write blocker is used during forensic imaging to prevent any writes to the original evidence drive."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "tools": "Displays the chain of custody reference including collection steps, documentation requirements, storage procedures, and common errors.",
   "learn": "Chain of custody is the documented, unbroken sequence of possession for\nevidence. In legal proceedings, broken chain of custody can make evidence\ninadmissible — the entire investigation can be thrown out.\n\nChain of custody for digital evidence:\n\nCOLLECTION:\n  1. Document the scene (photographs, notes, location, time)\n  2. Hash the evidence BEFORE collection (SHA-256 preferred)\n  3. Use write blockers when imaging drives (prevents modification)\n  4. Create forensic copies — never analyze originals\n  5. Hash the copy and verify it matches the original hash\n\nDOCUMENTATION (required for each transfer):\n  - Description of evidence (type, serial number, size)\n  - Date and time of collection/transfer\n  - Person collecting/receiving (full name, role, signature)\n  - Location (where collected, where stored)\n  - Reason for transfer\n  - Hash values (before and after)\n\nSTORAGE:\n  - Physical: evidence bags, tamper-evident seals, secure room\n  - Digital: write-protected storage, access logging, off-site backup\n\nCOMMON CHAIN OF CUSTODY ERRORS:\n  - Analyzing originals instead of forensic copies\n  - Forgetting to use a write blocker during imaging\n  - Missing documentation on a transfer\n  - Not re-hashing after storage to verify integrity\n  - Allowing unauthorized personnel to access evidence\n\nIf chain of custody is broken:\n  Evidence may be deemed inadmissible in court.\n  Investigation credibility is damaged.\n  Attacker prosecution may fail.",
   "debrief": {

@@ -1,0 +1,55 @@
+{
+  "id": "case03",
+  "title": "Tampered Evidence?",
+  "stage": "stage1",
+  "difficulty": 1,
+  "xp_base": 100,
+  "tools_type": "hash_verifier",
+  "scenario": "A disk image was collected from a suspect's workstation and placed into the evidence locker. The acquisition hash was recorded at the time of collection by Detective Torres. Before beginning your forensic analysis, you must verify that the evidence file matches the acquisition hash — any discrepancy would mean the evidence has been altered and could be inadmissible in court. Run the hash verification and determine whether the file is intact.",
+  "challenge": "Has the evidence file been tampered with since acquisition?",
+  "challenge_data": "EVIDENCE ACQUISITION RECORD\n============================\nCase Number    : CF-2026-0312\nEvidence Item  : exhibit_A.img\nDescription    : Forensic disk image, 250GB WD Blue SSD\nCollected By   : Det. M. Torres\nCollection Date: 2026-04-01 09:15:00 UTC\nCollection Tool: FTK Imager v4.7.1\nWrite Blocker  : Tableau TX1\n\nRecorded Acquisition Hashes:\n  MD5    : 7f3d9a1c4e8b2f6a0d5c3e7b1a9f4d8c\n  SHA-256: 3a7f1c9e2b4d6f8a0c2e4f6b8d0a2c4e6f8b0d2a4c6e8f0a2b4d6f8a0c2e4f6\n\n=====================================\nCURRENT FILE HASH VERIFICATION\n=====================================\n$ md5sum exhibit_A.img\n7f3d9a1c4e8b2f6a0d5c3e7b1a9f4d8c  exhibit_A.img\n\nComparing to acquisition MD5...\n  Acquisition : 7f3d9a1c4e8b2f6a0d5c3e7b1a9f4d8c\n  Current     : 7f3d9a1c4e8b2f6a0d5c3e7b1a9f4d8c\n  Result      : [MATCH]\n\n$ sha256sum exhibit_A.img\n3a7f1c9e2b4d6f8a0c2e4f6b8d0a2c4e6f8b0d2a4c6e8f0a2b4d6f8a0c2e4f6  exhibit_A.img\n\nComparing to acquisition SHA-256...\n  Acquisition : 3a7f1c9e2b4d6f8a0c2e4f6b8d0a2c4e6f8b0d2a4c6e8f0a2b4d6f8a0c2e4f6\n  Current     : 3a7f1c9e2b4d6f8a0c2e4f6b8d0a2c4e6f8b0d2a4c6e8f0a2b4d6f8a0c2e4f6\n  Result      : [MATCH]\n\n=====================================\nINTEGRITY STATUS: VERIFIED\nBoth MD5 and SHA-256 hashes match acquisition values.\nFile has not been modified since collection on 2026-04-01.\n=====================================",
+  "valid_answers": ["no", "no it has not", "no tampering", "not tampered", "verified", "no modification", "intact", "file is intact", "hashes match", "not modified"],
+  "hints": [
+    "Hash verification compares two hash values: the one recorded at collection time and the one computed right now. Look at the 'Result' lines for each hash.",
+    "Both the MD5 and SHA-256 hashes are compared in the output. Check whether each comparison shows MATCH or MISMATCH.",
+    "The output shows [MATCH] for both hash algorithms, and the Integrity Status at the bottom summarizes the finding.",
+    "Both hashes match, and the output states 'VERIFIED — File has not been modified since collection.' The answer is: No, the file has not been tampered with."
+  ],
+  "steps": [
+    {
+      "question": "What is the result of comparing the MD5 hash — does it show MATCH or MISMATCH?",
+      "valid_answers": ["match", "[match]", "the md5 matches", "md5 match"],
+      "hints": [
+        "The MD5 comparison section shows both the acquisition hash and the current hash side by side.",
+        "After the two MD5 values are shown, there is a 'Result:' line that states the outcome.",
+        "Look at the line that reads 'Result :' under the MD5 comparison section.",
+        "The Result line under the MD5 comparison reads: [MATCH] — both values are identical."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "mismatch", "response": "Look again at the Result line — compare the Acquisition and Current MD5 values character by character."}
+      ]
+    },
+    {
+      "question": "Based on both hash comparisons, has the evidence file been tampered with since acquisition?",
+      "valid_answers": ["no", "no it has not", "no tampering", "not tampered", "verified", "no modification", "intact", "file is intact", "hashes match", "not modified"],
+      "hints": [
+        "Both hash algorithms (MD5 and SHA-256) showed MATCH results. What does that tell you about the file's integrity?",
+        "If both hashes match, the file is byte-for-byte identical to what was collected. Has anything changed?",
+        "The INTEGRITY STATUS section at the bottom of the output summarizes the conclusion.",
+        "The output states 'INTEGRITY STATUS: VERIFIED — File has not been modified since collection.' The evidence has NOT been tampered with."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "yes", "response": "Both MD5 and SHA-256 show MATCH — if the file were tampered with even slightly, the hashes would be completely different."},
+        {"pattern": "tampered", "response": "Both hashes matched perfectly. Tampering would produce a completely different hash value."}
+      ]
+    }
+  ],
+  "learn": "Cryptographic hash verification is the foundation of digital forensics integrity assurance. Before any analysis begins, the investigator must verify that the evidence they are working with is identical to what was collected — byte for byte. This process protects the chain of custody and ensures findings will be admissible in legal proceedings.\n\nHow hashing works in DFIR:\nWhen evidence is acquired, the forensic tool computes a hash of the entire image and records it in the acquisition report. Before analysis, and again after analysis, the hash is recomputed and compared. If even a single bit has changed, the hash will be completely different — this property is called collision resistance.\n\nMD5 vs SHA-256 for forensics:\n- MD5 (128-bit): Fast to compute, widely supported by forensic tools. Cryptographically broken (collisions can be engineered), but still valid for forensic integrity checking because accidental or natural bit-flips will produce a different hash. Not suitable for security applications, but fine for forensics.\n- SHA-256 (256-bit): Cryptographically strong, preferred for modern forensic work. Used by most current tools (FTK Imager, EnCase, Autopsy).\n- SHA-1 (160-bit): Deprecated — collisions demonstrated in 2017 (SHAttered attack). Avoid.\n\nChain of custody requirements:\n- Evidence must be hashed at acquisition\n- Hash must be documented in writing (acquisition report)\n- Evidence must be stored in a controlled evidence locker\n- Every access to evidence must be logged\n- Hash must be re-verified before and after each examination\n- If hashes do not match, the evidence may be inadmissible\n\nWrite blockers (hardware or software) prevent any writes to the original evidence media during acquisition, ensuring the original is never modified. The Tableau TX1 mentioned in this case is a common hardware write blocker.\n\nFederal Rules of Evidence (FRE) Rule 901 requires that digital evidence be authenticated — showing that 'the item is what the proponent claims it is.' Hash verification is the primary mechanism for this authentication.\n\nFTK Imager and EnCase are the most common acquisition tools. Both create forensic image formats (.E01 for EnCase, .AD1 for FTK) that embed the acquisition hash in the image metadata itself.",
+  "debrief": {
+    "summary": "Both the MD5 and SHA-256 hashes of exhibit_A.img match the acquisition values recorded by Detective Torres, confirming that the evidence file is forensically sound and has not been modified since collection on April 1st.",
+    "real_world": "Hash verification is the mandatory first step before any forensic examination. Courts require this documentation to establish that the evidence analyzed is identical to what was collected, establishing authenticity under FRE Rule 901.",
+    "next_step": "Document the successful hash verification in the case file with timestamps, analyst name, and tool used, then proceed with mounting the image read-only for analysis.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), CHFI v10 Module 4 (Digital Evidence), GCFE",
+    "exam_tip": "MD5 and SHA-256 are used for evidence integrity verification, NOT security. MD5 is cryptographically broken (collisions can be crafted) but remains valid for forensic checksums because accidental bit-flips still produce different hashes. SHA-256 is preferred for new cases."
+  }
+}

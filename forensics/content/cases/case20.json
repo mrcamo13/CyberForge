@@ -1,0 +1,85 @@
+{
+  "id": "case20",
+  "title": "Attribution Analysis",
+  "stage": "stage4",
+  "difficulty": 4,
+  "xp_base": 250,
+  "tools_type": "intel_correlator",
+  "scenario": "The Meridian Financial Group ransomware investigation is complete. Your team has collected 47 indicators of compromise (IOCs) and mapped every observed attacker behavior to the MITRE ATT&CK framework. This TTP report has been cross-referenced against a threat intelligence database to identify threat actor patterns. You need to correctly classify the phase of the attack where the ransomware was actually deployed across all 14 servers simultaneously, using the MITRE ATT&CK tactic framework.",
+  "challenge": "What MITRE ATT&CK tactic is used when the attacker deployed the ransomware across all 14 servers simultaneously?",
+  "challenge_data": "THREAT INTELLIGENCE CORRELATION REPORT\n=======================================\nCase     : CF-2026-0401-RANSOMWARE\nIOCs     : 47 submitted\nPlatform : MISP (Malware Information Sharing Platform)\nDate     : 2026-04-03 14:00:00 UTC\nAnalyst  : DFIR Team\n\nTTP MAPPING — MITRE ATT&CK Enterprise Framework v14\n=====================================================\n\n[TA0001] INITIAL ACCESS\n  T1133  External Remote Services (RDP without MFA)          ✓ CONFIRMED\n  T1566  Phishing (CEO spoof email — prior credential theft) ✓ CONFIRMED\n\n[TA0002] EXECUTION\n  T1059.001  Command and Scripting: PowerShell               ✓ CONFIRMED\n  T1059.003  Command and Scripting: Windows CMD              ✓ CONFIRMED\n  T1569.002  System Services: Service Execution (PsExec)     ✓ CONFIRMED\n\n[TA0003] PERSISTENCE\n  T1547.001  Registry Run Keys / Startup Folder              ✓ CONFIRMED\n  T1053.005  Scheduled Task                                  ✓ CONFIRMED\n  T1546.003  WMI Event Subscription (fileless)               ✓ CONFIRMED\n\n[TA0004] PRIVILEGE ESCALATION\n  T1548      Abuse Elevation Control Mechanism               ✓ CONFIRMED\n\n[TA0005] DEFENSE EVASION\n  T1036.005  Masquerading: Match Legitimate Name (svch0st.exe) ✓ CONFIRMED\n  T1055.001  Process Injection: DLL Injection                ✓ CONFIRMED\n  T1027.010  Obfuscated Files: Command Obfuscation (base64)  ✓ CONFIRMED\n\n[TA0006] CREDENTIAL ACCESS\n  T1003.001  OS Credential Dumping: LSASS Memory             ✓ CONFIRMED\n  T1110.003  Brute Force: Password Spraying                  ✓ CONFIRMED\n\n[TA0007] DISCOVERY\n  T1083      File and Directory Discovery (dir /s /b)        ✓ CONFIRMED\n  T1069      Permission Groups Discovery (net localgroup)    ✓ CONFIRMED\n\n[TA0008] LATERAL MOVEMENT\n  T1021.002  Remote Services: SMB/Windows Admin Shares       ✓ CONFIRMED\n  T1021.001  Remote Services: RDP (within network)           ✓ CONFIRMED\n\n[TA0009] COLLECTION\n  T1074.001  Data Staged: Local Data Staging                 ✓ CONFIRMED\n\n[TA0010] EXFILTRATION\n  T1048.003  Exfiltration Over Alternative Protocol: HTTPS   ✓ CONFIRMED\n  T1041      Exfiltration Over C2 Channel                    ✓ CONFIRMED\n\n[TA0040] IMPACT\n  T1486      Data Encrypted for Impact (RANSOMWARE)          ✓ CONFIRMED\n  T1490      Inhibit System Recovery (VSS deletion)          ✓ CONFIRMED\n  T1491      Defacement: Internal Defacement (ransom notes)  ✓ CONFIRMED\n\nTHREAT ACTOR PROFILE\n====================\nSimilarity Score    : 78% match to known RaaS profile\nConfidence Level    : HIGH\nOperator Type       : Ransomware-as-a-Service (RaaS) affiliate\nRansom Note Format  : Consistent with observed group TTPs\nC2 Infrastructure   : Tor exit nodes + bulletproof hosting\n\nATT&CK NAVIGATOR HEAT MAP: (14 tactics covered, 22 techniques confirmed)\nRecommendation: Share TTP report with FS-ISAC (Financial Services ISAC)",
+  "valid_answers": ["impact", "ta0040", "data encrypted for impact", "t1486", "ransomware deployment", "impact tactic", "the impact tactic", "ta0040 impact"],
+  "steps": [
+    {
+      "question": "How many MITRE ATT&CK tactics were confirmed across the full incident?",
+      "valid_answers": ["14", "fourteen", "14 tactics", "fourteen tactics"],
+      "hints": [
+        "The ATT&CK Navigator heat map note at the bottom of the report includes a count of confirmed tactics. Look for that summary line.",
+        "The report maps every tactic with a [TA00XX] header. Count the distinct tactic sections shown, or look at the ANALYST NOTE at the bottom of the report.",
+        "The report footer reads: 'ATT&CK NAVIGATOR HEAT MAP: (14 tactics covered, 22 techniques confirmed)'. This is the total tactic count.",
+        "14 tactics were confirmed across the incident — all 14 of the standard MITRE ATT&CK Enterprise tactics were represented in the attack chain from Initial Access through Impact."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "22", "response": "22 is the number of confirmed techniques — individual methods like T1486 or T1059.001. The question asks for the number of tactics (the higher-level categories like Initial Access, Execution, etc.)."},
+        {"pattern": "47", "response": "47 is the total number of IOCs submitted to MISP. The question asks for the MITRE ATT&CK tactic count from the navigator heat map note."}
+      ]
+    },
+    {
+      "question": "Under which MITRE ATT&CK tactic ID does T1486 (Data Encrypted for Impact) fall?",
+      "valid_answers": ["ta0040", "tactic ta0040", "ta0040 impact", "impact ta0040"],
+      "hints": [
+        "Find the section header that contains T1486 in the TTP mapping. The section header format is [TAXXXX] followed by the tactic name.",
+        "T1486 is listed under a section labeled [TA0040]. What is the full tactic name shown next to that ID?",
+        "The section header reads '[TA0040] IMPACT' and contains T1486 (Data Encrypted for Impact), T1490 (Inhibit System Recovery), and T1491 (Defacement).",
+        "T1486 falls under tactic TA0040 — IMPACT. This is the final tactic in the ATT&CK kill chain, representing actions that directly harm the victim's data and systems."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "ta0010", "response": "TA0010 is Exfiltration — the data theft phase. Ransomware encryption happens after exfiltration and belongs to a different tactic. Look at which section header T1486 appears under."},
+        {"pattern": "ta0002", "response": "TA0002 is Execution — running tools and code. The ransomware deployment (encryption) is categorized under a different, later-stage tactic."}
+      ]
+    },
+    {
+      "question": "What MITRE ATT&CK tactic is used when the attacker deployed the ransomware across all 14 servers simultaneously?",
+      "valid_answers": ["impact", "ta0040", "data encrypted for impact", "t1486", "ransomware deployment", "impact tactic", "the impact tactic", "ta0040 impact"],
+      "hints": [
+        "The TTP report maps every observed attacker behavior to a MITRE ATT&CK tactic (the columns). Look through the tactic sections for the one that covers the actual ransomware encryption of files.",
+        "Ransomware encryption — the act of encrypting victim files to make them unavailable and demand payment — falls under a specific MITRE ATT&CK tactic. Look for the technique T1486.",
+        "T1486 'Data Encrypted for Impact' is listed under tactic TA0040. What is the name of that tactic? The tactic represents the attacker's ultimate goal — causing harm to the victim's operations.",
+        "The ransomware deployment maps to the MITRE ATT&CK tactic TA0040 — IMPACT. This tactic covers actions where attackers manipulate, interrupt, or destroy systems and data. T1486 (Data Encrypted for Impact) is the specific technique for ransomware."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "exfiltration", "response": "Exfiltration (TA0010) covers the data theft that happened before the encryption. The ransomware deployment itself — the encryption of files — belongs to a different, later-stage tactic."},
+        {"pattern": "execution", "response": "Execution (TA0002) covers running the ransomware binary, but the tactic that describes what the ransomware actually achieves — encrypting victim data — is a different, goal-oriented tactic."},
+        {"pattern": "lateral movement", "response": "Lateral Movement (TA0008) is how the attacker spread to all 14 servers, but the ransomware deployment (the encryption itself) maps to a different tactic focused on the outcome."}
+      ]
+    },
+    {
+      "question": "What additional Impact technique, paired with ransomware encryption, prevents victims from recovering using backups?",
+      "valid_answers": ["t1490", "inhibit system recovery", "t1490 inhibit system recovery", "vss deletion", "volume shadow copy deletion", "shadow copy deletion"],
+      "hints": [
+        "Look at the [TA0040] IMPACT section. Two techniques are listed alongside T1486 (ransomware encryption). One of them specifically targets recovery capabilities.",
+        "The technique description in parentheses mentions 'VSS deletion'. VSS stands for Volume Shadow Copy Service — Windows' built-in snapshot and backup mechanism.",
+        "T1490 'Inhibit System Recovery' is listed under TA0040 with the note '(VSS deletion)'. Attackers delete Volume Shadow Copies so victims cannot use Windows' built-in recovery points to restore encrypted files.",
+        "T1490 (Inhibit System Recovery) pairs with T1486 ransomware in nearly every modern ransomware attack. Attackers run 'vssadmin delete shadows /all /quiet' to destroy all Volume Shadow Copies before or during encryption, eliminating the victim's ability to self-recover."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "t1491", "response": "T1491 (Defacement — placing ransom notes) is also in the Impact tactic, but it does not prevent recovery. Look for the technique specifically targeting backup and recovery mechanisms."},
+        {"pattern": "t1486", "response": "T1486 is the encryption itself. The question asks for the technique that prevents victims from recovering FROM that encryption using backups. Look for the other Impact technique."}
+      ]
+    }
+  ],
+  "hints": [
+    "The TTP report maps every observed attacker behavior to a MITRE ATT&CK tactic (the columns). Look through the tactic sections for the one that covers the actual ransomware encryption of files.",
+    "Ransomware encryption — the act of encrypting victim files to make them unavailable and demand payment — falls under a specific MITRE ATT&CK tactic. Look for the technique T1486.",
+    "T1486 'Data Encrypted for Impact' is listed under tactic TA0040. What is the name of that tactic? The tactic represents the attacker's ultimate goal — causing harm to the victim's operations.",
+    "The ransomware deployment maps to the MITRE ATT&CK tactic TA0040 — IMPACT. This tactic covers actions where attackers manipulate, interrupt, or destroy systems and data. T1486 (Data Encrypted for Impact) is the specific technique for ransomware."
+  ],
+  "learn": "The MITRE ATT&CK (Adversarial Tactics, Techniques, and Common Knowledge) framework is the universal language for describing, classifying, and sharing threat actor behavior. It is used by defenders, threat hunters, incident responders, and threat intelligence teams worldwide.\n\nATT&CK structure:\n- Tactics (the 'why' — the adversary's goal): 14 columns in the Enterprise matrix\n- Techniques (the 'how' — specific methods): Numbered T1XXX\n- Sub-techniques (more specific variants): T1XXX.XXX\n- Procedures (specific implementation by a threat actor): Described in group pages\n\nThe 14 MITRE ATT&CK Enterprise Tactics (memorize in order for exams):\n1. TA0043 — Reconnaissance\n2. TA0042 — Resource Development\n3. TA0001 — Initial Access\n4. TA0002 — Execution\n5. TA0003 — Persistence\n6. TA0004 — Privilege Escalation\n7. TA0005 — Defense Evasion\n8. TA0006 — Credential Access\n9. TA0007 — Discovery\n10. TA0008 — Lateral Movement\n11. TA0009 — Collection\n12. TA0011 — Command and Control\n13. TA0010 — Exfiltration\n14. TA0040 — Impact\n\nTA0040 — Impact techniques include:\n- T1486: Data Encrypted for Impact (ransomware)\n- T1490: Inhibit System Recovery (deleting Volume Shadow Copies with vssadmin)\n- T1491: Defacement (ransom notes placed on systems)\n- T1498: Network Denial of Service\n- T1529: System Shutdown/Reboot\n\nRaaS (Ransomware-as-a-Service) model:\nModern ransomware operations work like businesses:\n- Core developers: Build and maintain the ransomware platform and infrastructure\n- Affiliates: Conduct the actual intrusions, using the RaaS platform's tools and C2\n- Profit split: Typically 70-80% to affiliate, 20-30% to core developers\n- Negotiation team: Handles victim communication and payment\n- Leak site: Publishes stolen data if ransom not paid (double extortion enforcement)\n\nISAC (Information Sharing and Analysis Center): Sector-specific organizations for sharing threat intelligence. FS-ISAC serves the financial sector. Others include H-ISAC (Healthcare), E-ISAC (Energy), MS-ISAC (Multi-State for government). Sharing TTP reports through ISACs helps other organizations in the same sector defend against the same threat actors.\n\nATT&CK Navigator: A web-based tool (attack.mitre.org/resources/attack-navigator) for visualizing and annotating the ATT&CK matrix. Used to create heat maps showing which techniques a threat actor uses or which techniques an organization has detection coverage for.",
+  "debrief": {
+    "summary": "The simultaneous ransomware deployment across all 14 servers maps to MITRE ATT&CK tactic TA0040 — Impact, specifically technique T1486 (Data Encrypted for Impact). The full TTP report covers 14 tactics and 22 confirmed techniques, consistent with a RaaS affiliate operation. The 78% similarity match to a known threat actor profile provides attribution direction for law enforcement referral.",
+    "real_world": "MITRE ATT&CK is the standard framework for sharing threat intelligence across organizations and with law enforcement. After a major incident, the TTP report is shared with sector-specific ISACs, government partners (CISA, FBI), and threat intelligence platforms (MISP, OpenCTI) so the entire community can benefit from detection and prevention improvements.",
+    "next_step": "Share the TTP report with FS-ISAC and CISA, implement ATT&CK-based detection rules in the SIEM for each confirmed technique, brief executive leadership and the board on the incident, and engage a threat intelligence retainer for ongoing monitoring of the identified C2 infrastructure.",
+    "cert_link": "CySA+ CS0-003 Domain 2 (Threat Intelligence), GCFA",
+    "exam_tip": "Memorize the 14 MITRE ATT&CK tactics in order. Impact (TA0040) is the final tactic and includes T1486 (ransomware). T1490 (inhibit system recovery = VSS deletion) is often paired with T1486. The framework uses Tactics (why) → Techniques (how) → Sub-techniques (specific variant). ATT&CK Navigator visualizes coverage."
+  }
+}

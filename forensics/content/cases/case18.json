@@ -1,0 +1,71 @@
+{
+  "id": "case18",
+  "title": "Lateral Tracks",
+  "stage": "stage4",
+  "difficulty": 3,
+  "xp_base": 200,
+  "tools_type": "event_log_analyzer",
+  "scenario": "During the ransomware investigation, your team needs to understand exactly how the attacker moved from the initially compromised workstation (WKSTN-047) to the domain controller (DC-01). Establishing this lateral movement path is essential for both remediation and for preventing re-compromise. Analyze the Windows event logs and network evidence from DC-01 to identify the tool used for lateral movement.",
+  "challenge": "What tool did the attacker use for lateral movement to the domain controller?",
+  "challenge_data": "LATERAL MOVEMENT EVIDENCE REPORT\n==================================\nCase     : CF-2026-0401-RANSOMWARE\nSource   : DC-01 Security Event Log + Network Capture\nTime     : 2026-04-01 01:10:00 to 2026-04-01 01:20:00 UTC\nAnalyst  : D. Kim\n\n[DC-01 Security Event Log]\n==========================\n01:13:21 UTC  EventID 5140 — Network Share Accessed\n  Account : MERIDIAN\\Administrator\n  Share   : \\\\DC-01\\ADMIN$\n  Access  : WriteData\n  Source  : 10.0.0.47 (WKSTN-047)\n\n01:13:22 UTC  EventID 7045 — A New Service Was Installed\n  Service Name      : PSEXESVC\n  Service File Path : %SystemRoot%\\PSEXESVC.exe\n  Service Type      : User Mode Service (Win32OwnProcess)\n  Start Type        : Demand Start\n  Account           : LocalSystem\n  Source            : WKSTN-047\n\n01:13:23 UTC  EventID 4624 — An Account Was Successfully Logged On\n  Account Name      : MERIDIAN\\Administrator\n  Logon Type        : 3 (Network)\n  Authentication    : NTLM\n  Source IP         : 10.0.0.47 (WKSTN-047)\n  Source Port       : 49821\n  Logon ID          : 0xA3F7C2\n\n01:13:24 UTC  EventID 4672 — Special Privileges Assigned to New Logon\n  Account Name      : MERIDIAN\\Administrator\n  Logon ID          : 0xA3F7C2\n  Privileges        : SeSecurityPrivilege, SeTakeOwnershipPrivilege,\n                      SeLoadDriverPrivilege, SeDebugPrivilege,\n                      SeSystemtimePrivilege, SeBackupPrivilege\n\n01:14:02 UTC  EventID 4688 — A New Process Has Been Created\n  Creator Process   : PSEXESVC.exe\n  New Process       : ADSyncTask.exe\n  Command Line      : ADSyncTask.exe -dump lsass\n  Account           : MERIDIAN\\Administrator\n\n[WKSTN-047 Network Capture (TAP-LAN)]\n======================================\n01:13:19 UTC  WKSTN-047 (10.0.0.47) → DC-01 (10.0.0.10):445  [SMB Session Setup]\n01:13:20 UTC  SMB TREE_CONNECT: \\\\DC-01\\ADMIN$  [admin$ share mounted]\n01:13:22 UTC  SMB WRITE: \\\\DC-01\\ADMIN$\\PSEXESVC.exe  [Service binary copied]\n01:13:22 UTC  SMB ServiceControl: Start PSEXESVC  [Service started]\n01:14:01 UTC  SMB IPC$: Pipe \\PSEXESVC  [Command issued via named pipe]\n\n[ANALYST NOTE]\n==============\nPSEXESVC.exe was deleted from DC-01 after execution (evidence of cleanup attempt).\nService was removed from the registry after the session ended.\nThe binary was recovered from the Volume Shadow Copy on DC-01.",
+  "valid_answers": ["psexec", "psexesvc", "sysinternals psexec", "psexec.exe", "ps exec", "psexec tool", "sysinternals psexec tool"],
+  "steps": [
+    {
+      "question": "What Windows Admin Share did the attacker mount on DC-01 from WKSTN-047?",
+      "valid_answers": ["admin$", "\\\\dc-01\\admin$", "the admin$ share", "admin dollar share"],
+      "hints": [
+        "Event ID 5140 records network share access. Look at the 'Share' field in the 01:13:21 event from DC-01.",
+        "The 5140 event shows the attacker mounted a default administrative share. These shares use a $ suffix to indicate hidden admin shares.",
+        "The 5140 event reads: 'Share: \\\\DC-01\\ADMIN$'. The ADMIN$ share maps directly to C:\\Windows\\ on the target system — which is why it can be used to write files like PSEXESVC.exe.",
+        "The share is ADMIN$ (\\\\DC-01\\ADMIN$). This is a default Windows hidden administrative share that maps to C:\\Windows\\. The attacker needed WriteData access to copy the PSEXESVC service binary to the domain controller."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "c$", "response": "C$ is another admin share (maps to C:\\), but it is not what appears in the 5140 event. Look at the Share field value specifically."},
+        {"pattern": "ipc$", "response": "IPC$ is used for inter-process communication via named pipes — it appears in the network capture after the service starts. The initial file copy used a different share."}
+      ]
+    },
+    {
+      "question": "What Windows Event ID recorded the installation of the lateral movement tool's service on DC-01?",
+      "valid_answers": ["7045", "event 7045", "event id 7045", "id 7045"],
+      "hints": [
+        "Scroll through the DC-01 Security Event Log entries. One event specifically records a new service being installed on the system.",
+        "The service installed is named PSEXESVC. Windows logs service installations with a specific Event ID — find it in the 01:13:22 entry.",
+        "Event ID 7045 reads 'A New Service Was Installed' and records the service name, file path, start type, and account. This event fires when any service is registered on a Windows system.",
+        "Event ID 7045 at 01:13:22 records 'PSEXESVC' being installed as a service. This is the most reliable detection indicator for PsExec lateral movement — hunting for Event 7045 with service name PSEXESVC is a standard SIEM rule."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "4624", "response": "4624 records the logon that authenticated the attacker to DC-01, but not the service installation itself. Look for the event that explicitly says 'A New Service Was Installed'."},
+        {"pattern": "4688", "response": "4688 records process creation (ADSyncTask.exe running) — that comes after the service was installed. Look for the event that records the service installation at 01:13:22."}
+      ]
+    },
+    {
+      "question": "What tool did the attacker use for lateral movement to the domain controller?",
+      "valid_answers": ["psexec", "psexesvc", "sysinternals psexec", "psexec.exe", "ps exec", "psexec tool", "sysinternals psexec tool"],
+      "hints": [
+        "Windows Event ID 7045 records when a new service is installed on a system. This is a classic indicator of PsExec lateral movement. Look at the service name that was installed.",
+        "A service named 'PSEXESVC' was installed. This is the service binary that PsExec copies to the target system before executing commands. What tool installs PSEXESVC?",
+        "PSEXESVC.exe is the server-side component of PsExec from Sysinternals (now Microsoft). When you run PsExec on a source machine targeting another host, it copies PSEXESVC.exe to the admin$ share and creates this service. The tool is PsExec.",
+        "The lateral movement tool is PsExec (Sysinternals). The signature is clear: SMB access to admin$ share → PSEXESVC.exe file write → Event 7045 (service installed: PSEXESVC) → Event 4624 (network logon). This is the textbook PsExec lateral movement pattern."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "mimikatz", "response": "Mimikatz (disguised as ADSyncTask.exe) was used for credential dumping after lateral movement succeeded — not for the lateral movement itself. What tool created the PSEXESVC service?"},
+        {"pattern": "wmi", "response": "WMI is another lateral movement technique, but the event logs here show a specific service being installed via SMB. The service name PSEXESVC points to a specific Sysinternals tool."},
+        {"pattern": "rdp", "response": "RDP was used for initial access to WKSTN-047, but the lateral movement from WKSTN-047 to DC-01 used a different tool — identified by the service name in Event 7045."}
+      ]
+    }
+  ],
+  "hints": [
+    "Windows Event ID 7045 records when a new service is installed on a system. This is a classic indicator of PsExec lateral movement. Look at the service name that was installed.",
+    "A service named 'PSEXESVC' was installed. This is the service binary that PsExec copies to the target system before executing commands. What tool installs PSEXESVC?",
+    "PSEXESVC.exe is the server-side component of PsExec from Sysinternals (now Microsoft). When you run PsExec on a source machine targeting another host, it copies PSEXESVC.exe to the admin$ share and creates this service. The tool is PsExec.",
+    "The lateral movement tool is PsExec (Sysinternals). The signature is clear: SMB access to admin$ share → PSEXESVC.exe file write → Event 7045 (service installed: PSEXESVC) → Event 4624 (network logon). This is the textbook PsExec lateral movement pattern."
+  ],
+  "learn": "PsExec is a Sysinternals (now Microsoft) utility originally designed for legitimate remote administration. It is now one of the most commonly abused tools for lateral movement in enterprise environments because it requires no additional installation, uses built-in Windows protocols (SMB), and is signed by Microsoft — making it difficult to block without breaking legitimate administration workflows.\n\nHow PsExec works (step by step):\n1. Source system opens an SMB connection to the target (port 445)\n2. Authenticates and mounts the ADMIN$ share (\\\\target\\ADMIN$ maps to C:\\Windows\\)\n3. Copies PSEXESVC.exe to \\\\target\\ADMIN$ (appears at C:\\Windows\\PSEXESVC.exe on target)\n4. Creates and starts a service named PSEXESVC using the Service Control Manager\n5. Establishes a named pipe (\\\\target\\pipe\\PSEXESVC) for command I/O\n6. The attacker's commands execute on the target under the context of the PSEXESVC service (typically SYSTEM or the authenticated user)\n7. When the session ends, PSEXESVC attempts to delete itself and remove the service\n\nDetection signature (Event IDs to know):\n- Event 7045 (DC-01): New service installed named PSEXESVC — the most reliable indicator\n- Event 5140: admin$ share accessed — shows the SMB mount used to copy the binary\n- Event 4624 Type 3 from a workstation source — network logon to DC from a user workstation is suspicious\n- Network: SMB port 445 from workstation → server + file write to admin$ share\n\nLateral movement technique alternatives:\nMITRE ATT&CK T1021 (Remote Services) includes:\n- T1021.001: RDP — requires interactive access, more visible\n- T1021.002: SMB/Windows Admin Shares (PsExec, smbexec) — most common\n- T1021.003: DCOM — less common, harder to detect\n- T1021.004: SSH — Linux/Mac environments\n- T1021.006: WinRM / PowerShell Remoting — uses WS-Management protocol, port 5985/5986\n- WMI (Windows Management Instrumentation): wmic.exe or Invoke-WMICommand — no file on disk, stealthier than PsExec\n\nMitigation:\n- Disable admin$ share where not needed (net share ADMIN$ /delete)\n- Implement network segmentation — workstations should not reach domain controllers via SMB\n- Use Privileged Access Workstations (PAWs) for admin tasks\n- Implement Microsoft LAPS (Local Administrator Password Solution) so each machine has a unique local admin password\n- Monitor for Event 7045 with PSEXESVC as service name in your SIEM",
+  "debrief": {
+    "summary": "The attacker used PsExec to move laterally from WKSTN-047 to DC-01. The evidence chain is clear: admin$ share access via SMB, PSEXESVC.exe copied to the DC, Event 7045 confirming service installation, followed immediately by Event 4624 (network logon) and process creation of a credential dumping tool (ADSyncTask.exe targeting lsass).",
+    "real_world": "PsExec lateral movement is observed in the majority of enterprise ransomware incidents. Modern EDR solutions detect it through behavioral analysis of SMB file writes to admin$, service creation patterns, and named pipe activity. Threat hunters specifically query SIEMs for Event 7045 with PSEXESVC as a detection rule.",
+    "next_step": "Implement network segmentation blocking workstation-to-DC SMB traffic, deploy LAPS to eliminate reusable local admin credentials, and search all DC and server event logs for Event 7045 to identify every host that received a PsExec service installation.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCIR",
+    "exam_tip": "PsExec lateral movement signature: Event 7045 (PSEXESVC service installed) + Event 5140 (admin$ share accessed) + Event 4624 Logon Type 3 from a workstation. MITRE T1021.002 (SMB/Windows Admin Shares). Disable admin$ and restrict workstation-to-server SMB to mitigate."
+  }
+}

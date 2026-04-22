@@ -17,6 +17,44 @@
     "SPOILER -- When a patch cannot be applied, the standard response is to\n        implement a COMPENSATING CONTROL -- a security measure that reduces\n        the risk of exploitation without fixing the underlying vulnerability.\n        Examples for PrintNightmare: disable Print Spooler on non-print servers,\n        restrict printer operator access, network segment the print server.\n        Type: compensating control"
   ],
   "tools": "Reference guide for patch management: inhibitor categories, compensating control options, virtual patching, the patch exception process, and documentation requirements.",
+  "steps": [
+    {
+      "question": "The operations team says applying the PrintNightmare patch breaks legacy label printers critical for 2,000 daily shipments. What is this type of obstacle called in vulnerability management?",
+      "valid_answers": ["patch inhibitor", "inhibitor", "exception"],
+      "hints": [
+        "In vulnerability management, there is a specific term for legitimate business constraints that prevent patching",
+        "It is not called a 'blocker' or 'conflict' — there is a precise term used in frameworks like NIST and PCI-DSS",
+        "The term starts with 'patch' and describes something that inhibits (prevents) patching",
+        "A 'patch inhibitor' is the correct term for a legitimate business constraint preventing immediate patch application."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Since patching is not currently an option, the security risk must still be managed. What is the appropriate type of security measure to implement when a patch cannot be applied?",
+      "valid_answers": ["compensating control", "compensating controls", "virtual patching", "network segmentation"],
+      "hints": [
+        "When the primary control (patching) cannot be applied, a secondary control must reduce the risk instead",
+        "This type of control compensates for the missing patch — it doesn't fix the vulnerability but reduces exploit risk",
+        "Frameworks like PCI-DSS and NIST explicitly require this type of control when standard controls cannot be met",
+        "The answer is a 'compensating control' — a security measure that reduces risk without fixing the underlying vulnerability."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "accept", "response": "Risk acceptance means acknowledging the risk with no additional action. A compensating control is the better answer here — it actively reduces risk while the patch exception is pending."},
+        {"pattern": "ignore", "response": "Ignoring a known vulnerability is not acceptable. When a patch inhibitor exists, compensating controls must be implemented."}
+      ]
+    },
+    {
+      "question": "Name one specific compensating control that could reduce exploitation risk for PrintNightmare (Windows Print Spooler RCE) while the patch cannot be applied.",
+      "valid_answers": ["disable print spooler", "network segmentation", "restrict access", "enhanced monitoring", "virtual patching", "disable spooler on non-print servers"],
+      "hints": [
+        "Think about what an attacker needs to exploit PrintNightmare: network access to the Print Spooler service",
+        "If you cannot patch the vulnerability itself, what else can you do to limit exposure? Think about network access or service configuration.",
+        "Options include: disable Print Spooler on servers that don't need it, network-segment the print server, or use a WAF/IPS rule to block exploitation",
+        "Valid compensating controls include: disable Print Spooler on non-print servers, network segmentation of the print server, enhanced monitoring for exploitation indicators."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Not every vulnerability can be patched immediately. Patch inhibitors are\nlegitimate obstacles that security teams must navigate daily.\n\nCommon patch inhibitors:\n\nBusiness continuity:\n  Patching requires downtime the business cannot afford.\n  Response: schedule during next maintenance window; add monitoring now.\n\nOperational constraints:\n  The patch breaks dependent functionality (like PrintNightmare + label printers).\n  Response: compensating controls until compatibility can be resolved.\n\nLegacy dependencies:\n  System runs software incompatible with the patched OS or library version.\n  Response: network segmentation, enhanced monitoring, risk acceptance.\n\nVendor support limitations:\n  Vendor hasn't certified the patch for their product.\n  Response: virtual patching at the network layer (WAF/IPS rule).\n\nCompensating controls (primary alternative to patching):\n  - Virtual patching: WAF or IPS rule blocks exploitation attempts at the network layer\n  - Network segmentation: isolate vulnerable system to reduce attack surface\n  - Enhanced monitoring: alert on exploitation indicators\n  - Disable vulnerable feature: turn off the vulnerable service/component if not needed\n  - Access restriction: limit who can reach the vulnerable system\n\nPatch exception process:\n  1. Document the inhibitor and justification\n  2. Risk assessment (likelihood x impact with and without compensating controls)\n  3. CISO approval and sign-off\n  4. Implement compensating controls\n  5. Set a review date (typically 30/60/90 days)\n  6. Track in vulnerability management platform\n\nKey principle: A vulnerability without a patch is still a vulnerability that must be\nmanaged. The risk must be accepted formally (with compensating controls) or the system\nmust be removed from service.",
   "debrief": {
     "summary": "When a patch cannot be applied (patch inhibitor), the correct response is to implement compensating controls -- security measures that reduce the exploitation risk without fixing the underlying vulnerability. For PrintNightmare, this means disabling Print Spooler on non-print servers, restricting access to the print server, and monitoring for exploitation indicators while the operations team prepares a test environment.",

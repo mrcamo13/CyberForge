@@ -1,0 +1,70 @@
+{
+  "id": "case14",
+  "title": "Phishing Origins",
+  "stage": "stage3",
+  "difficulty": 3,
+  "xp_base": 175,
+  "tools_type": "email_analyzer",
+  "scenario": "Fifteen employees reported clicking a suspicious email that appeared to come from the company CEO. The email directed recipients to a fake credential harvesting portal. Your task is to trace the phishing email back to its true origin by analyzing the full email headers. This will allow the security team to block the source and notify law enforcement. Determine the true originating IP address of the phishing email.",
+  "challenge": "What is the true originating IP address of the phishing email?",
+  "challenge_data": "FROM: Full Email Headers — Suspicious CEO Email\n================================================\nReturn-Path: <ceo@meridian-financial.com>\nDelivered-To: all-staff@meridian-financial.com\nReceived: from mail.meridian-financial.com (10.0.0.25) by mx.meridian-financial.com\n  with ESMTPS id a3sm4201234qkb.47.2026.04.01.08.44.14\n  for <all-staff@meridian-financial.com>;\n  Wed, 1 Apr 2026 08:44:14 -0500 (CDT)\nReceived: from smtp.external-relay.net (smtp.external-relay.net [203.0.113.88])\n  by mail.meridian-financial.com with ESMTP id b7lm3912543.22.2026.04.01.08.44.11\n  for <all-staff@meridian-financial.com>;\n  Wed, 1 Apr 2026 08:44:11 -0500 (CDT)\nReceived: from localhost (unknown [45.33.32.156])\n  by smtp.external-relay.net with ESMTP id c9xn8821765.13.2026.04.01.13.44.08\n  for <all-staff@meridian-financial.com>;\n  Wed, 1 Apr 2026 13:44:08 +0000 (UTC)\nMessage-ID: <20260401134408.GA3271@localhost>\nDate: Wed, 1 Apr 2026 08:44:15 -0500\nFrom: \"David Chen - CEO\" <ceo@meridian-financial.com>\nReply-To: <reply-ceo@secure-mailbox.com>\nTo: All Staff <all-staff@meridian-financial.com>\nSubject: Urgent: Verify Your Account Access — Required by EOD Today\nMIME-Version: 1.0\nContent-Type: text/html; charset=UTF-8\nX-Mailer: PHPMailer 6.8.0\nX-Originating-IP: 45.33.32.156\n\nAuthentication-Results: mx.meridian-financial.com;\n  spf=fail (sender IP 45.33.32.156 is not authorized to send for domain meridian-financial.com)\n      smtp.mailfrom=ceo@meridian-financial.com;\n  dkim=fail (signature verification failed)\n      header.d=meridian-financial.com;\n  dmarc=fail (p=none; aspf=r; adkim=r)\n      header.from=meridian-financial.com;\n\nX-Spam-Status: SPAM (score: 8.4)\nX-Spam-Indicators: SPF_FAIL, DKIM_FAIL, REPLY_TO_MISMATCH, URGENT_SUBJECT",
+  "valid_answers": ["45.33.32.156", "45.33.32.156 is the originating ip", "the ip is 45.33.32.156", "originating ip 45.33.32.156"],
+  "steps": [
+    {
+      "question": "Did the email pass SPF, DKIM, and DMARC authentication checks?",
+      "valid_answers": ["no", "all failed", "all three failed", "spf fail dkim fail dmarc fail", "no it failed all", "failed", "none passed"],
+      "hints": [
+        "The Authentication-Results section at the bottom of the headers lists the outcome of each email authentication check. Look for the pass/fail result for SPF, DKIM, and DMARC.",
+        "Each check (spf=, dkim=, dmarc=) is followed by either 'pass' or 'fail'. What are the three results?",
+        "The Authentication-Results reads: 'spf=fail ... dkim=fail ... dmarc=fail'. All three authentication mechanisms failed for this email.",
+        "All three checks failed: SPF fail (sending IP not authorized), DKIM fail (no valid cryptographic signature from the real domain), and DMARC fail (both underlying checks failed). This is a strong phishing indicator."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "yes", "response": "Look at the Authentication-Results section more carefully — each check is listed with its result. They do not show 'pass'."},
+        {"pattern": "pass", "response": "Check the Authentication-Results section again — each of the three authentication methods shows a specific result keyword."}
+      ]
+    },
+    {
+      "question": "In which direction should you read Received: headers to find the true origin of an email?",
+      "valid_answers": ["bottom to top", "from bottom to top", "bottom up", "last to first", "reverse order", "upward"],
+      "hints": [
+        "Email headers are added by each mail server as the email passes through. Think about the order they are added: the first server to touch the email adds its header, then the next server adds above it, and so on.",
+        "The newest Received: header is at the top (the final delivery server). The oldest is at the bottom (the first server that touched the message). Which direction do you read to find the first server?",
+        "To trace an email to its origin, read Received: headers from BOTTOM to TOP. The bottom-most header is from the first hop — the server closest to the original sender.",
+        "You read Received: headers from BOTTOM to TOP. The bottom entry shows 'from localhost (unknown [45.33.32.156]) by smtp.external-relay.net' — this is the first hop, closest to the attacker."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "top to bottom", "response": "Reading top to bottom gives you the most recent hop first, ending at the sender — which is backwards for tracing origin. Flip the direction."},
+        {"pattern": "top", "response": "The top-most Received header is the most recent (final delivery). To find where the email came from originally, read from the opposite direction."}
+      ]
+    },
+    {
+      "question": "What is the true originating IP address of the phishing email?",
+      "valid_answers": ["45.33.32.156", "45.33.32.156 is the originating ip", "the ip is 45.33.32.156", "originating ip 45.33.32.156"],
+      "hints": [
+        "Email headers contain a series of 'Received:' lines. Each server that handles the email adds one. The key is knowing which direction to read them — from the top or from the bottom.",
+        "Read Received: headers from BOTTOM to TOP to trace the email's path from sender to recipient. The bottom-most Received: header is the first hop — the true originating server.",
+        "The bottom-most Received: header shows: 'from localhost (unknown [45.33.32.156]) by smtp.external-relay.net'. The IP address in brackets here is the first server that injected this email into the mail system.",
+        "The true originating IP is 45.33.32.156. This appears in the bottom-most Received header, in the X-Originating-IP field, and is confirmed by the SPF fail notice which explicitly states this IP is not authorized to send for meridian-financial.com."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "203.0.113.88", "response": "203.0.113.88 is the IP of smtp.external-relay.net — the second hop the email passed through, not the original source. Keep reading toward the bottom of the headers."},
+        {"pattern": "10.0.0.25", "response": "10.0.0.25 is the company's own internal mail server (mail.meridian-financial.com) — the final delivery hop, not the origin. The origin is at the other end of the chain."}
+      ]
+    }
+  ],
+  "hints": [
+    "Email headers contain a series of 'Received:' lines. Each server that handles the email adds one. The key is knowing which direction to read them — from the top or from the bottom.",
+    "Read Received: headers from BOTTOM to TOP to trace the email's path from sender to recipient. The bottom-most Received: header is the first hop — the true originating server.",
+    "The bottom-most Received: header shows: 'from localhost (unknown [45.33.32.156]) by smtp.external-relay.net'. The IP address in brackets here is the first server that injected this email into the mail system.",
+    "The true originating IP is 45.33.32.156. This appears in the bottom-most Received header, in the X-Originating-IP field, and is confirmed by the SPF fail notice which explicitly states this IP is not authorized to send for meridian-financial.com."
+  ],
+  "learn": "Email header analysis is a fundamental DFIR skill for phishing investigations. Every email carries a chain of 'Received:' headers added by each mail server along the delivery path. Reading these correctly reveals the true origin of an email, even when the visible 'From' address is spoofed.\n\nHow to read Received headers:\n- Headers are added in reverse chronological order — newest at the top, oldest at the bottom\n- To trace the origin, read Received: headers from BOTTOM to TOP\n- The bottom-most Received header shows the first server that received the email (the sender's server)\n- The top-most Received header shows the final delivery server\n\nIn this case, reading bottom to top:\n1. 45.33.32.156 → smtp.external-relay.net (first hop — attacker's machine)\n2. smtp.external-relay.net (203.0.113.88) → mail.meridian-financial.com (second hop)\n3. mail.meridian-financial.com (10.0.0.25) → mx.meridian-financial.com (final delivery)\n\nEmail authentication protocols:\n- SPF (Sender Policy Framework): A DNS TXT record listing all IP addresses authorized to send email for a domain. If the sending IP (45.33.32.156) is not in meridian-financial.com's SPF record, SPF fails. This is the first line of defense against spoofing.\n- DKIM (DomainKeys Identified Mail): Cryptographic signature added by the legitimate mail server using a private key. Recipients verify with the public key in DNS. A forged email won't have a valid DKIM signature.\n- DMARC (Domain-based Message Authentication, Reporting and Conformance): Policy that ties SPF and DKIM together. p=none means the domain owner wants to receive reports but hasn't enforced rejection. p=quarantine sends failures to spam. p=reject blocks the email outright.\n\nPhishing indicators in this email:\n1. SPF fail — sending IP not authorized\n2. DKIM fail — no valid cryptographic signature from the real domain\n3. DMARC fail — fails both underlying checks\n4. Reply-To mismatch — replies go to reply-ceo@secure-mailbox.com, not the CEO's real address\n5. X-Mailer: PHPMailer — mass phishing kit indicator\n6. 'Urgent' subject line — social engineering pressure tactic\n7. X-Originating-IP included by the relay server reveals the true source\n\nTools for email header analysis: MXToolbox Header Analyzer, Google Admin Toolbox, EmailHeaders.net.",
+  "debrief": {
+    "summary": "The phishing email originated from IP address 45.33.32.156, which is not authorized to send email for the meridian-financial.com domain per SPF records. The email was routed through smtp.external-relay.net (203.0.113.88) to disguise its origin, but the bottom-most Received header and X-Originating-IP field both confirm 45.33.32.156 as the true source.",
+    "real_world": "Email header analysis is performed on every reported phishing email. The originating IP is used to identify the hosting provider for takedown requests, correlated with threat intel databases to identify the threat actor or phishing kit, and provided to law enforcement for criminal investigations.",
+    "next_step": "Block 45.33.32.156 and the domain secure-mailbox.com at the email gateway, submit the originating IP to abuse reporting services (abuse.ch, Spamhaus), and identify which of the 15 employees who clicked also entered their credentials.",
+    "cert_link": "CySA+ CS0-003 Domain 1 (Security Operations) and Domain 4, CHFI v10 Module 11 (Email Investigation)",
+    "exam_tip": "Read Received: headers BOTTOM to TOP to find the true origin — the bottom-most header is the first hop. SPF fail + DKIM fail + Reply-To mismatch = strong phishing indicators. DMARC p=none collects reports only; p=quarantine sends to spam; p=reject blocks the email."
+  }
+}

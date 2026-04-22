@@ -18,6 +18,47 @@
   ],
   "tools": "Computes per-incident MTTD (compromise to detection) and MTTR (detection to resolution) from timestamp data, then calculates aggregate averages for the metric report.",
   "learn": "Security metrics translate technical security activities into business language.\nMTTD and MTTR are the two most commonly reported security KPIs.\n\nMean Time to Detect (MTTD):\n  Definition: average time from initial compromise to security team detection.\n  Formula: sum of (detected_at - compromised_at) for all incidents / incident count\n  Units: hours\n  Better = lower. Target: industry leaders achieve < 24h MTTD.\n\nMean Time to Respond (MTTR):\n  Definition: average time from detection to containment/resolution.\n  Formula: sum of (resolved_at - detected_at) for all incidents / incident count\n  Units: hours\n  Better = lower.\n\nIndustry benchmarks (CrowdStrike 2023 Global Threat Report):\n  Average MTTD for all incidents: ~21 days\n  Top quartile MTTD: < 24 hours\n  Average MTTR: ~5 days\n  Best-in-class MTTR: < 1 hour\n\nOther security metrics:\n  Patch compliance rate:    % of systems patched within SLA window\n  SLA adherence rate:       % of incidents resolved within SLA\n  Vulnerability closure rate: % of critical vulns remediated within 30 days\n\nMetric improvement strategies:\n  Lower MTTD: better threat detection rules, EDR coverage, UEBA\n  Lower MTTR: playbook automation, SOAR platform, pre-approved response actions",
+  "steps": [
+    {
+      "question": "Calculate the time from compromise to detection for INC-001. How many hours elapsed?",
+      "valid_answers": ["516", "516 hours"],
+      "hints": [
+        "INC-001 was compromised on 2026-03-01 00:00 and detected on 2026-03-22 12:00.",
+        "Count the days first: March 1 to March 22 is 21 full days = 504 hours, plus 12 additional hours.",
+        "504 + 12 = 516 hours. INC-001 went undetected for over three weeks.",
+        "INC-001's MTTD contribution is 516 hours — the NIGHTWIRE incident was active for 21.5 days before detection."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "21", "response": "21 days is correct but the answer needs to be in hours: 21 days × 24h + 12h = 516 hours."},
+        {"pattern": "504", "response": "Close — 21 full days = 504 hours, but add the 12 extra hours from 00:00 to 12:00 on detection day. Total: 516h."}
+      ]
+    },
+    {
+      "question": "The three individual MTTD values are 516h, 2h, and 48h. What is their sum?",
+      "valid_answers": ["566", "566 hours"],
+      "hints": [
+        "INC-001: March 1 00:00 to March 22 12:00 = 516 hours. INC-002: 2 hours. INC-003: 48 hours.",
+        "Add the three values: 516 + 2 + 48.",
+        "516 + 2 = 518. Then 518 + 48 = 566.",
+        "The sum of all three MTTD values is 566 hours. Divide by 3 to get the mean."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "What is the Mean Time to Detect (MTTD) across all three incidents, rounded to the nearest hour?",
+      "valid_answers": ["189", "189 hours"],
+      "hints": [
+        "MTTD = sum of individual detection times / number of incidents. You have 3 incidents.",
+        "The sum of all three individual MTTDs is 566 hours. Divide by 3.",
+        "566 / 3 = 188.67 hours. Rounding to the nearest hour gives 189.",
+        "MTTD = 189 hours. INC-001 (516h) heavily skews the average — without it, MTTD would be only 25 hours."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "188", "response": "188.67 rounds UP to 189 — round to the nearest whole hour."},
+        {"pattern": "566", "response": "566 is the sum of all MTTDs, not the mean. Divide by 3 (the number of incidents) to get the average."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "MTTD = 189 hours (~7.9 days). The average is heavily skewed by INC-001 (NIGHTWIRE), which went undetected for 516 hours (21.5 days). INC-002 was detected in just 2 hours -- excellent detection. MTTR = 44 hours -- faster than the industry average of ~5 days, indicating the response team is effective once detection occurs.",
     "real_world": "MTTD and MTTR are reported quarterly to CISOs and annually to boards in most enterprise security programs. IBM Cost of a Data Breach Report 2023: identifying a breach in < 200 days saves an average of $1.02M compared to > 200 days.",

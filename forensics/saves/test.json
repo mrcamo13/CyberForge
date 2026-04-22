@@ -1,0 +1,30 @@
+{
+  "player_name": "test",
+  "created_at": "2026-04-17T11:33:03.217705+00:00",
+  "last_played": "2026-04-17T11:33:50.480395+00:00",
+  "total_time_played_seconds": 41,
+  "streak": {
+    "current": 0,
+    "longest": 0,
+    "last_played_date": "2026-04-17"
+  },
+  "xp": 100,
+  "badges": [
+    "first_find",
+    "no_hints"
+  ],
+  "completed": [
+    "case01"
+  ],
+  "skipped": [],
+  "hints_used": {},
+  "notes": {},
+  "metrics": {
+    "case01": {
+      "completed": true,
+      "hints_maxed": false,
+      "time_spent_seconds": 41,
+      "started_at": "2026-04-17T11:33:08.590191+00:00"
+    }
+  }
+}

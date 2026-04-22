@@ -18,6 +18,52 @@
   ],
   "learn": "MD5 is a hashing algorithm — it produces a 128-bit (32 hex character)\nfixed-length digest from any input. Hashes are one-way: you cannot\nmathematically reverse them. But you can crack them.\n\nDictionary attack: hash every word in a wordlist and compare to the\ntarget hash. If the password is in the list, you find it instantly.\n\nWhy MD5 is broken for passwords:\n1. No salt — identical passwords produce identical hashes\n2. Fast — a GPU can compute billions of MD5 hashes per second\n3. Pre-computed rainbow tables exist for common passwords\n\nThe hash 5f4dcc3b5aa765d61d8327deb882cf99 has been in public hash\ndatabases for over a decade. Any cracking tool finds it in milliseconds.\n\nSecure alternatives: bcrypt, scrypt, Argon2 — slow by design,\nsalted by default. Finding MD5 in a password store is a critical\nvulnerability finding in any real engagement.",
   "tools": "Runs a simulated MD5 dictionary attack against the hash and displays each attempt with the final match.",
+  "steps": [
+    {
+      "question": "Identify the hash algorithm used to store the admin password: 5f4dcc3b5aa765d61d8327deb882cf99. What hashing algorithm produced this hash?",
+      "valid_answers": ["md5", "md5sum", "message digest 5", "message-digest algorithm 5"],
+      "hints": [
+        "Count the hexadecimal characters in the hash: 5f4dcc3b5aa765d61d8327deb882cf99. The length is a key identifier.",
+        "A 32-character hexadecimal string (128 bits) is the standard output length for one specific legacy hashing algorithm.",
+        "This algorithm was designed by Ron Rivest in 1991. Its name is an acronym for its output size and function type.",
+        "SPOILER — The 32-character hex digest indicates MD5 (Message Digest 5). Type: md5"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "sha", "response": "SHA-256 produces 64 hex characters, SHA-1 produces 40. This 32-character hash is a different algorithm."},
+        {"pattern": "sha256", "response": "SHA-256 produces 64 hex characters. This hash is only 32 characters long — a different algorithm."},
+        {"pattern": "bcrypt", "response": "bcrypt hashes start with $2b$ or $2a$ and contain a salt. This is a plain 32-character hex string — a different algorithm."}
+      ]
+    },
+    {
+      "question": "Determine whether the hash is salted. What does the absence of a salt mean for the security of this hash?",
+      "valid_answers": ["unsalted", "no salt", "not salted", "crackable", "rainbow table", "precomputed", "vulnerable"],
+      "hints": [
+        "A salt is a random value prepended to a password before hashing, making identical passwords produce different hashes. Look at the stored data — is there anything besides the hash itself?",
+        "The config file stores only the raw 32-character hash: 5f4dcc3b5aa765d61d8327deb882cf99. No prefix, no extra field, no salt string.",
+        "Without a salt, the same password always produces the same hash. This means pre-computed rainbow tables and online lookups work instantly.",
+        "SPOILER — The hash has no salt. Type: unsalted"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "salted", "response": "A salted hash would have an additional random value stored alongside it. This is a bare 32-character hex string — no salt present."},
+        {"pattern": "secure", "response": "Unsalted MD5 is not secure for passwords. It can be reversed by dictionary attack or rainbow tables in milliseconds."}
+      ]
+    },
+    {
+      "question": "Crack the hash 5f4dcc3b5aa765d61d8327deb882cf99 using a dictionary attack. What is the plaintext password?",
+      "valid_answers": ["password"],
+      "hints": [
+        "Go to crackstation.net — paste the hash and click Crack Hashes. CrackStation checks billions of known password hashes instantly.",
+        "Run a Python dictionary attack: python3 -c \"import hashlib; words=['password','admin','nexuscorp','letmein']; h='5f4dcc3b5aa765d61d8327deb882cf99'; [print(w) for w in words if hashlib.md5(w.encode()).hexdigest()==h]\"",
+        "Type 'tools' in the game. The hash cracker runs a simulated dictionary attack and shows each attempt. Look for the MATCH FOUND line.",
+        "SPOILER — MD5(\"password\") = 5f4dcc3b5aa765d61d8327deb882cf99. This is one of the most commonly cracked hashes in existence. Type: password"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "admin", "response": "MD5(\"admin\") = 21232f297a57a5a743894a0e4a801fc3 — that does not match. Run the cracker against the actual hash."},
+        {"pattern": "nexuscorp", "response": "Good guess given the context, but that is not the hash match. Run the dictionary attack to find the actual plaintext."},
+        {"pattern": "5f4dcc", "response": "That is part of the hash itself, not the plaintext. A dictionary attack reverses the hash to find the original word."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You cracked NexusCorp's admin password hash using a dictionary attack.\nThe password \"password\" was stored as an unsalted MD5 hash — one of the\nmost commonly seen credentials in real breach databases. This gives full\naccess to the admin panel at /admin/dashboard.",
     "real_world": "Cracking password hashes is a core post-exploitation skill. When\npentesters dump a database or config file containing hashes, they run them\nthrough tools like Hashcat or John the Ripper with wordlists like rockyou.txt.\nMD5 without salting is a critical finding — any common password is crackable\nin seconds.",

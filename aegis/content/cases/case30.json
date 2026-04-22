@@ -18,6 +18,47 @@
   ],
   "tools": "Reference guide for post-incident lessons learned: primary goal, root cause categories, document structure, key metrics reviewed, corrective action tracking, and distribution requirements.",
   "learn": "Post-incident lessons learned (also called After-Action Review, AAR, or Post-Incident\nReview) is the final phase of NIST SP 800-61 incident response. It transforms\nincident experience into organizational improvement.\n\nPrimary goal: PREVENT RECURRENCE\n\nEvery element of the lessons learned process serves this goal:\n  - Root cause analysis explains WHY the incident happened\n  - Gap identification shows WHAT failed (detection, response, controls)\n  - Corrective actions define WHAT WILL CHANGE to prevent it happening again\n  - Documentation preserves the knowledge for future responders\n\nRoot cause categories:\n\nTechnical failure:\n  Security control failed (misconfigured firewall, patching gap, weak credentials)\n\nProcess gap:\n  Missing procedure (no playbook) or process not followed (steps skipped)\n\nHuman error:\n  Analyst missed indicator (alert fatigue) or configuration mistake\n\nDetection failure:\n  Log source missing (no visibility) or detection rule gap (TTP not covered)\n\nResponse gap:\n  Slow escalation or communication failure\n\nLessons learned document structure:\n  1. Incident summary -- what happened, when, impact\n  2. Timeline -- reconstructed from multi-source evidence\n  3. Root cause -- primary and contributing factors\n  4. What went well -- preserve effective practices\n  5. What failed -- gaps in detection, response, controls\n  6. Corrective actions -- specific action items, owner, target date\n  7. Metrics -- MTTD, MTTR, containment time, total impact\n  8. Approvals -- IR lead, CISO sign-off\n\nKey principle: Blameless post-mortems focus on systems and processes, not individuals.\nBlame inhibits honest reporting. The goal is improvement, not punishment.",
+  "steps": [
+    {
+      "question": "The IR manager says the lessons learned meeting is 'not to assign blame.' What is the name of this blame-free approach to post-incident review?",
+      "valid_answers": ["blameless post-mortem", "blameless postmortem", "blameless", "blameless review", "blameless retrospective"],
+      "hints": [
+        "The IR manager's brief explicitly states the purpose is not punitive — it is to understand what happened and why.",
+        "This philosophy was popularized in the tech industry by Google's Site Reliability Engineering (SRE) book.",
+        "It focuses on systems and processes rather than individual errors. The name starts with 'blameless'.",
+        "A blameless post-mortem is the term for a post-incident review that focuses on process improvement, not personal accountability."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "root cause", "response": "Root cause analysis is a component of the process, but the name for the blame-free approach to post-incident review is a 'blameless post-mortem'."},
+        {"pattern": "after action", "response": "After-Action Review (AAR) is another name for the document, but the specific philosophy described — no blame, process-focused — is called a blameless post-mortem."}
+      ]
+    },
+    {
+      "question": "The lessons learned document has a section for 'corrective actions.' What three pieces of information must each corrective action include?",
+      "valid_answers": ["action owner date", "action item owner target date", "owner date action", "specific action owner target date"],
+      "hints": [
+        "Think about what makes a corrective action trackable and accountable: you need to know what to do, who will do it, and when.",
+        "From the learn section: corrective actions include 'specific action items, owner, target date'.",
+        "Each action needs: (1) a description of the specific action, (2) the person/team responsible (owner), and (3) a deadline (target date).",
+        "Corrective actions require: specific action item + owner + target date. Without all three, the action cannot be tracked or held accountable."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "What is the primary goal of the post-incident lessons learned process?",
+      "valid_answers": ["prevent recurrence", "prevention", "identify root cause", "root cause analysis"],
+      "hints": [
+        "The IR manager's brief says everything feeds into 'one primary objective.' The lessons learned reference states this goal explicitly at the top.",
+        "Think about WHY an organization conducts lessons learned: not to document what happened, not to measure performance — but to ensure what?",
+        "The learn section states: 'Primary goal: PREVENT RECURRENCE'. Every element of the process serves this goal.",
+        "The primary goal is to PREVENT RECURRENCE — understanding root cause so the same attack vector cannot be used again. Type: prevent recurrence"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "blame", "response": "Assigning blame is explicitly NOT the goal. The process is blameless — it focuses on improving systems and processes."},
+        {"pattern": "document", "response": "Documentation is a component of the process, but the primary goal is to prevent recurrence — ensuring the same incident cannot happen again."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "The primary goal of post-incident lessons learned is to prevent recurrence -- to understand what happened and why, so that the same attack cannot succeed again. For NIGHTWIRE, the key corrective actions include: deploying EDR on all servers (detection gap), creating a threat hunting schedule (NIGHTWIRE was active for 21 days before detection), and documenting recovery procedures (the RECOVER gap identified in the compliance assessment).",
     "real_world": "The lessons learned report is the most important deliverable of incident response -- it's how organizations actually improve over time. Without it, the same vulnerabilities, detection gaps, and response failures recur. NIST SP 800-61 Rev 2 dedicates an entire section to Post-Incident Activity. Google's SRE book popularized blameless post-mortems in the tech industry.",

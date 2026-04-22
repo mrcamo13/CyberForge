@@ -1,0 +1,69 @@
+{
+  "id": "case06",
+  "title": "Process Masquerade",
+  "stage": "stage2",
+  "difficulty": 2,
+  "xp_base": 150,
+  "tools_type": "mem_analyzer",
+  "scenario": "A workstation at Meridian Financial Group triggered an EDR alert for unusual outbound network activity. The machine was isolated and a memory dump was acquired for analysis. You are using Volatility3 to examine running processes. One process is pretending to be a legitimate Windows system process — but a careful look at the process name, file path, and parent process reveals the deception. Identify the malicious masquerading process.",
+  "challenge": "What is the exact name of the suspicious process?",
+  "challenge_data": "$ python3 vol.py -f meridian-wkstn047.mem windows.pslist\nVolatility 3 Framework 2.7.0\nProgress:  100.00               PID PPID ImageFileName        Offset(V)  Threads  Handles  SessionId  Wow64  CreateTime                 ExitTime\n\n       4    0 System               0xf8060001e040       138      ---        ---        False  2026-03-28 08:14:02.000000\n     352    4 smss.exe             0xf80600234080         3       53        ---        False  2026-03-28 08:14:02.000000\n     468  360 csrss.exe            0xf80600302140        12      551          0        False  2026-03-28 08:14:04.000000\n     540  532 wininit.exe          0xf806003c8300         3       ---          0        False  2026-03-28 08:14:05.000000\n     548  360 csrss.exe            0xf806003d1080        12      383          1        False  2026-03-28 08:14:05.000000\n     616  540 services.exe         0xf80600419200         9      ---          0        False  2026-03-28 08:14:05.000000\n     624  540 lsass.exe            0xf8060041b080        10      ---          0        False  2026-03-28 08:14:05.000000\n     732  616 svchost.exe          0xf806004e2200        22      ---          0        False  2026-03-28 08:14:06.000000\n     840  616 svchost.exe          0xf80600561300        18      ---          0        False  2026-03-28 08:14:07.000000\n     972  616 svchost.exe          0xf806005e8400        45      ---          0        False  2026-03-28 08:14:08.000000\n    1204  616 svchost.exe          0xf80600688500        12      ---          0        False  2026-03-28 08:14:09.000000\n    1892  732 RuntimeBroker.exe    0xf806009a1600         9      ---          1        False  2026-03-28 08:14:22.000000\n    2344 1104 explorer.exe         0xf80600bc4700        82      ---          1        False  2026-03-28 08:22:11.000000\n    3104 2344 chrome.exe           0xf80600ef1200        48      ---          1        False  2026-03-28 09:01:44.000000\n    5124 3892 svch0st.exe          0xf80601a44800        12      ---          1        False  2026-03-31 21:44:19.000000\n    6011 5124 cmd.exe              0xf80601b21900         4      ---          1        False  2026-03-31 21:45:03.000000\n\n$ python3 vol.py -f meridian-wkstn047.mem windows.dlllist --pid 5124 | head -5\nVolatility 3 Framework 2.7.0\nPID    Process       Base             Size  Name                 Path\n5124   svch0st.exe   0x7ff6a0000000  147456  svch0st.exe          C:\\Users\\Public\\svch0st.exe\n\n[Note: Legitimate svchost.exe runs from C:\\Windows\\System32\\svchost.exe with parent PID = 616 (services.exe)]",
+  "valid_answers": ["svch0st.exe", "svch0st", "svchost masquerade", "fake svchost", "svch0st.exe pid 5124"],
+  "hints": [
+    "Look carefully at every process name in the list. Most are legitimate Windows processes — but one has a subtle difference in its name that makes it stand out.",
+    "Compare the process names carefully character by character. Attackers often substitute look-alike characters — for example, the number zero '0' instead of the letter 'o'.",
+    "There is a process called 'svch0st.exe' (with a zero instead of the letter o). Legitimate Windows processes use 'svchost.exe' (all letters). Also check the Parent PID — legitimate svchost.exe processes have PPID 616 (services.exe).",
+    "svch0st.exe (PID 5124) has three red flags: (1) the name uses a zero instead of 'o', (2) its parent PID is 3892 which does not exist in the process list, and (3) it runs from C:\\Users\\Public\\ instead of C:\\Windows\\System32\\."
+  ],
+  "steps": [
+    {
+      "question": "What is the name of the process in the pslist output that has a suspicious character substitution in its name?",
+      "valid_answers": ["svch0st.exe", "svch0st", "svch0st.exe pid 5124"],
+      "hints": [
+        "Scan the ImageFileName column carefully. Attackers use typosquatting — substituting look-alike characters so the name appears legitimate at a glance.",
+        "Look at all the svchost.exe processes. Now compare them character by character — is there one that is slightly different?",
+        "The number zero '0' and the letter 'o' look very similar. Check whether any process name uses a zero where there should be an 'o'.",
+        "PID 5124 shows 'svch0st.exe' — the fourth character is the number zero (0), not the letter o. This is a typosquatted process name."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "svchost", "response": "There are multiple legitimate svchost.exe processes. Look for the one with a character substitution — a number where a letter should be."},
+        {"pattern": "cmd", "response": "cmd.exe is a standard Windows command shell. Look for a process whose name mimics a system process but uses a subtle character swap."}
+      ]
+    },
+    {
+      "question": "What is the file path from which svch0st.exe is running? (From the dlllist output)",
+      "valid_answers": ["c:\\users\\public\\svch0st.exe", "c:\\users\\public\\", "users\\public\\svch0st.exe", "users\\public"],
+      "hints": [
+        "The second command output shows the file path for the suspicious process. Look at the 'Path' column of the dlllist output.",
+        "Legitimate svchost.exe always runs from C:\\Windows\\System32\\. Any deviation from this path is suspicious.",
+        "The dlllist output for PID 5124 shows the Path column. Where is svch0st.exe located on disk?",
+        "The dlllist output shows svch0st.exe runs from C:\\Users\\Public\\svch0st.exe — a user-writable directory, not a system directory."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "system32", "response": "Legitimate svchost.exe is in System32, but check the dlllist output for where svch0st.exe (with a zero) is actually running from."},
+        {"pattern": "windows", "response": "Look more carefully at the full path in the dlllist output — the directory is not C:\\Windows\\System32\\."}
+      ]
+    },
+    {
+      "question": "What is the exact name of the suspicious process? (The masquerading process you identified)",
+      "valid_answers": ["svch0st.exe", "svch0st", "fake svchost", "svch0st.exe pid 5124"],
+      "hints": [
+        "You have identified the suspicious process by its typosquatted name and wrong file path. What is its exact process name?",
+        "The process name uses a zero (0) instead of the letter o in the middle of what looks like 'svchost'.",
+        "The process is in the ImageFileName column — write out the exact name as it appears, including the zero.",
+        "The exact process name is svch0st.exe — spelled with a zero in place of the 'o', running from C:\\Users\\Public\\ with a non-existent parent process."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "svchost.exe", "response": "Close — but look at the exact spelling again. Is the 'o' in that name actually a letter o, or is it the number zero?"}
+      ]
+    }
+  ],
+  "learn": "Process masquerading (MITRE ATT&CK T1036 — Masquerading) is one of the most common techniques malware uses to hide in plain sight within a running system. Attackers name their malicious processes to closely resemble legitimate Windows system processes, hoping analysts will skim past them during triage.\n\nCommon masquerading techniques:\n1. Typosquatting — substituting similar-looking characters: svch0st (zero), lsass (extra 's'), crss.exe, winlogon (added space)\n2. Extra/missing characters: svchost.exe vs svchosts.exe\n3. Case variation: sVcHoSt.exe\n4. Running from unexpected paths: svchost.exe from C:\\Windows\\Temp\\ instead of C:\\Windows\\System32\\\n5. Mismatched parent process: svchost.exe whose parent is not services.exe\n\nKey Windows process parent relationships to memorize:\n- System (PID 4) → parent: none (PID 0)\n- smss.exe → parent: System (PID 4)\n- csrss.exe → parent: smss.exe\n- wininit.exe → parent: smss.exe\n- services.exe → parent: wininit.exe\n- lsass.exe → parent: wininit.exe\n- svchost.exe → parent: services.exe (ALWAYS)\n- explorer.exe → parent: userinit.exe (or sometimes winlogon.exe)\n\nAny svchost.exe whose parent is NOT services.exe is suspicious.\n\nVolatility3 commands for process analysis:\n- windows.pslist: Lists processes from the EPROCESS linked list (can be hidden by rootkits)\n- windows.psscan: Scans raw memory for EPROCESS structures (finds hidden/unlinked processes)\n- windows.pstree: Shows parent-child relationships visually\n- windows.dlllist: Shows loaded DLLs and the full executable path for a process\n- windows.cmdline: Shows the command line arguments used to launch each process\n\nThe combination of psscan + pslist can reveal rootkit-hidden processes: processes that appear in psscan but not pslist have been unlinked from the active process list by a rootkit.\n\nFor process masquerade detection in a live system, Sysinternals Process Explorer is invaluable — it highlights processes with names similar to system processes and shows their full path and parent.",
+  "debrief": {
+    "summary": "svch0st.exe (PID 5124) is masquerading as the legitimate svchost.exe by substituting the letter 'o' with the number '0'. It runs from C:\\Users\\Public\\ rather than C:\\Windows\\System32\\, and its parent process PID 3892 does not match any known process — both clear indicators of malicious activity.",
+    "real_world": "Process masquerading is consistently among the top MITRE ATT&CK techniques observed in real-world incidents. EDR solutions detect this automatically by comparing process names, paths, and parent-child relationships against known-good baselines. Manual analysis with Volatility or Process Explorer is required when EDR is bypassed.",
+    "next_step": "Dump the process memory for svch0st.exe using 'vol windows.dumpfiles --pid 5124', compute its hash, and submit to VirusTotal. Then analyze its network connections using windows.netstat.",
+    "cert_link": "CySA+ CS0-003 Domain 1 (Security Operations) and Domain 4, GCFE",
+    "exam_tip": "Legitimate svchost.exe always runs from C:\\Windows\\System32\\ and its parent is always services.exe (PID typically around 616). Any deviation — wrong path, wrong parent, typosquatted name — is a strong indicator of masquerading malware (MITRE T1036)."
+  }
+}

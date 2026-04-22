@@ -1,0 +1,56 @@
+{
+  "id": "case02",
+  "title": "The Author's Secret",
+  "stage": "stage1",
+  "difficulty": 1,
+  "xp_base": 100,
+  "tools_type": "metadata_reader",
+  "scenario": "A leaked internal document from Meridian Financial Group has appeared on a dark web forum. The document was supposedly submitted by an anonymous source who claimed to have no connection to the company. However, Office documents embed metadata about their creation that may betray the real author. Extract and analyze the file metadata to identify who actually created this document.",
+  "challenge": "What is the username of the original document author?",
+  "challenge_data": "$ exiftool leaked_report.docx\nExifTool Version Number         : 12.76\nFile Name                       : leaked_report.docx\nDirectory                       : /evidence/case-2026-0312\nFile Size                       : 284 kB\nFile Modification Date/Time     : 2026:04:02 08:14:33+00:00\nFile Access Date/Time           : 2026:04:02 09:01:12+00:00\nFile Inode Change Date/Time     : 2026:04:02 08:14:33+00:00\nFile Permissions                : -rw-r--r--\nFile Type                       : DOCX\nFile Type Extension             : docx\nMIME Type                       : application/vnd.openxmlformats-officedocument.wordprocessingml.document\nZip Type                        : Deflate\nCreator                         : r.vasquez\nLast Modified By                : anonymous\nCreate Date                     : 2026:03:22 23:47:03\nModify Date                     : 2026:04:01 08:30:15\nApplication                     : Microsoft Office Word\nApp Version                     : 16.0000\nDoc Security                    : 0\nScale Crop                      : No\nHeadings Pairs                  : Title, 1\nTitles Of Parts                 :\nLinks Up To Date                : No\nShared Doc                      : No\nHyper Links Changed             : No\nPages                           : 12\nWords                           : 4821\nCharacters                      : 27494\nCharacters With Spaces          : 32198\nParagraphs                      : 341\nSlides                          : 0\nNotes                           : 0\nHidden Slides                   : 0\nMM Clips                        : 0\nCompany                         : Meridian Financial Group\nLines                           : 231\nTemplate                        : Normal.dotm\nRevision Number                 : 14",
+  "valid_answers": ["r.vasquez", "vasquez", "rvasquez", "r vasquez"],
+  "hints": [
+    "ExifTool extracts metadata embedded inside Office documents. Look through the output for fields related to authorship.",
+    "There are two authorship fields in the output. One shows who last edited the file — but that is not the same as who originally created it.",
+    "The 'Last Modified By' field has been changed to 'anonymous', but this is not the original author. Look for the field that records who first created the document.",
+    "The 'Creator' field records the username of the person who originally created the document. It reads: r.vasquez — this persists even after another user edits and saves the file."
+  ],
+  "steps": [
+    {
+      "question": "What does the 'Last Modified By' field show in the ExifTool output?",
+      "valid_answers": ["anonymous", "anonymous user"],
+      "hints": [
+        "ExifTool lists many metadata fields. Scan through the output for the 'Last Modified By' field.",
+        "The 'Last Modified By' field records the username of the most recent person to save the document.",
+        "This field is one of the authorship fields near the top of the ExifTool output.",
+        "The 'Last Modified By' field reads: anonymous — someone changed their display name before re-saving."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "vasquez", "response": "r.vasquez is in a different field. The 'Last Modified By' field has a different value — look carefully."},
+        {"pattern": "meridian", "response": "Meridian Financial Group is the Company field, not the Last Modified By field."}
+      ]
+    },
+    {
+      "question": "What is the username in the 'Creator' field — the person who originally created the document?",
+      "valid_answers": ["r.vasquez", "vasquez", "rvasquez", "r vasquez"],
+      "hints": [
+        "The 'Creator' field is separate from 'Last Modified By'. Look for the exact field named 'Creator' in the ExifTool output.",
+        "The Creator field records who first saved the document — this persists even when someone else later edits it.",
+        "Find the line that begins 'Creator' in the ExifTool output. It appears a few lines after the file type information.",
+        "The 'Creator' field reads: r.vasquez — this is the original author who cannot easily hide their identity through a simple re-save."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "anonymous", "response": "'anonymous' is the Last Modified By value — that was set by whoever last saved it. The Creator field holds the original author."},
+        {"pattern": "microsoft", "response": "Microsoft is the application vendor. Look for the 'Creator' field specifically."}
+      ]
+    }
+  ],
+  "learn": "Microsoft Office documents (both legacy .doc/.xls and modern .docx/.xlsx) embed metadata in their internal XML properties files. For DOCX files, this metadata lives in the docProps/core.xml file inside the ZIP container. ExifTool and other metadata readers surface this information without requiring Microsoft Office to be installed.\n\nKey metadata fields for DFIR investigators:\n- Creator (dc:creator): The username of the person who originally created the document. This is set when the file is first saved and typically persists unchanged even through many edits.\n- Last Modified By (cp:lastModifiedBy): The username of the most recent editor. This can be changed by anyone who saves the file.\n- Company: The organization name from the Office installation that created the file.\n- Create Date: When the file was first created.\n- Modify Date: When the file was last saved.\n- Revision Number: How many times the file has been saved.\n- Template: The document template used, which can reveal organizational naming conventions.\n\nA common mistake made by individuals trying to anonymize leaked documents is changing their display name or username before re-saving, which updates 'Last Modified By' — but does not change the original 'Creator' field. The only way to truly strip metadata is to use a dedicated tool such as MAT2 (Metadata Anonymisation Toolkit 2), ExifTool with the -all= flag, or Microsoft's built-in Document Inspector.\n\nFor investigators, leaked document metadata can provide: the original author's domain username (for correlation with Active Directory), the company name (for attribution), timestamps for creating a timeline, and template names that may reveal internal organizational structure.\n\nThis technique has been used in real-world cases including the attribution of leaked government documents and corporate espionage investigations. The Office Open XML format makes metadata extraction especially straightforward since it is stored as plain XML — investigators can even unzip a .docx and read docProps/core.xml directly without any tools.",
+  "debrief": {
+    "summary": "The 'Creator' metadata field reveals that r.vasquez originally authored the document at Meridian Financial Group. The 'Last Modified By' field was changed to 'anonymous' in an attempt to conceal the author's identity, but the Creator field was not scrubbed and persisted through the edit.",
+    "real_world": "Document metadata analysis is routinely used in insider threat investigations and document leak attribution cases. Investigators correlate the Creator username against Active Directory to identify the employee, then pull their access logs for the relevant timeframe.",
+    "next_step": "Search Active Directory for the username r.vasquez, pull their access logs and DLP alerts for the two weeks prior to the document appearing online, and interview them with HR present.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), CHFI v10 Module 8 (Investigating Email Crimes and Corporate Espionage)",
+    "exam_tip": "'Creator' persists even when 'Last Modified By' is changed. Always check both fields in leaked document investigations. ExifTool with -all= strips all metadata. MAT2 is the dedicated tool for metadata anonymisation."
+  }
+}

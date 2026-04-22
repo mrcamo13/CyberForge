@@ -1,0 +1,71 @@
+{
+  "id": "case15",
+  "title": "Prefetch Confession",
+  "stage": "stage3",
+  "difficulty": 3,
+  "xp_base": 175,
+  "tools_type": "prefetch_analyzer",
+  "scenario": "Investigators need to prove in court that a specific malware file was executed on the suspect's workstation — and exactly when it was first run. The defense may argue the malware was 'just there' and never actually executed. Windows Prefetch files have been analyzed to reconstruct the full execution history of the malicious SVCH0ST.EXE binary. Determine when the malware was first executed on this system.",
+  "challenge": "When was the malware first executed? (Format: YYYY-MM-DD HH:MM:SS)",
+  "challenge_data": "PREFETCH ANALYSIS REPORT\n=========================\nTool     : PECmd v1.5.0.0 (Eric Zimmermann)\nSource   : C:\\Windows\\Prefetch\\\nHost     : WKSTN-047\nDate     : 2026-04-02 10:44:22 UTC\nAnalyst  : J. Rivera\n\n--- Other Prefetch Files (Selected) ---\nFile: CHROME.EXE-A2B3C4D5.pf        Run Count: 847  Last Run: 2026-04-01 08:55:44\nFile: OUTLOOK.EXE-F1E2D3C4.pf       Run Count: 312  Last Run: 2026-04-01 08:58:11\nFile: EXPLORER.EXE-4A5B6C7D.pf      Run Count: 412  Last Run: 2026-04-01 08:22:55\n\n--- SUSPICIOUS PREFETCH FILE ---\n\nFile: SVCH0ST.EXE-A3F7C291.pf\n  Executable Name  : SVCH0ST.EXE\n  Hash             : A3F7C291\n  File Size        : 24,832 bytes\n  Version          : Windows 10 (version 26)\n\n  Execution Metrics:\n    Run Count      : 7\n    Last Run Time  : 2026-04-01 03:22:14 UTC\n\n  All Recorded Run Times (Windows 8+ stores up to 8):\n    Run 7 (Most Recent): 2026-04-01 03:22:14 UTC\n    Run 6              : 2026-04-01 03:21:55 UTC\n    Run 5              : 2026-04-01 03:19:58 UTC\n    Run 4              : 2026-03-31 22:14:33 UTC\n    Run 3              : 2026-03-31 22:11:07 UTC\n    Run 2              : 2026-03-31 22:08:42 UTC\n    Run 1 (First)      : 2026-03-31 21:44:19 UTC   ← FIRST EXECUTION\n\n  Volume Information:\n    Volume Path       : C:\\\n    Volume Creation   : 2024-09-12 14:22:07 UTC\n    Serial Number     : 2A4B6C8D\n\n  Files Referenced by SVCH0ST.EXE (selected):\n    \\DEVICE\\HARDDISKVOLUME3\\WINDOWS\\TEMP\\UPDATE.DAT\n    \\DEVICE\\HARDDISKVOLUME3\\WINDOWS\\SYSTEM32\\NTDLL.DLL\n    \\DEVICE\\HARDDISKVOLUME3\\WINDOWS\\SYSTEM32\\KERNEL32.DLL\n    \\DEVICE\\HARDDISKVOLUME3\\WINDOWS\\SYSTEM32\\WS2_32.DLL\n    \\DEVICE\\HARDDISKVOLUME3\\WINDOWS\\SYSTEM32\\WININET.DLL\n    \\DEVICE\\HARDDISKVOLUME3\\USERS\\PUBLIC\\SVCH0ST.EXE\n\n  Analysis Notes:\n    - SVCH0ST.EXE (with zero) is NOT a legitimate Windows binary\n    - References UPDATE.DAT — same file identified in Registry Run key and console history\n    - First execution correlates with attacker RDP session at 21:33:45 UTC (Event 4624)\n    - File path C:\\Users\\Public\\SVCH0ST.EXE confirmed by DLL list analysis",
+  "valid_answers": ["2026-03-31 21:44:19", "2026-03-31 21:44:19 utc", "march 31 2026 at 21:44", "21:44:19 on march 31", "21:44:19 march 31 2026", "2026-03-31 21:44:19 UTC", "march 31st 2026 21:44:19"],
+  "steps": [
+    {
+      "question": "How many total times was SVCH0ST.EXE executed according to the Prefetch file?",
+      "valid_answers": ["7", "seven", "7 times", "seven times", "run count 7"],
+      "hints": [
+        "The Prefetch report includes an 'Execution Metrics' section with a 'Run Count' field. Find that number.",
+        "Windows Prefetch records a running count of how many times a program has been executed. Look at the Run Count value for SVCH0ST.EXE.",
+        "The Execution Metrics section reads: 'Run Count: 7'. The malware was executed 7 times total, with all run times recorded.",
+        "The run count is 7. The report lists all 7 timestamps, from Run 1 (First) at 2026-03-31 21:44:19 UTC through Run 7 (Most Recent) at 2026-04-01 03:22:14 UTC."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "8", "response": "Windows 8+ stores up to 8 run times in the Prefetch file, but look at the actual Run Count value recorded for SVCH0ST.EXE — it is not 8."},
+        {"pattern": "1", "response": "The question asks for the total run count, not how many first-execution entries exist. Check the 'Run Count' field in the Execution Metrics section."}
+      ]
+    },
+    {
+      "question": "What other malicious file does the Prefetch data show SVCH0ST.EXE referenced during its first execution?",
+      "valid_answers": ["update.dat", "windows\\temp\\update.dat", "c:\\windows\\temp\\update.dat", "temp\\update.dat"],
+      "hints": [
+        "The 'Files Referenced by SVCH0ST.EXE' section lists files the malware accessed during its first 10 seconds of execution. Look for the non-standard Windows file in that list.",
+        "Legitimate DLLs like ntdll.dll, kernel32.dll, and ws2_32.dll are expected references. Look for the file that is NOT a standard Windows system file.",
+        "One of the referenced files is \\DEVICE\\HARDDISKVOLUME3\\WINDOWS\\TEMP\\UPDATE.DAT — the same staging file identified in the registry Run key and console history cases.",
+        "The Prefetch shows SVCH0ST.EXE referenced \\WINDOWS\\TEMP\\UPDATE.DAT on first execution, confirming the malware immediately loaded its companion payload file. This is the same update.dat staged via the copy command recovered from console history."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "ntdll", "response": "ntdll.dll is a core Windows system library — its presence is expected and legitimate. Look for the non-Windows file in the references list."},
+        {"pattern": "svch0st", "response": "SVCH0ST.EXE is the malware itself — look at what other file it loaded, which is listed in the 'Files Referenced' section among the Windows DLLs."}
+      ]
+    },
+    {
+      "question": "When was the malware first executed? (Format: YYYY-MM-DD HH:MM:SS)",
+      "valid_answers": ["2026-03-31 21:44:19", "2026-03-31 21:44:19 utc", "march 31 2026 at 21:44", "21:44:19 on march 31", "21:44:19 march 31 2026", "2026-03-31 21:44:19 UTC", "march 31st 2026 21:44:19"],
+      "hints": [
+        "Windows Prefetch records execution history for programs that have been run. The output shows multiple run times for SVCH0ST.EXE. You need to find when it was run for the very first time.",
+        "The 'All Recorded Run Times' section lists executions from most recent (Run 7) to the first. Look for the entry labeled '(First)' or 'Run 1'.",
+        "The output explicitly labels 'Run 1 (First)' with a timestamp and an arrow pointing to it. This is the first execution timestamp.",
+        "Run 1 (First Execution) shows: 2026-03-31 21:44:19 UTC. This is when SVCH0ST.EXE was first executed on this machine, approximately 10 minutes after the attacker's initial RDP session was established."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "03:22", "response": "03:22:14 is the most recent (last) run time — Run 7. You need the very first execution, which is listed as Run 1 at the bottom of the run times list."},
+        {"pattern": "03:21", "response": "That is Run 6, not the first execution. Scroll to the bottom of the 'All Recorded Run Times' section and find Run 1."},
+        {"pattern": "22:14", "response": "22:14:33 is Run 4 on March 31st — not the first. The first execution is labeled 'Run 1 (First)' with an arrow indicator."}
+      ]
+    }
+  ],
+  "hints": [
+    "Windows Prefetch records execution history for programs that have been run. The output shows multiple run times for SVCH0ST.EXE. You need to find when it was run for the very first time.",
+    "The 'All Recorded Run Times' section lists executions from most recent (Run 7) to the first. Look for the entry labeled '(First)' or 'Run 1'.",
+    "The output explicitly labels 'Run 1 (First)' with a timestamp and an arrow pointing to it. This is the first execution timestamp.",
+    "Run 1 (First Execution) shows: 2026-03-31 21:44:19 UTC. This is when SVCH0ST.EXE was first executed on this machine, approximately 10 minutes after the attacker's initial RDP session was established."
+  ],
+  "learn": "Windows Prefetch is an optimization feature that records data about programs that are executed, helping Windows pre-load resources for faster subsequent launches. From a forensic perspective, Prefetch files are invaluable because they prove a program was executed — even if the program was later deleted.\n\nPrefetch basics:\n- Location: C:\\Windows\\Prefetch\\\n- File format: [EXECUTABLE]-[HASH].pf (e.g., NOTEPAD.EXE-A1B2C3D4.pf)\n- The hash in the filename is based on the full path of the executable (not the file content)\n- Enabled by default on Windows workstations\n- DISABLED by default on Windows Servers (must be manually enabled)\n- Also disabled on some SSDs (Windows detects SSD and may disable prefetch automatically)\n\nWhat Prefetch stores:\n- Executable name and path\n- Run count (how many times the program has been executed)\n- Timestamps (Windows 8+ stores up to 8 most recent run times)\n- Files and directories referenced during the first 10 seconds of execution\n- Volume information\n\nForensic value:\n1. Proves execution — even if the program was deleted after running\n2. First run time — establishes when malware was first activated\n3. Run count — shows how many times it ran (attackers rarely delete prefetch)\n4. Files referenced — reveals what files the program accessed on first launch (can identify payload locations, loaded DLLs, and staging files)\n5. Multiple timestamps — allows reconstruction of a detailed execution timeline\n\nKey tool: PECmd (Prefetch Explorer Command Line) by Eric Zimmerman — the standard tool for parsing Prefetch files in forensic investigations. Part of the EZ Tools suite (also includes MFTECmd, LECmd, JLECmd, etc.).\n\nOther Windows execution artifacts:\n- ShimCache (AppCompatCache): Tracks executables for application compatibility. Records path and last modified time (not run time).\n- AmCache (Amcache.hve): Records installed applications and recently executed files with SHA-1 hash — useful for hash verification of deleted files.\n- UserAssist: Registry-based record of programs run through Explorer (run count + last run time, but ROT-13 encoded).\n- BAM (Background Activity Moderator): Tracks process execution for modern Windows 10/11.\n- LNK files / Jump Lists: Reveal recently opened files even if the file itself is deleted.\n\nCorrelation in this case: The prefetch first-run timestamp (21:44:19) correlates precisely with the timeline established from event logs (attacker RDP session: 21:33:45, malware first seen in process list: 21:44:19) — building a legally defensible timeline.",
+  "debrief": {
+    "summary": "Windows Prefetch analysis confirms SVCH0ST.EXE was first executed on 2026-03-31 at 21:44:19 UTC — approximately 11 minutes after the attacker established an RDP session. The file ran 7 times total before the system was isolated. Prefetch also reveals that the malware loaded update.dat on its very first execution.",
+    "real_world": "Prefetch is critical forensic evidence for proving execution in court. Defense attorneys may argue a file was 'just on the disk' and never run — Prefetch files directly refute this. Run count and timestamps build a detailed execution timeline that corroborates event logs and memory forensics.",
+    "next_step": "Correlate the first execution timestamp (21:44:19) with Windows Event Logs to confirm who was logged in at that exact moment, then use AmCache to verify the SHA-1 hash of the deleted malware binary.",
+    "cert_link": "CHFI v10 Module 6 (Windows Forensics), GCFE, CySA+ CS0-003 Domain 4",
+    "exam_tip": "Windows Prefetch stores up to 8 run times in Windows 8+. ONLY on workstations by default — disabled on servers. Location: C:\\Windows\\Prefetch\\. PECmd by Eric Zimmerman is the standard analysis tool. Prefetch proves execution even after the file is deleted — critical for proving malware ran."
+  }
+}

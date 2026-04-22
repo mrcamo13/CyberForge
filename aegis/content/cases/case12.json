@@ -16,6 +16,55 @@
     "Type 'tools' in the game. The remediation planner calculates\nimpact/effort ratios, respects dependencies, and outputs a\nranked plan. The first item in the ranked output is your answer.",
     "SPOILER — Patch nginx 1.24.0 has the highest ratio (5.0) because\nit closes the original entry point (CVSS 9.8 actively exploited)\nwith minimal effort (a single package update). It also unblocks\nthe WAF rule implementation. Type: patch nginx 1.24.0"
   ],
+  "steps": [
+    {
+      "question": "Calculate the impact/effort ratio for 'patch nginx 1.24.0' (item01: Impact=5, Effort=1). What is the ratio?",
+      "valid_answers": ["5", "5.0", "5/1"],
+      "hints": [
+        "The formula is: Priority Ratio = Impact / Effort",
+        "item01 has Impact=5 and Effort=1. Divide Impact by Effort.",
+        "5 divided by 1 = ?",
+        "5 / 1 = 5.0. This is the highest possible ratio for a 5-point scale."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Calculate the ratio for each remaining item and identify which item has the second-highest ratio. Which item is it?",
+      "valid_answers": ["item02", "reset deploymaster credentials", "reset credentials"],
+      "hints": [
+        "Calculate ratios: item02=4/1=4.0, item03=4/2=2.0, item04=3/3=1.0 (also blocked by dependency), item05=5/5=1.0, item06=2/4=0.5",
+        "After item01 (ratio 5.0), which item has the next highest ratio?",
+        "item02 (reset deploymaster credentials) has Impact=4, Effort=1 → ratio=4.0",
+        "item02 (reset deploymaster credentials) has ratio 4.0 — second highest. It is a quick win: low effort, high impact."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Based on highest impact/effort ratio, which remediation action should be completed FIRST?",
+      "valid_answers": ["patch nginx", "patch nginx 1.24.0"],
+      "hints": [
+        "The item with the highest ratio (Impact/Effort) goes first — that is the quick win with maximum risk reduction",
+        "item01 has ratio 5.0. item02 has 4.0. item03 has 2.0. All others are 1.0 or less.",
+        "item01 also has no dependencies, so it can start immediately and it unblocks item04 (WAF rules)",
+        "Patch nginx 1.24.0 (item01) has the highest ratio (5.0) and should be done first. Type: patch nginx 1.24.0"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "item05", "response": "item05 (network segmentation) has ratio 1.0 (5/5) — high impact but very high effort. item01 has ratio 5.0 (5/1) — same impact for far less effort."},
+        {"pattern": "item02", "response": "item02 is second priority (ratio 4.0). item01 has ratio 5.0 — highest ratio, first priority."}
+      ]
+    },
+    {
+      "question": "item04 (WAF rules, ratio 1.0) has a dependency on item01. What does this mean for sequencing item04?",
+      "valid_answers": ["item01 must be done first", "patch nginx first", "cannot start until item01 is done", "blocked by dependency"],
+      "hints": [
+        "A dependency means one item must be completed before another can start",
+        "item04 depends on item01 (patch nginx). You cannot implement WAF rules before the underlying nginx is patched.",
+        "If item01 is not done, item04 cannot begin — it is blocked.",
+        "item04 cannot start until item01 (patch nginx) is complete. Dependencies define sequence regardless of ratio."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Remediation prioritization is a critical skill when you have more findings\nthan time. The goal is maximum risk reduction for minimum effort.\n\nImpact/Effort ratio method (quick wins first):\n  Priority = Impact / Effort\n  High ratio = high impact, low effort = do first\n  Low ratio  = low impact, high effort = defer or deprioritize\n\nAdditional prioritization factors:\n  Active exploitation  — if being exploited NOW, patch regardless of ratio\n  Dependencies         — some actions unlock others (sequence matters)\n  Asset criticality    — production > staging > test\n  Compliance deadline  — regulatory requirements can override ratio\n  Cost                 — financial budget constraints\n\nCommon prioritization frameworks:\n  CISA KEV catalog   — known exploited vulns, must patch within deadline\n  CVSS + context     — CVSS score adjusted for your environment\n  Risk score         — likelihood × impact (as in case10)\n  DREAD model        — Damage, Reproducibility, Exploitability, Affected, Discoverability\n\nRemediation sequencing:\n  Dependencies must be respected — implementing WAF rules without patching\n  the underlying nginx first may be bypassed by the same exploit vector.\n  Always identify dependencies before building the remediation schedule.",
   "tools": "Ranks remediation actions by impact/effort ratio, respects dependency ordering, and outputs a prioritized remediation plan.",
   "debrief": {

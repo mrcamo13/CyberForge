@@ -17,6 +17,46 @@
     "SPOILER -- Four services should be removed:\n        telnet (unencrypted, not needed externally)\n        ftp (unencrypted file transfer, not needed externally)\n        rdp (remote desktop -- use VPN instead)\n        smb (Windows file sharing should never be internet-facing)\n        ssh and https remain because they have documented business requirements.\n        Type: 4"
   ],
   "tools": "Parses the service inventory, flags each service as [REDUCE] (internet-facing with no business justification) or [OK], and outputs a count of unnecessary exposures by attack surface category.",
+  "steps": [
+    {
+      "question": "Look at the 6 internet-facing services. How many of them are marked 'required:no' (internet-accessible but with no documented business justification)?",
+      "valid_answers": ["4", "four"],
+      "hints": [
+        "Go through each service and check the 'required' field: required:yes means there is a business need, required:no means there is not.",
+        "ssh=required:yes, telnet=required:no, ftp=required:no, https=required:yes, rdp=required:no, smb=required:no",
+        "Count the 'required:no' entries: telnet, ftp, rdp, smb",
+        "4 services have required:no — they are internet-exposed without documented justification."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "2", "response": "Count more carefully — there are 4 services marked required:no, not 2. Check telnet, ftp, rdp, and smb."},
+        {"pattern": "6", "response": "Not all 6 — ssh and https are marked required:yes (they have legitimate business needs). Count only the required:no services."}
+      ]
+    },
+    {
+      "question": "Which of the 4 unnecessary services is the most dangerous to have internet-exposed, and was exploited in real-world attacks like WannaCry and NotPetya?",
+      "valid_answers": ["smb", "smb port 445", "port 445"],
+      "hints": [
+        "Think about major ransomware outbreaks in 2017. Both WannaCry and NotPetya used a specific network protocol.",
+        "The protocol is Windows file sharing — it runs on port 445",
+        "EternalBlue exploited SMB (Server Message Block) on port 445 — this vulnerability spread WannaCry globally",
+        "SMB (port 445) is the most notoriously dangerous service to expose to the internet. It should never be internet-facing."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "rdp", "response": "RDP is also very dangerous to expose (BlueKeep, etc.), but SMB on port 445 is historically the most catastrophically exploited protocol (WannaCry, NotPetya)."}
+      ]
+    },
+    {
+      "question": "How many services should be removed from internet exposure to reduce the attack surface?",
+      "valid_answers": ["4", "four"],
+      "hints": [
+        "The rule is: if internet-facing AND required:no — it should be removed from internet exposure",
+        "SSH (required:yes) and HTTPS (required:yes) should remain. The others should be removed.",
+        "Services to remove: telnet (23), ftp (21), rdp (3389), smb (445) — all are required:no",
+        "4 services should be removed from internet exposure: telnet, ftp, rdp, and smb. Type: 4"
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Attack surface reduction is one of the most effective vulnerability management\npractices -- it eliminates entire categories of risk before an attacker can exploit\nthem. If a service doesn't need to be internet-facing, it shouldn't be.\n\nCommon unnecessary internet exposures:\n\nTelnet (port 23):\n  Unencrypted remote shell. No legitimate reason to expose to the internet in 2026.\n  Replace with SSH (encrypted). Attackers scan for open Telnet constantly.\n\nFTP (port 21):\n  Unencrypted file transfer. Credentials transmitted in cleartext.\n  Replace with SFTP (SSH-based) or FTPS (TLS). Never expose to internet.\n\nRDP (port 3389):\n  Windows Remote Desktop. Massive attack surface.\n  Never expose directly to internet. Use VPN + then RDP internally.\n\nSMB (port 445):\n  Windows file sharing. Notorious attack vector: EternalBlue (WannaCry, NotPetya).\n  Should never be accessible from the internet.\n\nReduction techniques:\n  Firewall rules: block external access to unnecessary ports\n  Network segmentation: isolate services that don't need internet access\n  VPN: require VPN before accessing internal services remotely\n  Service disabling: turn off services not in use\n\nCIS Control 4 (Secure Configuration) and CIS Control 12 (Network Infrastructure\nManagement) both address attack surface reduction as foundational controls.",
   "debrief": {
     "summary": "Four services -- telnet, FTP, RDP, and SMB -- should be removed from internet exposure. None have documented business requirements for external access, and all four are historically exploited protocols. SSH and HTTPS remain because they have valid business justifications. Attack surface reduction eliminates risk before it can be exploited.",

@@ -17,6 +17,47 @@
     "SPOILER -- CWE-89 (SQL Injection) in auth.py line 45 is the top finding.\n        SQL injection in a login function is especially dangerous -- it can\n        allow an attacker to bypass authentication entirely (entering\n        ' OR 1=1 -- as a username logs in as any user).\n        Type: cwe-89"
   ],
   "tools": "Parses SAST output, sorts findings by severity (critical > high > medium > low), maps each CWE to its name, and identifies the top finding that should be remediated first.",
+  "steps": [
+    {
+      "question": "Look at the SAST findings. Which file has a CRITICAL severity finding?",
+      "valid_answers": ["auth.py", "auth"],
+      "hints": [
+        "SAST findings are labeled with severity: CRITICAL, HIGH, MEDIUM, or LOW",
+        "Scan the finding list for the one marked CRITICAL — only one file has this severity",
+        "auth.py has a CRITICAL finding. All others are HIGH, MEDIUM, or LOW.",
+        "auth.py at line 45 is marked CRITICAL — it is the highest-severity finding in the scan."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "config.py", "response": "config.py has a HIGH severity finding (CWE-798 hardcoded credential) — not CRITICAL. Look for the CRITICAL entry."},
+        {"pattern": "upload.py", "response": "upload.py has a HIGH severity finding (CWE-22 path traversal) — not CRITICAL."}
+      ]
+    },
+    {
+      "question": "The CRITICAL finding in auth.py is identified as CWE-89. What is the name of this vulnerability class?",
+      "valid_answers": ["sql injection", "sqli", "sql i", "structured query language injection"],
+      "hints": [
+        "CWE IDs map to named vulnerability classes. CWE-89 is one of the most famous web vulnerabilities.",
+        "It involves unsanitized user input being passed directly to a database query",
+        "The CWE Top 25 consistently ranks this as one of the most dangerous software weaknesses",
+        "CWE-89 is SQL Injection. It allows attackers to manipulate database queries using malicious input."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "xss", "response": "XSS is CWE-79 (Cross-Site Scripting) — different from CWE-89. The finding in auth.py is SQL Injection."},
+        {"pattern": "path traversal", "response": "Path traversal is CWE-22. That is the upload.py finding. auth.py has CWE-89 (SQL Injection)."}
+      ]
+    },
+    {
+      "question": "What is the CWE ID of the highest-severity finding (the CRITICAL finding) in the SAST report?",
+      "valid_answers": ["cwe-89", "89", "sql injection"],
+      "hints": [
+        "The CRITICAL finding is in auth.py. Look at its CWE ID in the scan results.",
+        "The scan output shows: auth.py line 45 CWE-89 CRITICAL — SQL injection via unsanitized user input",
+        "CWE-89 is listed next to CRITICAL in the auth.py finding.",
+        "The highest-severity finding is CWE-89 (SQL Injection) in auth.py. Type: cwe-89"
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Static Application Security Testing (SAST) analyzes source code without executing it,\nidentifying security vulnerabilities at development time -- before the code ships.\n\nHow SAST works:\n  - Parses source code into an Abstract Syntax Tree (AST)\n  - Traces data flows from input (user-controlled) to sinks (dangerous functions)\n  - Flags patterns that match known vulnerability classes (CWE IDs)\n  - Output: file, line number, CWE, severity, description\n\nKey CWE IDs for CySA+ exam:\n\nCWE-89 -- SQL Injection:\n  User-controlled input used directly in a SQL query.\n  Impact: data exfiltration, authentication bypass, data destruction.\n  Fix: parameterized queries / prepared statements.\n\nCWE-79 -- Cross-Site Scripting (XSS):\n  Attacker-controlled data rendered as HTML/JS in the browser.\n  Fix: output encoding, Content Security Policy.\n\nCWE-22 -- Path Traversal:\n  Filename input not validated, allows reading files outside intended directory.\n  Fix: validate filenames, use allowlists, canonicalize paths.\n\nCWE-798 -- Hard-coded Credentials:\n  Secret keys, passwords, or API tokens embedded in source code.\n  Fix: secrets management (HashiCorp Vault, AWS Secrets Manager, env vars).\n\nSAST vs DAST:\n  SAST: static analysis of source code (shift-left, finds issues early)\n  DAST: dynamic testing of running application (black-box, finds runtime issues)\n  Best practice: use both (SAST in CI/CD pipeline, DAST before release)\n\nCommon SAST tools:\n  SonarQube, Semgrep, Checkmarx, Veracode, GitHub Advanced Security (CodeQL)",
   "debrief": {
     "summary": "CWE-89 (SQL Injection) in auth.py at line 45 is the top priority finding -- it is critical severity and exists in the login function, meaning an attacker could bypass authentication entirely. The hardcoded API key (CWE-798) and path traversal (CWE-22) are also high severity and should follow immediately. SAST findings should be triaged by severity and remediated in priority order.",

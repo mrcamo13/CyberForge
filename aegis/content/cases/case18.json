@@ -18,6 +18,44 @@
     "Type 'tools' in the game. The disk analyzer flags files where the\n        modified timestamp string is earlier than the created timestamp string.\n        ISO format (YYYY-MM-DDTHH:MM:SS) sorts correctly as strings.",
     "SPOILER — mimikatz.exe has created=2026-04-05 but modified=2026-03-01.\n        Modified (March 1) is BEFORE created (April 5) — impossible normally.\n        The attacker used a timestomping tool to make mimikatz look like an\n        older, legitimate file. Type: mimikatz.exe"
   ],
+  "steps": [
+    {
+      "question": "Timestomping means modifying file timestamps to hide when a file was created. Under normal conditions, can a file's 'modified' timestamp be earlier than its 'created' timestamp?",
+      "valid_answers": ["no", "no it cannot", "not normally", "impossible normally"],
+      "hints": [
+        "Think logically: can you modify a file before it exists?",
+        "A file must be created first. Any modification happens after creation — so 'modified' should be >= 'created'.",
+        "If modified < created, the timestamps were artificially manipulated — you cannot modify something before it exists.",
+        "No. Modified timestamp cannot naturally be earlier than created timestamp. If it is, the timestamps were altered."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Review the file listing. Which file has a 'created' timestamp of 2026-04-05 but a 'modified' timestamp of 2026-03-01 (earlier than created)?",
+      "valid_answers": ["mimikatz.exe", "mimikatz"],
+      "hints": [
+        "Compare created and modified dates for each file — look for a case where modified date is BEFORE created date",
+        "nightwire.exe: created 2026-03-20, modified 2026-03-20 — normal. update.bat: created 2026-04-05, modified 2026-04-05 — normal.",
+        "mimikatz.exe: created 2026-04-05, modified 2026-03-01. March 1 is before April 5 — modified BEFORE created!",
+        "mimikatz.exe has modified=2026-03-01 which is earlier than created=2026-04-05. Impossible without tampering. Type: mimikatz.exe"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "nightwire", "response": "nightwire.exe has the same created and modified date (2026-03-20). That's suspicious because it's deleted, but the timestamps are consistent."},
+        {"pattern": "config.sys", "response": "config.sys was modified in 2026 but created in 2021. That is normal — old files can be modified. Look for modified BEFORE created."}
+      ]
+    },
+    {
+      "question": "mimikatz.exe was also deleted and is a known credential dumping tool. What MITRE ATT&CK technique ID corresponds to the timestamp manipulation used here?",
+      "valid_answers": ["t1070.006", "1070.006", "timestomping"],
+      "hints": [
+        "Search MITRE ATT&CK for 'timestomping' — it is a Defense Evasion sub-technique",
+        "The parent technique T1070 is 'Indicator Removal'. Timestomping is a specific sub-technique of T1070.",
+        "T1070.006 is the sub-technique number for Timestomping in MITRE ATT&CK",
+        "The MITRE ATT&CK ID for Timestomping is T1070.006. It falls under Defense Evasion."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "tools": "Analyzes file system entries for malicious filenames, deleted files, timestomping, and suspicious paths.",
   "learn": "Disk forensics reconstructs attacker activity from file system artifacts.\nEven deleted files leave traces — forensic tools can recover them from\nunallocated disk space.\n\nKey disk forensics indicators:\n\nTimestomping (T1070.006):\n  Attackers modify file timestamps to blend in with legitimate files.\n  Detection: modified timestamp earlier than created timestamp.\n  Tools: Autopsy, FTK, Sleuth Kit (istat command).\n\nDeleted files:\n  Deletion removes directory entries but not file content (until overwritten).\n  Recovery: carving from unallocated space, $MFT analysis (Windows NTFS).\n  Key insight: deleted files often contain the most incriminating evidence.\n\nSuspicious file locations:\n  C:\\Users\\Public\\          — world-readable, no user context\n  C:\\Windows\\Temp\\          — temporary files, often abused\n  C:\\Temp\\                  — non-standard temp, suspicious\n  AppData\\Local\\Temp\\       — user temp, common malware location\n\nNTFS forensic artifacts:\n  $MFT (Master File Table) — every file and directory metadata\n  $LogFile               — file system transaction log (last ~days)\n  $UsnJrnl               — change journal (file create/delete/modify history)\n  $RECYCLE.BIN           — recycled files with original path and time\n\nCommon disk forensics tools:\n  Autopsy        — open source forensic suite, GUI\n  FTK Imager     — disk imaging and preview\n  Sleuth Kit     — command line, underpins Autopsy\n  Plaso/Log2timeline — timeline generation from forensic artifacts",
   "debrief": {

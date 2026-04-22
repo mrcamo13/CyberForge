@@ -64,9 +64,10 @@ def main() -> None:
         _p(_CYAN,   "=" * 50)
         _p(_CYAN,   "  SELECT SIMULATOR")
         _p(_CYAN,   "=" * 50)
-        _p(_WHITE,  "  [1] CIPHER  -- Red Team   (PenTest+)")
-        _p(_WHITE,  "  [2] AEGIS   -- Blue Team  (CySA+)")
-        _p(_GREEN,  "  [3] LAB     -- Script Lab  (Python automation)")
+        _p(_WHITE,  "  [1] CIPHER    -- Red Team         (PenTest+)")
+        _p(_WHITE,  "  [2] AEGIS     -- Blue Team        (CySA+)")
+        _p(_GREEN,  "  [3] LAB       -- Script Lab       (Python automation)")
+        _p(_YELLOW, "  [4] FORENSICS -- Digital Forensics (DFIR / CHFI)")
         _p(_GRAY,   "  [0] Quit")
         _p(_CYAN,   "=" * 50)
 
@@ -76,12 +77,13 @@ def main() -> None:
             _p(_GRAY, "Goodbye.")
             sys.exit(0)
 
-        if choice in ("1", "2", "3"):
-            target_dir = {"1": "cipher", "2": "aegis", "3": "lab"}[choice]
+        if choice in ("1", "2", "3", "4"):
+            target_dir = {"1": "cipher", "2": "aegis", "3": "lab", "4": "forensics"}[choice]
             target_main = os.path.join(HERE, target_dir, "main.py")
 
             if not os.path.exists(target_main):
                 _p(_YELLOW, f"Could not find {target_dir}/main.py -- check your install.")
+                input("Press Enter to continue...")
                 continue
 
             # Pass --dev through if set
@@ -97,7 +99,7 @@ def main() -> None:
             runpy.run_path(target_main, run_name="__main__")
             return  # game exited cleanly; drop back to OS
 
-        _p(_YELLOW, "Enter 1, 2, 3, or 0.")
+        _p(_YELLOW, "Enter 1, 2, 3, 4, or 0.")
 
 
 if __name__ == "__main__":

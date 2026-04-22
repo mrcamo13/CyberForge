@@ -1,0 +1,64 @@
+{
+  "id": "case08",
+  "title": "Strings of Evidence",
+  "stage": "stage2",
+  "difficulty": 2,
+  "xp_base": 150,
+  "tools_type": "string_extractor",
+  "scenario": "You have dumped the memory of the malicious svch0st.exe process (PID 5124) and are running strings analysis to extract human-readable text. Among thousands of garbage strings, stack addresses, and partial Windows API names, the malware has hardcoded its primary C2 domain in plaintext. Your task is to find that hardcoded domain — it will be a key indicator of compromise (IOC) for threat hunting and blocking.",
+  "challenge": "What is the hardcoded C2 domain found in the malware strings?",
+  "challenge_data": "$ strings -a -el svch0st.exe.dmp | grep -v '^.$' | head -60\nVolatility 3 Framework 2.7.0 - Process dump PID 5124\n\nMZ\n!This program cannot be run in DOS mode.\n.text\n.data\n.rdata\n.reloc\nVirtualAlloc\nVirtualFree\nCreateThread\nWaitForSingleObject\nWSAStartup\nWSACleanup\nconnect\nrecv\nsend\nclosesocket\nntdll.dll\nkernel32.dll\nws2_32.dll\nwininet.dll\nHHH\nPPP\n@@@@\nRRRR\n2.0.4\nUpdate module initialized\nFailed to initialize network subsystem\nerror: %d\nSECRET_SECTION_BEGIN\nXOR_KEY=0x42\nUser-Agent: Mozilla/5.0 (compatible; WindowsUpdate/2.0; +http://windowsupdate.local)\nSOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\nWindowsUpdateHelper\nC:\\Windows\\Temp\\update.dat\nc2-panel.darkhosting[.]ru\n/api/v2/check-in\n/api/v2/task\n/api/v2/result\nHTTP/1.1\nContent-Type: application/octet-stream\nAccept: */*\nConnection: keep-alive\nSECRET_SECTION_END\nSleep interval: %d ms\nBeacon jitter: %d\nPayload received, size: %d bytes\nExecution failed: %d\nEncrypted channel established\nFailed to connect: retry %d of 5\nKernel32.dll\nNtQuerySystemInformation\nRtlAdjustPrivilege\n00000\naaaaaa\n!@#$%\nzzzzzz",
+  "valid_answers": ["c2-panel.darkhosting[.]ru", "c2-panel.darkhosting.ru", "darkhosting.ru", "darkhosting[.]ru", "c2-panel.darkhosting"],
+  "hints": [
+    "The strings tool extracts all human-readable text from binary files and memory dumps. Scroll through the output looking for anything that resembles a web address or domain name.",
+    "Look for strings that contain a dot separator pattern typical of domain names or URLs. Ignore Windows API names and DLL names — focus on strings that look like external internet addresses.",
+    "There is a line that begins with 'c2-panel.' — this naming convention (c2-panel) is a strong indicator of a command and control infrastructure domain. The brackets around the dot are a defanging technique used in threat intelligence to prevent accidental clicking.",
+    "The hardcoded C2 domain is 'c2-panel.darkhosting[.]ru'. The brackets around the dot are a defang notation used in threat intelligence reports to make domains safe to share. The actual domain would be c2-panel.darkhosting.ru."
+  ],
+  "steps": [
+    {
+      "question": "What XOR key is embedded in the malware strings? (Look for the XOR_KEY line)",
+      "valid_answers": ["0x42", "42", "xor key 0x42", "xor_key=0x42"],
+      "hints": [
+        "Malware often embeds its configuration values as strings. Look for any line that contains 'XOR' in the strings output.",
+        "Between the SECRET_SECTION_BEGIN and SECRET_SECTION_END markers, there is a configuration line.",
+        "The configuration line shows the key used for XOR obfuscation of data.",
+        "The string 'XOR_KEY=0x42' appears in the output — 0x42 is hexadecimal for 66 in decimal."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "What is the hardcoded C2 domain found in the malware strings?",
+      "valid_answers": ["c2-panel.darkhosting[.]ru", "c2-panel.darkhosting.ru", "darkhosting.ru", "darkhosting[.]ru", "c2-panel.darkhosting"],
+      "hints": [
+        "Domain names in strings output look like 'something.something.tld'. Look for a line that matches this pattern — not a Windows DLL or API name.",
+        "There is a string that starts with 'c2-panel.' — this prefix is a clear indicator of command and control infrastructure.",
+        "The domain uses bracket notation [.] around one of the dots. This is a defanging technique used in threat intelligence to prevent accidental clicks.",
+        "The hardcoded domain is c2-panel.darkhosting[.]ru — the brackets are defanging notation making it safe to share. The real domain would be c2-panel.darkhosting.ru."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "windowsupdate", "response": "windowsupdate.local is a fake User-Agent string used to blend in — it is not a real domain. Look for the actual domain used for C2 communication."},
+        {"pattern": "update.dat", "response": "update.dat is a file path, not a domain name. Look for a string that ends in a top-level domain like .ru, .com, or .net."}
+      ]
+    },
+    {
+      "question": "What API endpoint path does the malware use to check in with its C2 server?",
+      "valid_answers": ["/api/v2/check-in", "api/v2/check-in", "/api/v2/check-in and /api/v2/task"],
+      "hints": [
+        "After the C2 domain, there are URL path strings that reveal how the malware communicates with the C2 server.",
+        "Look for strings that begin with '/api/' — these are REST API endpoint paths the malware calls.",
+        "There are three API paths listed. The first one is the check-in endpoint — used when the malware first contacts the C2.",
+        "The strings show three API paths: /api/v2/check-in, /api/v2/task, and /api/v2/result — the check-in path is the first one."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
+  "learn": "Strings analysis is one of the fastest and most productive first-pass techniques in malware analysis. The `strings` command extracts sequences of printable ASCII or Unicode characters from any binary file, regardless of whether the analyst can read the binary format.\n\nHow strings works:\n- Default minimum length is 4 characters (configurable with -n)\n- -a flag: scan entire file (not just data sections)\n- -el flag: extract little-endian Unicode strings (common in Windows PE files compiled for x86/x64)\n- -eb flag: extract big-endian Unicode strings\n- Running both ASCII and Unicode extraction is best practice\n\nTypical valuable strings in malware:\n- Hardcoded IP addresses or domain names (C2 infrastructure)\n- URL paths (/api/v2/check-in, /gate.php, /upload)\n- Registry keys (persistence mechanism locations)\n- File paths (staging locations, payload drops)\n- User-Agent strings (C2 HTTP traffic disguise)\n- Mutex names (prevent multiple instances of malware)\n- Error messages (reveal malware logic and capabilities)\n- Encryption keys or markers (XOR keys, AES key placeholders)\n- Version strings (reveal malware family/version)\n\nWhat we found in this case:\n- XOR_KEY=0x42: the malware uses XOR with key 0x42 (66 decimal) for obfuscation\n- c2-panel.darkhosting[.]ru: primary C2 domain\n- /api/v2/check-in, /api/v2/task: C2 API endpoints\n- WindowsUpdateHelper + C:\\Windows\\Temp\\update.dat: persistence via registry Run key\n- Sleep interval / Beacon jitter: classic C2 beacon configuration\n\nDefanging notation: Security researchers use [.] or [:]// when sharing IOCs (Indicators of Compromise) in reports to prevent email clients, browsers, and SIEM tools from treating them as active links. c2-panel.darkhosting[.]ru = c2-panel.darkhosting.ru.\n\nFLOSS (FireEye Labs Obfuscated String Solver) is an advanced alternative to strings that can decode XOR-obfuscated strings and stacked strings automatically — useful when the malware tries to hide strings through simple obfuscation.\n\nFor production analysis, strings output is piped into IOC extractors like CyberChef, ioc-finder, or custom grep patterns to automatically identify IP addresses, domains, registry keys, and file paths.",
+  "debrief": {
+    "summary": "Strings analysis of the svch0st.exe memory dump reveals two critical IOCs: the hardcoded C2 domain 'c2-panel.darkhosting[.]ru' with API endpoints for check-in and task retrieval, and the XOR key 0x42 used for payload obfuscation. The strings also confirm the registry persistence key and staging file path.",
+    "real_world": "Strings analysis is the fastest initial malware triage technique and is performed on every suspicious binary. IOCs extracted from strings are immediately added to threat intel platforms (MISP, OpenCTI) and used to hunt for the same infrastructure across all monitored environments.",
+    "next_step": "Search all proxy and DNS logs for any queries or connections to darkhosting[.]ru or its subdomains, and add the domain to DNS blacklists and firewall block lists. Use the XOR key to attempt decoding of additional obfuscated configuration data.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCFE",
+    "exam_tip": "The strings command finds ASCII (minimum 4 chars by default) and Unicode strings. Use -a for all sections, -el for little-endian Unicode (Windows PE standard). FLOSS extends strings to decode XOR-obfuscated and stacked strings. Domain names, IPs, registry keys, and User-Agent strings are the most valuable malware IOCs."
+  }
+}

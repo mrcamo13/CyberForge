@@ -16,6 +16,33 @@
     "Hint 3: Type 'tools' in the game. The IOC classifier will analyze\n        the string and identify the encoding type automatically.",
     "Hint 4: SPOILER — The string uses Base64 encoding. The = padding is\n        absent here (padding is optional for some Base64 variants).\n        It decodes to 'deploymaster' — a credential artifact.\n        Type: base64"
   ],
+  "steps": [
+    {
+      "question": "Look at the string \"ZGVwbG95bWFzdGVy\". What type of encoding does this string use?",
+      "valid_answers": ["base64", "base 64", "b64"],
+      "hints": [
+        "Look at the character set: A-Z, a-z, 0-9 with no special symbols — what encoding uses only these characters?",
+        "Base64 encodes binary data using 64 printable characters (A-Za-z0-9+/). The string matches this pattern.",
+        "The string is 16 characters long with no spaces or punctuation — consistent with Base64 without padding",
+        "This is Base64 encoding. The = padding is optional in some variants. Type: base64"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "hex", "response": "Hex only uses 0-9 and a-f. This string has uppercase and lowercase letters — that's not hex."},
+        {"pattern": "rot13", "response": "ROT13 only shifts letters by 13. This string preserves lowercase/uppercase which doesn't match ROT13 output."}
+      ]
+    },
+    {
+      "question": "The string \"ZGVwbG95bWFzdGVy\" decodes to a plaintext value. What does it decode to?",
+      "valid_answers": ["deploymaster", "deploy master"],
+      "hints": [
+        "Base64 is reversible — use CyberChef (https://gchq.github.io/CyberChef/) or a Python one-liner to decode it",
+        "In Python: import base64; base64.b64decode('ZGVwbG95bWFzdGVy').decode()",
+        "The decoded string looks like a username or credential artifact. It has two words joined together.",
+        "The decoded value is 'deploymaster' — an attacker-planted credential in the config file."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "An Indicator of Compromise (IOC) is a piece of evidence that a\nsecurity incident has occurred. IOCs are classified by type so\nthey can be shared, tracked, and acted on.\n\nCommon IOC types:\n  IP address     — source of malicious traffic\n  Domain name    — C2 server or phishing domain\n  File hash      — MD5/SHA256 of a malicious file\n  URL            — malicious link\n  Encoded string — obfuscated data left by an attacker\n\nEncoding types analysts encounter:\n  Base64  — A-Z, a-z, 0-9, +, / characters. Often ends with =\n  Hex     — 0-9, a-f only. Even character count.\n  ROT13   — Only letters, shifted 13 positions\n  URL     — %XX percent-encoded characters\n\nRecognizing encoding on sight is a CySA+ tested skill. The key\nis knowing what each encoding 'looks like' so you can triage quickly\nwithout running a tool on every artifact you encounter.",
   "tools": "Analyzes the artifact string and identifies the encoding type, then decodes it to reveal the plaintext value.",
   "debrief": {

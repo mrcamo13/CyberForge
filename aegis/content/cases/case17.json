@@ -19,6 +19,43 @@
     "Type 'tools' in the game. The memory analyzer flags regions where\n        permissions include execute (x) AND path is [anon]. That combination\n        indicates code running in memory with no file on disk — a hallmark\n        of shellcode injection.",
     "SPOILER — PID 1337 ('update') has rwx permissions and path=[anon].\n        Execute permission on an anonymous (non-file-backed) memory region\n        is a textbook shellcode injection indicator. Type: 1337"
   ],
+  "steps": [
+    {
+      "question": "Look at the memory map. Which process has its memory path listed as '[anon]' (no backing file on disk)?",
+      "valid_answers": ["pid 1337", "1337", "update", "pid:1337"],
+      "hints": [
+        "Normal processes have memory backed by executable files on disk. The path column shows the file path.",
+        "Look at the path column for each PID. Most show a full file path like C:\\Windows\\... What is different about one entry?",
+        "One PID has path=[anon] instead of a real file path. Anonymous memory means the code has no file on disk.",
+        "PID 1337 ('update') has path=[anon] — its memory is not backed by any file on disk."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "3999", "response": "PID 3999 (svchost) does have an unusual large size, but its path still points to a real file on disk. Look for [anon]."}
+      ]
+    },
+    {
+      "question": "PID 1337 has permissions 'rwx' (read, write, execute). Why is rwx on an anonymous memory region suspicious?",
+      "valid_answers": ["shellcode injection", "fileless malware", "executable without file on disk", "code executed in memory", "no disk file"],
+      "hints": [
+        "Normal code is read-only or read-execute — it is written during loading and not changed afterward",
+        "RWX means the memory can be written to AND executed. This is how shellcode works: write it, then execute it.",
+        "Combined with [anon] (no file on disk), rwx permissions indicate shellcode that was written into memory and then executed",
+        "rwx + [anon] = classic shellcode injection. Malicious code was written into memory with no file ever touching disk."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Based on rwx permissions and an anonymous (non-file-backed) memory region, what is the PID of the process showing memory injection indicators?",
+      "valid_answers": ["1337", "pid 1337", "pid:1337"],
+      "hints": [
+        "The key combination is: execute permission (x) AND path=[anon]",
+        "Only one process has both rwx AND [anon] — that is the injection indicator",
+        "PID 1337 named 'update' has rwx permissions and path=[anon] — both criteria for shellcode injection",
+        "PID 1337 is the answer. The name 'update' is a common masquerade for malware. Type: 1337"
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "tools": "Analyzes a memory map for injection indicators: anonymous executable regions, RWX permissions, anomalous process sizes, and known malicious process names.",
   "learn": "Memory forensics reveals what was running in a system at the time of\ncompromise — including malware that never touched disk. This is critical\nfor detecting fileless malware and process injection attacks.\n\nKey memory forensics indicators:\n\nAnonymous executable regions ([anon] with r-x or rwx):\n  Normal processes have memory backed by files on disk.\n  Injected shellcode lives in anonymous memory — no corresponding file.\n  This is how fileless malware and Cobalt Strike beacons hide.\n\nRWX permissions (read + write + execute):\n  Memory that is simultaneously writable and executable is suspicious.\n  Legitimate code: loaded read-only or read-execute. Not writable.\n  Malware: writes shellcode then executes it in the same region.\n\nProcess hollowing indicators:\n  Legitimate process path but unusual base address or size.\n  svchost.exe with very large size or unusual memory layout.\n\nCommon memory forensics tools:\n  Volatility     — Python framework, plugin-based, supports Windows/Linux/macOS\n  Rekall         — Volatility fork, cloud forensics focus\n  WinPmem        — Windows memory acquisition tool\n  LiME           — Linux memory acquisition kernel module\n\nVolatility plugins for this scenario:\n  vol.py -f memory.dmp windows.malfind     — finds injected code regions\n  vol.py -f memory.dmp windows.pslist      — process list\n  vol.py -f memory.dmp windows.cmdline     — process command lines",
   "debrief": {

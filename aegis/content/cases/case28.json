@@ -18,6 +18,63 @@
   ],
   "tools": "Maps implemented controls to NIST CSF functions (Identify, Protect, Detect, Respond, Recover), computes compliance percentage per function, and ranks functions from largest to smallest gap.",
   "learn": "Compliance gap analysis identifies where an organization's security controls fall\nshort of a framework standard. The gap is the distance between current state and\ntarget state.\n\nNIST Cybersecurity Framework (CSF) -- 5 Functions:\n\nIDENTIFY (ID):\n  Know your assets, risks, and business environment.\n  Sub-categories: Asset Management (AM), Risk Assessment (RA), Risk Management (RM)\n  Foundational -- you can't protect what you don't know you have.\n\nPROTECT (PR):\n  Implement safeguards to limit impact of threats.\n  Sub-categories: Access Control (AC), Data Security (DS), Protective Technology (PT)\n\nDETECT (DE):\n  Identify cybersecurity events when they occur.\n  Sub-categories: Anomalies (AE), Continuous Monitoring (CM), Detection Processes (DP)\n\nRESPOND (RS):\n  Take action on detected cybersecurity events.\n  Sub-categories: Response Planning (RP), Communications (CO), Analysis (AN)\n\nRECOVER (RC):\n  Restore capabilities impaired by incidents.\n  Sub-categories: Recovery Planning (RP), Improvements (IM), Communications (CO)\n\nGap analysis process:\n  1. Map implemented controls to framework sub-categories\n  2. Calculate compliance % per function (implemented / total x 100)\n  3. Rank functions by compliance (lowest = biggest gap)\n  4. Build remediation roadmap targeting lowest-compliance functions first\n  5. Present to CISO/board with gap visualization (radar chart is common)\n\nCommon compliance frameworks on CySA+ exam:\n  NIST CSF        -- voluntary, widely adopted, 5 functions\n  NIST SP 800-53  -- federal systems, 20 control families\n  ISO 27001       -- international, Annex A domains\n  PCI-DSS         -- payment card industry, 12 requirements\n  HIPAA           -- healthcare, safeguards (administrative, physical, technical)",
+  "steps": [
+    {
+      "question": "How many NIST CSF controls in the RECOVER function are listed as NOT IMPLEMENTED?",
+      "valid_answers": ["5", "five"],
+      "hints": [
+        "Look only at the RECOVER function rows in the challenge_data or the scenario's control status table.",
+        "The RECOVER function has 6 controls: RC-RP-01, RC-RP-02, RC-IM-01, RC-IM-02, RC-CO-01, RC-CO-02.",
+        "RC-CO-02 is marked IMPLEMENTED. Count the remaining controls marked NOT IMPLEMENTED.",
+        "5 of the 6 RECOVER controls are NOT IMPLEMENTED: RC-RP-01, RC-RP-02, RC-IM-01, RC-IM-02, and RC-CO-01."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "6", "response": "The RECOVER function has 6 total controls, but one (RC-CO-02) is implemented. Count only the NOT IMPLEMENTED ones."},
+        {"pattern": "4", "response": "Count again — RC-RP-01, RC-RP-02, RC-IM-01, RC-IM-02, and RC-CO-01 are all NOT IMPLEMENTED. That is 5."}
+      ]
+    },
+    {
+      "question": "What is the compliance percentage for the RECOVER function (implemented controls / total controls × 100)?",
+      "valid_answers": ["17%", "17", "17 percent"],
+      "hints": [
+        "RECOVER has 6 total controls. Only 1 is implemented (RC-CO-02).",
+        "Compliance % = (implemented / total) × 100 = (1 / 6) × 100.",
+        "1 ÷ 6 = 0.1667. Multiply by 100 = 16.67%, which rounds to approximately 17%.",
+        "RECOVER compliance is 17% — the lowest of all 5 NIST CSF functions. All other functions are at 100%."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "83", "response": "83% would be 5 out of 6 — but that counts the NOT IMPLEMENTED controls. Only 1 of 6 is implemented, giving 17%."},
+        {"pattern": "100", "response": "Identify, Protect, Detect, and Respond are at 100%, but the question asks about RECOVER specifically."}
+      ]
+    },
+    {
+      "question": "Which NIST CSF function has the lowest compliance percentage and represents the biggest gap?",
+      "valid_answers": ["recover", "recovery"],
+      "hints": [
+        "The 5 NIST CSF functions are: Identify, Protect, Detect, Respond, Recover. Calculate the compliance % for each.",
+        "Identify (2/2=100%), Protect (3/3=100%), Detect (2/2=100%), Respond (2/2=100%). Only one function has controls marked NOT IMPLEMENTED.",
+        "Type 'tools' to run the compliance mapper — it calculates and ranks all 5 functions by compliance percentage.",
+        "RECOVER has only 1 of 6 controls implemented = 17% compliance. All other functions are at 100%. RECOVER is the biggest gap."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "respond", "response": "RESPOND has 2 of 2 controls implemented = 100% compliance. Look at the RECOVER function instead."},
+        {"pattern": "identify", "response": "IDENTIFY has 2 of 2 controls implemented = 100% compliance. The gap is in the RECOVER function."}
+      ]
+    },
+    {
+      "question": "Which specific RECOVER sub-category has the most unimplemented controls — Recovery Planning (RP), Improvements (IM), or Communications (CO)?",
+      "valid_answers": ["recovery planning", "rp", "improvements", "im"],
+      "hints": [
+        "The RECOVER function has three sub-categories: RP (Recovery Planning), IM (Improvements), and CO (Communications).",
+        "RP controls: RC-RP-01 (not implemented), RC-RP-02 (not implemented) — 2 controls, both missing.",
+        "IM controls: RC-IM-01 (not implemented), RC-IM-02 (not implemented) — 2 controls, both missing. CO: RC-CO-01 (not implemented), RC-CO-02 (implemented) — 1 of 2 missing.",
+        "Both RP and IM have 0% compliance (2/2 controls missing each). CO has 50% compliance (1/2 implemented). RP and IM are tied for worst."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "co", "response": "CO (Communications) has RC-CO-02 implemented, giving it 50% compliance. RP and IM are both at 0% — worse than CO."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "RECOVER has the lowest compliance at 17% (1 of 6 controls implemented). Identify, Protect, Detect, and Respond are all at 100%. The NIGHTWIRE incident directly exposed this gap -- Veridian had no documented recovery plan, no business continuity test, and no formal lessons-learned process. Operation IRONCLAD must prioritize RECOVER function controls.",
     "real_world": "NIST CSF compliance assessments are used by CISOs to build board-level security roadmaps. The gap analysis output (typically a radar/spider chart) visually shows which functions are mature vs. underdeveloped. After a major incident, the RECOVER function consistently shows the largest gaps. NIST CSF 2.0 (released 2024) added GOVERN as a sixth function.",

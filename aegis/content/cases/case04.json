@@ -16,6 +16,46 @@
     "Hint 3: Type 'tools' in the game. The process analyzer flags\n        processes with anomalous privilege combinations. Look for\n        the process marked as suspicious — that PID is your answer.",
     "Hint 4: SPOILER — PID 1004 is python3.10 running as root with SUID=yes,\n        spawned by another python3.10 process (PID 1001, www-data).\n        This is the SUID privilege escalation from op08 — python3.10\n        was used to spawn a root shell. Type: 1004"
   ],
+  "steps": [
+    {
+      "question": "Look at the process list. Which process is running as root AND has the SUID bit set?",
+      "valid_answers": ["pid 1004", "1004", "pid:1004", "python3.10 pid 1004"],
+      "hints": [
+        "Filter the process table: look for user=root AND SUID=yes at the same time",
+        "PID 1003 (sshd) runs as root but has SUID=no. PID 1004 has both user=root and SUID=yes.",
+        "Only one process in the list has user=root AND SUID=yes — that is the suspicious one.",
+        "PID 1004 is python3.10, user=root, SUID=yes. That combination is the anomaly."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "1001", "response": "PID 1001 has SUID=yes but runs as www-data — not root. Look for user=root AND SUID=yes together."},
+        {"pattern": "1003", "response": "PID 1003 is sshd, which legitimately runs as root but SUID=no. SUID is the critical flag here."}
+      ]
+    },
+    {
+      "question": "PID 1004 (python3.10, root, SUID=yes) was spawned by PID 1001 (python3.10, www-data). Why is this parent-child relationship suspicious?",
+      "valid_answers": ["www-data spawned root", "non-privileged parent", "privilege escalation", "suid abuse", "web process spawned root shell"],
+      "hints": [
+        "Legitimate root processes are normally started by systemd or init — check what PID 1004's parent is",
+        "PID 1004's parent is PID 1001, which is python3.10 running as www-data (the web server user)",
+        "A web server process (www-data) should never be able to spawn a root process — that means SUID was abused",
+        "This is SUID privilege escalation: www-data ran python3.10 which had the SUID bit, causing it to run as root."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "What is the PID of the malicious process that represents the attacker's root access via SUID abuse?",
+      "valid_answers": ["1004", "pid 1004", "pid:1004"],
+      "hints": [
+        "The malicious process is the one running as root via SUID abuse spawned by the web server user",
+        "It is the python3.10 process running as root — not the one running as www-data",
+        "The parent chain: PID 1001 (www-data) → PID 1004 (root via SUID). The attacker's shell is 1004.",
+        "The answer is PID 1004 — the root python3.10 process spawned by www-data through SUID exploitation."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "1001", "response": "PID 1001 is the www-data process that triggered the SUID abuse — the malicious ROOT shell is the child process it spawned."}
+      ]
+    }
+  ],
   "learn": "Process analysis is used to detect malware, unauthorized tools, and\nprivilege escalation in progress on a live system.\n\nSuspicious process indicators:\n  Unexpected user     — web server process (www-data) spawning a shell\n  SUID on interpreters — python, perl, ruby with SUID = privesc risk\n  Unusual parent       — root process spawned by a non-system parent\n  Known tool names     — nc, ncat, python, bash running unexpectedly\n\nNormal parent chain for system processes:\n  systemd → nginx       (expected)\n  systemd → sshd        (expected)\n  bash    → python3.10  (suspicious — interactive shell spawning python)\n  python3 → python3.10  (root) — very suspicious\n\nWhen investigating a process:\n  1. Check the user — should this process run as this user?\n  2. Check SUID — should this binary have the SUID bit?\n  3. Check the parent — how was this process spawned?\n  4. Cross-reference with EDR alerts and system baseline\n\nProcess analysis maps to CySA+ Domain 1 endpoint security and\nanomaly detection objectives.",
   "tools": "Analyzes the process list and flags processes with anomalous privilege combinations (SUID + root + non-system parent).",
   "debrief": {

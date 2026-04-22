@@ -18,6 +18,51 @@
   ],
   "learn": "A port scan probes a host to find which TCP/UDP ports are open\nand what services are listening on them.\n\nCommon port numbers to know:\n  22   — SSH (remote shell)\n  80   — HTTP (web, unencrypted)\n  443  — HTTPS (web, encrypted)\n  3306 — MySQL database\n  8080 — HTTP alternate (dev/staging web servers)\n  8443 — HTTPS alternate\n\nTools used in real engagements:\n  nmap    — the standard. Use -sV for version detection.\n  masscan — faster for large ranges but noisier.\n\nPort scanning is one of the first steps in active reconnaissance.\nIt builds a map of the attack surface before exploitation begins.\nPenTest+ calls this \"enumeration.\"",
   "tools": "Runs a simulated port scan on 203.0.113.47 and displays open ports with service versions.",
+  "steps": [
+    {
+      "question": "Before scanning, determine the target's IP address from the mission briefing. What is the IPv4 address of the NexusCorp host to scan?",
+      "valid_answers": ["203.0.113.47", "203.0.113.47:8080"],
+      "hints": [
+        "The target IP is stated directly in the mission briefing above. Read the GHOST transmission carefully.",
+        "It is a standard IPv4 address in dotted-decimal notation. Look for the format xxx.xxx.xxx.xxx in the scenario text.",
+        "The address falls in the 203.0.113.0/24 range — a TEST-NET range used in documentation (RFC 5737).",
+        "SPOILER — The target host is 203.0.113.47, as stated in the GHOST transmission. Type: 203.0.113.47"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "10.0.0", "response": "10.0.0.x is an internal/private range. The target is an external host in the 203.0.113.x range."},
+        {"pattern": "localhost", "response": "localhost (127.0.0.1) is your own machine. The target is a remote NexusCorp host."}
+      ]
+    },
+    {
+      "question": "How many TCP ports are open on 203.0.113.47? Run the port scan to find out.",
+      "valid_answers": ["1", "one"],
+      "hints": [
+        "Type 'tools' to run the simulated port scan. Count how many ports are listed as OPEN in the results.",
+        "Real-world command: nmap -sV 203.0.113.47 — the -sV flag identifies service versions on each open port.",
+        "The scan output lists each open port on its own line with the service name alongside it. Count those lines.",
+        "SPOILER — The scan finds exactly 1 open port on this host. Type: 1"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "0", "response": "At least one port is open — that is how we know a service is running. Run the scan to confirm."},
+        {"pattern": "65535", "response": "65535 is the total number of possible TCP ports, not the number open on this host. Run the scan to see which ones respond."}
+      ]
+    },
+    {
+      "question": "Which port is the web service running on at 203.0.113.47?",
+      "valid_answers": ["8080", "port 8080"],
+      "hints": [
+        "Type 'tools' to run the simulated port scan. Look for the port labeled \"http\" or \"http-alt\" in the results.",
+        "Web services run on common ports. The standard HTTP port is 80, but developers often use alternatives for staging environments.",
+        "Port 8080 is commonly called \"http-alt\" — it is a non-standard HTTP port frequently used for dev and staging web servers.",
+        "SPOILER — The scan shows port 8080 open with service \"http-alt\". Type: 8080"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "80", "response": "Port 80 is standard HTTP, but it is not open here. Check the scan output for the actual open port."},
+        {"pattern": "443", "response": "Port 443 is HTTPS and is not open on this host. Run the scan and look at what is actually open."},
+        {"pattern": "22", "response": "Port 22 is SSH — useful for remote shell access, but the question asks for the web service port. Check the scan."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You ran a simulated port scan against NexusCorp host 203.0.113.47\nand identified port 8080 running a web service (nginx). Port scanning is\nthe foundation of active reconnaissance — it tells you what doors exist\nbefore you try to open them.",
     "real_world": "Every real penetration test begins with port scanning. Testers\nuse nmap with -sV to enumerate services, then pivot to vulnerability\nassessment on each open port. Finding a web server on a non-standard port\nlike 8080 often means a dev or staging environment — these are frequently\nless hardened than production.",

@@ -16,6 +16,33 @@
     "Hint 3: Type 'tools' in the game. The log filter highlights all entries\n        where an internal IP (10.0.0.x) received HTTP 200 on the admin\n        path. The IP address in those lines is your answer.",
     "Hint 4: SPOILER — IP 10.0.0.99 accessed /admin/dashboard three times\n        with HTTP 200 status. External IP 203.0.113.91 tried the same\n        path but got 404. Type: 10.0.0.99"
   ],
+  "steps": [
+    {
+      "question": "Look at the access log. Which IP address accessed the /admin/dashboard path and received an HTTP 200 status code?",
+      "valid_answers": ["10.0.0.99"],
+      "hints": [
+        "The log format is: IP - - [timestamp] \"METHOD /path HTTP/version\" STATUS SIZE",
+        "Filter for lines that contain /admin/dashboard — only some entries have that path",
+        "Status code 200 means success. Status 404 means not found. Look for 200.",
+        "IP 10.0.0.99 appears three times with /admin/dashboard and status 200. External IP 203.0.113.91 got a 404."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "203.0.113.91", "response": "That IP tried /admin/dashboard but got a 404 — not found. Look for a 200 status."},
+        {"pattern": "203.0.113.44", "response": "That IP accessed / and /about — not the admin panel. Filter for /admin/dashboard."}
+      ]
+    },
+    {
+      "question": "The IP accessed /admin/dashboard three times. All accesses occurred outside normal business hours (9 AM–5 PM UTC). What does this access pattern indicate about the nature of this activity?",
+      "valid_answers": ["unauthorized access", "suspicious", "after hours access", "unauthorized internal access", "insider threat"],
+      "hints": [
+        "Check the timestamps: 02:14, 02:14, and 03:02 UTC — what time of day is that?",
+        "An internal IP (10.0.0.x) accessing an admin panel outside business hours should raise flags",
+        "Consider whether this looks like normal admin work or anomalous behavior",
+        "Repeated access to a restricted admin path from an internal IP between 2 AM and 3 AM is a key indicator of unauthorized access or a compromised internal host."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "Log analysis is the foundation of security operations. When a SIEM\ntriggers an alert, the analyst pulls the relevant logs and filters\nthem to understand what happened, who did it, and when.\n\nStandard Apache/nginx log format:\n  IP - - [timestamp] \"METHOD /path HTTP/ver\" STATUS SIZE\n\nKey fields for triage:\n  Source IP     — internal (10.x) vs external (public IP)\n  Request path  — what resource was accessed\n  Status code   — 200 = success, 404 = not found, 403 = blocked\n  Timestamp     — when it happened (look for after-hours activity)\n\nSOC analyst workflow:\n  1. Identify the anomaly (unusual IP, path, status, or time)\n  2. Determine scope (how many requests, from where, how long)\n  3. Classify (authorized user? insider threat? external attacker?)\n  4. Escalate or close based on severity\n\nCySA+ Domain 1 heavily tests log analysis — it is the single most\ncommon skill tested in Security Operations questions.",
   "tools": "Filters the web server access log for entries where an internal IP (10.0.0.x) received HTTP 200 on the /admin/dashboard path.",
   "debrief": {

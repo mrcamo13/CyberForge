@@ -16,6 +16,46 @@
     "Type 'tools' in the game. The ATT&CK mapper searches for keywords\nfrom the behavior description. Look for the technique flagged as\nmatching 'SUID' or 'setuid' in the output.",
     "SPOILER — T1548.001 is the sub-technique 'Abuse Elevation Control\nMechanism: Setuid and Setgid'. The parent T1548 is too broad — the\nexam and this challenge expect the specific sub-technique.\nTactic: Privilege Escalation. Mitigation: remove unnecessary SUID bits.\nType: T1548.001"
   ],
+  "steps": [
+    {
+      "question": "The attacker abused a misconfigured SUID bit on python3 to gain root access. What MITRE ATT&CK tactic does this behavior fall under?",
+      "valid_answers": ["privilege escalation", "priv esc", "privesc"],
+      "hints": [
+        "MITRE ATT&CK organizes techniques under Tactics. Tactics describe the attacker's goal.",
+        "The attacker went from www-data (low privilege) to root (high privilege) — what goal does that describe?",
+        "The 14 ATT&CK tactics include: Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion...",
+        "Moving from a low-privilege to a high-privilege account is the Privilege Escalation tactic."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "execution", "response": "Execution describes running malicious code. The goal here was gaining higher privileges — a different tactic."},
+        {"pattern": "persistence", "response": "Persistence means maintaining access over time. Gaining root from www-data is Privilege Escalation."}
+      ]
+    },
+    {
+      "question": "On the MITRE ATT&CK framework, SUID/SGID binary abuse falls under technique T1548. What is the specific sub-technique ID for exploiting setuid binaries?",
+      "valid_answers": ["t1548.001", "1548.001"],
+      "hints": [
+        "Go to https://attack.mitre.org/ and search 'setuid' — look for the sub-technique under T1548",
+        "T1548 is 'Abuse Elevation Control Mechanism'. Sub-techniques specify the exact method. SUID is sub-technique .001",
+        "Sub-technique format is TXXXX.XXX — the parent is T1548, and SUID is the first sub-technique",
+        "The sub-technique ID for Setuid and Setgid abuse is T1548.001. Type: T1548.001"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "t1548$", "response": "T1548 is the parent technique — too broad. The exam expects the specific sub-technique for SUID/SGID abuse."}
+      ]
+    },
+    {
+      "question": "What is the MITRE ATT&CK Technique ID for exploiting SUID binaries to gain elevated privileges?",
+      "valid_answers": ["t1548.001", "1548.001"],
+      "hints": [
+        "MITRE ATT&CK sub-technique for Setuid and Setgid is listed under Privilege Escalation",
+        "The parent technique is T1548 (Abuse Elevation Control Mechanism). SUID is the first sub-technique.",
+        "Search https://attack.mitre.org/techniques/T1548/ and look for the .001 sub-technique",
+        "The answer is T1548.001 — Abuse Elevation Control Mechanism: Setuid and Setgid. Type: T1548.001"
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "learn": "MITRE ATT&CK is the industry-standard framework for describing adversary\ntactics, techniques, and procedures (TTPs). CySA+ CS0-003 requires\nanalysts to map observed behaviors to ATT&CK techniques.\n\nFramework structure:\n  Tactics    — the adversary's goal (e.g. Privilege Escalation)\n  Techniques — how they achieve it (e.g. T1548)\n  Sub-techniques — specific variants (e.g. T1548.001 = Setuid/Setgid)\n  Mitigations — how defenders prevent it\n  Detections  — how defenders detect it\n\nKey ATT&CK tactics for CySA+:\n  Initial Access       — how they got in (T1190 web exploit, T1078 valid accounts)\n  Execution            — running malicious code (T1059 command interpreter)\n  Persistence          — maintaining access (T1053 scheduled tasks)\n  Privilege Escalation — gaining higher access (T1548 SUID/SGID)\n  Defense Evasion      — hiding from detection (T1027 obfuscation)\n  Command and Control  — communicating with attacker (T1071 app layer protocol)\n  Exfiltration         — stealing data (T1041 exfil over C2)\n\nFor the NexusCorp attack, the full kill chain maps to:\n  T1190 → T1078 → T1059.004 → T1548.001 → T1071.001",
   "tools": "Searches the embedded MITRE ATT&CK technique reference for keywords from the behavior description.",
   "debrief": {

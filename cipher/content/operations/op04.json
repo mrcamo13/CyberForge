@@ -18,6 +18,51 @@
   ],
   "learn": "Web server access logs record every HTTP request made to the server.\nStandard Apache/nginx log format:\n\n  IP - - [date time] \"METHOD /path HTTP/version\" STATUS_CODE SIZE\n\nStatus codes to know:\n  200 — OK (request succeeded)\n  301 — Redirect (resource moved)\n  403 — Forbidden (resource exists but access blocked)\n  404 — Not Found (resource does not exist or is hidden)\n  500 — Server Error\n\nDuring recon, log analysis reveals:\n- Hidden paths that return 200 for internal IPs but 404 externally\n- Admin panels accessed only from internal network addresses\n- Backup files (.bak, .old) that were accidentally served\n- Rate of failed logins suggesting brute force attempts\n\nIn a real engagement, access to server logs is a goldmine.\nEven read-only log access can map the entire application structure.",
   "tools": "Parses the server access log and highlights paths returning HTTP 200 from internal IPs (10.0.0.x).",
+  "steps": [
+    {
+      "question": "Examine the access log. Which IP address range belongs to NexusCorp's internal network (the range that successfully reaches the admin panel)?",
+      "valid_answers": ["10.0.0.x", "10.0.0", "10.x", "10.", "10/8", "10.0.0.0/8", "10.0.0.0/24"],
+      "hints": [
+        "Web server logs record the source IP of every request. Compare which IPs get HTTP 200 vs HTTP 404 on the admin path.",
+        "There are two classes of IP in this log: external addresses starting with 203.x.x.x and internal addresses in a private range.",
+        "RFC 1918 defines private IP ranges: 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16. One of those appears in the log.",
+        "SPOILER — 10.0.0.15 is the internal IP that consistently receives HTTP 200 on the admin path. The range is 10.0.0.x. Type: 10.0.0"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "203.0.113", "response": "203.0.113.x addresses are external IPs — they get HTTP 404 on the admin path. Look for the IP that gets HTTP 200."},
+        {"pattern": "192.168", "response": "192.168.x.x is a valid private range, but it does not appear in this log. Check the actual IP addresses recorded."}
+      ]
+    },
+    {
+      "question": "Filter the log for HTTP 200 responses from internal IPs. How many times does the internal host successfully access the hidden admin path?",
+      "valid_answers": ["3", "three", "3 times", "three times"],
+      "hints": [
+        "Scan the log for lines where the IP starts with 10. and the status code is 200. Count those entries.",
+        "Real-world command: grep \" 200 \" access.log | grep \"^10\\.\" — this filters for 200 responses from internal IPs.",
+        "Type 'tools' in the game to run the log analyzer. It highlights all 200-status requests from 10.x.x.x addresses.",
+        "SPOILER — 10.0.0.15 appears 3 times in the log, each time with a 200 response on the admin path. Type: 3"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "1", "response": "There is more than one successful access. Check all log lines with IP 10.0.0.15 and status 200."},
+        {"pattern": "7", "response": "7 is the total number of log entries. Filter for only the internal IP (10.0.0.x) and only HTTP 200 responses."}
+      ]
+    },
+    {
+      "question": "What is the path of the admin panel that only internal IPs can successfully access? (include the leading /)",
+      "valid_answers": ["/admin/dashboard", "/admin/dashboard/"],
+      "hints": [
+        "Look at the URL path in each log entry from the internal IP 10.0.0.15 that returned HTTP 200.",
+        "Log format: IP - - [timestamp] \"GET /path HTTP/1.1\" STATUS SIZE — the path is between GET and HTTP/1.1.",
+        "Type 'tools' to run the simulated log analyzer. It highlights the 200-status lines from internal IPs and their paths.",
+        "SPOILER — 10.0.0.15 accesses /admin/dashboard three times and gets 200 each time. External IPs get 404 on that path. Type: /admin/dashboard"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "/login", "response": "/login is in the log but is accessed by external IPs. Look for the path that only 10.0.0.15 can reach successfully."},
+        {"pattern": "/admin", "response": "Close — but the full path includes a subdirectory. Read the complete URL from the log entries for 10.0.0.15."},
+        {"pattern": "dashboard", "response": "Correct word, but the answer needs the full path starting with /. Include the leading slash and the parent directory."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You analyzed NexusCorp's web server access log and identified\n/admin/dashboard — a hidden admin panel accessible only from internal IPs.\nLog analysis during recon reveals paths, behaviors, and access patterns\nthat are invisible from the outside.",
     "real_world": "Pentesters review logs whenever they gain read access to a system.\nAccess logs expose admin panels, backup files, API endpoints, and\ncredential-stuffing attempts. Even a small log excerpt can significantly\nnarrow the attack surface before active exploitation begins.",

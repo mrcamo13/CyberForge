@@ -1,0 +1,70 @@
+{
+  "id": "case07",
+  "title": "C2 Beacon",
+  "stage": "stage2",
+  "difficulty": 2,
+  "xp_base": 150,
+  "tools_type": "mem_analyzer",
+  "scenario": "The malicious process svch0st.exe (PID 5124) has been identified on the compromised workstation. Memory forensics suggests the process is actively communicating outbound. Using Volatility's network analysis plugin on the memory dump, you can see all active and recently-closed network connections — including ones that may have already been cleared from the OS. Identify the command and control server the malware is phoning home to.",
+  "challenge": "What is the IP address of the C2 server the malware is beaconing to?",
+  "challenge_data": "$ python3 vol.py -f meridian-wkstn047.mem windows.netstat\nVolatility 3 Framework 2.7.0\nProgress:  100.00\n\nOffset    Proto  LocalAddr          LocalPort  ForeignAddr        ForeignPort  State         PID    Owner              Created\n\n0xf806011a2010  TCPv4  0.0.0.0            135        0.0.0.0            0            LISTENING     732    svchost.exe        2026-03-28 08:14:06\n0xf806012b3020  TCPv4  0.0.0.0            445        0.0.0.0            0            LISTENING     4      System             2026-03-28 08:14:02\n0xf806014c4030  TCPv4  0.0.0.0            5040       0.0.0.0            0            LISTENING     840    svchost.exe        2026-03-28 08:14:07\n0xf806016d5040  TCPv4  0.0.0.0            7680       0.0.0.0            0            LISTENING     972    svchost.exe        2026-03-28 08:14:08\n0xf806018e6050  TCPv4  10.0.0.47          49821      10.0.0.25          88           ESTABLISHED   624    lsass.exe          2026-03-28 08:14:05\n0xf80601af7060  TCPv4  10.0.0.47          52341      142.250.80.46      443          ESTABLISHED   3104   chrome.exe         2026-03-31 21:33:11\n0xf80601c08070  TCPv4  10.0.0.47          52344      142.250.80.102     443          ESTABLISHED   3104   chrome.exe         2026-03-31 21:33:44\n0xf80601d19080  TCPv4  10.0.0.47          53012      185.220.101.47     4444         ESTABLISHED   5124   svch0st.exe        2026-03-31 21:44:31\n0xf80601e2a090  TCPv4  10.0.0.47          49901      10.0.0.10          389          ESTABLISHED   732    svchost.exe        2026-03-28 08:22:44\n0xf80601f3b0a0  UDPv4  0.0.0.0            5353       *                  *            ---           972    svchost.exe        2026-03-28 08:14:08\n0xf8060204c0b0  UDPv4  0.0.0.0            1900       *                  *            ---           972    svchost.exe        2026-03-28 08:14:08\n\n[Threat Intel Lookup: 185.220.101.47]\n  ASN     : AS4224 - Tor Project Exit Relay\n  Country : Netherlands\n  Type    : Known Tor Exit Node\n  Blacklist: ABUSE.CH, Emerging Threats, AlientVault OTX\n  Note    : Port 4444 is the default Metasploit listener port",
+  "valid_answers": ["185.220.101.47", "185.220.101.47:4444", "185.220.101.47 port 4444", "the c2 ip is 185.220.101.47"],
+  "hints": [
+    "The windows.netstat plugin shows all network connections associated with running processes. Look for connections from the suspicious process svch0st.exe (PID 5124).",
+    "Filter the output by PID 5124 — there is exactly one network connection associated with svch0st.exe. Note the state and the foreign address.",
+    "svch0st.exe (PID 5124) has an ESTABLISHED connection. The foreign address is the server it is connected to. The port number is also a significant clue.",
+    "The connection from svch0st.exe (PID 5124) goes to 185.220.101.47 on port 4444. Port 4444 is the default Metasploit listener port, and the threat intel lookup identifies 185.220.101.47 as a Tor exit node used for C2 communications."
+  ],
+  "steps": [
+    {
+      "question": "Looking at the netstat output, which PID has an ESTABLISHED outbound connection that is NOT to an internal IP (10.x.x.x)?",
+      "valid_answers": ["5124", "pid 5124", "svch0st.exe pid 5124", "svch0st"],
+      "hints": [
+        "Scan the ForeignAddr column. Most connections go to internal IPs (10.x.x.x) or are in LISTENING state. One connection goes to an external IP.",
+        "ESTABLISHED connections show active sessions. Look for an ESTABLISHED connection where the ForeignAddr is not a 10.x.x.x address.",
+        "The suspicious process svch0st.exe (PID 5124) identified earlier should have a suspicious network connection. Look for its PID in the PID column.",
+        "PID 5124 (svch0st.exe) has the only ESTABLISHED connection to an external public IP address. All other external connections belong to chrome.exe (a browser)."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "3104", "response": "PID 3104 is chrome.exe — browser connections to external IPs are expected. Look for a non-browser process with an external ESTABLISHED connection."},
+        {"pattern": "chrome", "response": "chrome.exe connections to external IPs are normal browser traffic. Look for a different process with an unexpected external connection."}
+      ]
+    },
+    {
+      "question": "What is the foreign IP address and port that svch0st.exe (PID 5124) is connected to?",
+      "valid_answers": ["185.220.101.47:4444", "185.220.101.47 port 4444", "185.220.101.47 4444"],
+      "hints": [
+        "Find the row with PID 5124. Look at the ForeignAddr and ForeignPort columns.",
+        "The ForeignAddr column shows the remote IP, and ForeignPort shows the port number.",
+        "The connection from PID 5124 goes to a specific IP address on port 4444.",
+        "The row for svch0st.exe (PID 5124) shows ForeignAddr: 185.220.101.47 and ForeignPort: 4444."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "443", "response": "Port 443 is used by chrome.exe for HTTPS. Look at PID 5124's row specifically for the port number."},
+        {"pattern": "88", "response": "Port 88 is used by lsass.exe for Kerberos. Look at the row for PID 5124."}
+      ]
+    },
+    {
+      "question": "What is the IP address of the C2 server the malware is beaconing to?",
+      "valid_answers": ["185.220.101.47", "185.220.101.47:4444", "185.220.101.47 port 4444"],
+      "hints": [
+        "You found the connection from svch0st.exe. The ForeignAddr is the C2 server's IP address.",
+        "The threat intel lookup at the bottom of the output confirms what this IP address is.",
+        "The threat intel lookup for this IP identifies it as a known Tor exit node on multiple blacklists.",
+        "The C2 IP is 185.220.101.47 — identified by threat intel as an AS4224 Tor Project exit relay, blacklisted on ABUSE.CH and Emerging Threats."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "10.0.0", "response": "10.x.x.x are internal IP addresses. The C2 server is at an external public IP — look at the ForeignAddr for PID 5124."},
+        {"pattern": "142", "response": "142.250.x.x are Google IP addresses used by Chrome. Look for the connection belonging to PID 5124 (svch0st.exe)."}
+      ]
+    }
+  ],
+  "learn": "Network connections preserved in memory are one of the most valuable forensic artifacts for identifying active compromise. Even if an attacker clears Windows network logs or firewall logs, the kernel-level network state stored in memory captures connections that are actively established at the time of the dump.\n\nVolatility network plugins:\n- windows.netstat: Reads the TCP/UDP endpoint tables from memory (equivalent to running 'netstat -ano' on the live system). Shows current connections with owning process.\n- windows.netscan: Scans raw memory pool allocations for network-related structures. Finds recently-closed connections that are no longer active but still in memory. More comprehensive than netstat.\n\nFor DFIR triage, windows.netscan is preferred over windows.netstat because it captures more historical connection data.\n\nSuspicious indicators in this output:\n1. svch0st.exe (PID 5124) — already identified as malicious\n2. Port 4444 — the default Metasploit meterpreter listener port\n3. 185.220.101.47 — a known Tor exit node (used to anonymize the attacker's true IP)\n4. ESTABLISHED state — the connection is active, not just listening\n\nCommon C2 ports to know for exams:\n- 4444 — Metasploit default\n- 8080 / 8443 — HTTP/HTTPS mimicry (blends with web traffic)\n- 53 — DNS C2 (highly evasive, tunnels data in DNS queries)\n- 443 — HTTPS C2 (encrypted, blends with normal web traffic)\n- 1337 — leet speak, common in older malware\n- 31337 — elite, common in older RATs\n\nWhy Tor exit nodes appear in C2:\nAttackers route C2 traffic through the Tor network to anonymize their true IP address. Traffic exits the Tor network through exit nodes (like 185.220.101.47) before reaching the victim. This makes tracing back to the attacker extremely difficult without Tor-level cooperation.\n\nPivoting methodology: When you find a suspicious process, always check its network connections. When you find a suspicious connection, always check what process owns it. The process → network → external IP pivot is a core memory forensics workflow.",
+  "debrief": {
+    "summary": "svch0st.exe (PID 5124) maintains an active ESTABLISHED connection to 185.220.101.47 on port 4444 — the default Metasploit C2 port. The external IP is a known Tor exit node, consistent with a sophisticated attacker routing C2 traffic through Tor to obscure their true location.",
+    "real_world": "Memory-resident network connections are captured even when network logs have been wiped. Security teams correlate this data with firewall logs to determine the full timeline of C2 activity and identify all compromised hosts that contacted the same C2 infrastructure.",
+    "next_step": "Immediately block 185.220.101.47 at the perimeter firewall and NGFW, search all proxy and firewall logs for other internal hosts that have connected to this IP, and hunt for additional compromised systems across the environment.",
+    "cert_link": "CySA+ CS0-003 Domain 1 (Security Operations) and Domain 4, GCFA",
+    "exam_tip": "Port 4444 = Metasploit default C2. Port 53 = DNS tunneling/C2. Port 443 from a non-browser process = suspicious HTTPS C2. Use windows.netscan (not just netstat) in Volatility to find recently-closed connections in addition to active ones."
+  }
+}

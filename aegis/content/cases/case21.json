@@ -20,6 +20,44 @@
     "Type 'tools' in the game. The timeline builder sorts all events,\n        labels IR phases, and annotates gaps. Find the gap annotation\n        between the persistence phase and the active operations phase.",
     "SPOILER — From 2026-03-20T14:02 to 2026-04-05T22:14:\n        16 days x 24h = 384 hours, plus 22:14 minus 14:02 = 8h 12m ~ 8 hours.\n        Total: approximately 392 hours (16.3 days of dormancy).\n        This is classic APT behavior — establish persistence, go quiet,\n        activate weeks later when defenders have stopped looking.\n        Type: 392"
   ],
+  "steps": [
+    {
+      "question": "From the timeline, when did NIGHTWIRE establish persistence (Run key modification)?",
+      "valid_answers": ["2026-03-20t14:02", "2026-03-20 14:02", "march 20 14:02", "march 20 2026"],
+      "hints": [
+        "Look through the raw events list for the registry event — Run key modification",
+        "The event is labeled: registry — HKLM\\...\\Run key modified — persistence established",
+        "The timestamp for the Run key persistence event is listed in the timeline data",
+        "NIGHTWIRE established Run key persistence on 2026-03-20 at 14:02 UTC."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "From the timeline, when was NIGHTWIRE's first confirmed active operation (the external root login)?",
+      "valid_answers": ["2026-04-05t22:14", "2026-04-05 22:14", "april 5 22:14", "april 5 2026"],
+      "hints": [
+        "Look for the syslog event showing successful external authentication",
+        "The event is labeled: syslog — auth_success — external root login",
+        "The timestamp for the first active operation (external root login) is in the timeline",
+        "The first active operation (external root login) occurred on 2026-04-05 at 22:14 UTC."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "How many hours elapsed between NIGHTWIRE establishing persistence (2026-03-20T14:02) and their first confirmed active operation (2026-04-05T22:14)?",
+      "valid_answers": ["392", "392 hours", "approximately 392 hours", "about 392 hours"],
+      "hints": [
+        "Calculate the difference from March 20 14:02 to April 5 22:14",
+        "Step 1: Days between March 20 and April 5 = 16 days. Step 2: 16 × 24 hours = 384 hours.",
+        "Step 3: Add the time difference within the day: from 14:02 to 22:14 = 8 hours 12 minutes ≈ 8 hours.",
+        "384 hours + 8 hours = 392 hours total dormancy. NIGHTWIRE waited 16.3 days before activating. Type: 392"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "384", "response": "Close — you have the day count right (16 days = 384 hours), but don't forget the additional hours within the day (14:02 to 22:14 = about 8 more hours)."},
+        {"pattern": "400", "response": "Check the time calculation again: March 20 14:02 to April 5 22:14 = 16 days + 8h 12m ≈ 392 hours, not 400."}
+      ]
+    }
+  ],
   "tools": "Sorts timeline events chronologically, identifies gaps over 1 hour, labels each event with the appropriate IR phase, and summarizes phase transitions.",
   "learn": "Incident timeline reconstruction is how IR teams understand the full scope\nof a breach — from first foothold to containment. Timelines are built from\nmulti-source evidence and presented in final IR reports.\n\nTimeline reconstruction process:\n  1. Collect timestamps from all available sources\n     (logs, file system metadata, memory artifacts, EDR telemetry)\n  2. Normalize timestamps to UTC (different sources may use local time)\n  3. Sort chronologically\n  4. Identify gaps — periods with no recorded activity\n  5. Map events to IR phases (Preparation, Detection, Containment, etc.)\n  6. Identify the initial access event (earliest attacker activity)\n\nKey timeline concepts:\n\nDwell time:\n  Time between initial compromise and detection.\n  NIGHTWIRE dwell: ~22 days (March 20 to April 11).\n  Industry average APT dwell: ~21 days (2023, CrowdStrike data).\n\nInitial access vs. first active operation:\n  Attackers often establish persistence, then go dormant.\n  Dormancy avoids detection by blending into normal baselines.\n  Activation comes later when defenders have relaxed.\n\nTimeline gaps:\n  Gaps > 1 hour in forensic evidence may indicate:\n  - Log rotation or deletion (attacker covering tracks)\n  - Attacker dormancy (waiting for opportunity)\n  - Evidence collection gap (log source not captured)\n\nIR phase timeline:\n  Detection phase start: when the first alert fired or anomaly was noticed.\n  Containment phase start: when the first containment action was taken.\n  Eradication phase start: when attacker tools were removed.\n  Recovery phase start: when normal operations resumed.\n\nThe timeline is the backbone of the final IR report and is used to calculate\nmetrics like Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR).",
   "debrief": {

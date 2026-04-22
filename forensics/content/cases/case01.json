@@ -1,0 +1,71 @@
+{
+  "id": "case01",
+  "title": "The Disguised File",
+  "stage": "stage1",
+  "difficulty": 1,
+  "xp_base": 100,
+  "tools_type": "file_analyzer",
+  "scenario": "A suspicious file named 'holiday_party.jpg' was found on the HR server during a routine security audit. The file has a .jpg extension, but the security team suspects it is not actually an image. Your job is to analyze the file signature to determine its true type. Extension-based filtering would have allowed this file through — magic bytes tell a different story.",
+  "challenge": "What is the true file type of holiday_party.jpg?",
+  "challenge_data": "$ file holiday_party.jpg\nholiday_party.jpg: Composite Document File V2 Document, Little Endian, Os: Windows, Version 10.0, Code page: 1252, Author: k.anderson, Last Saved By: k.anderson, Name of Creating Application: Microsoft Word, Template: Normal.dotm, Last Saved Time/Date: Wed Apr 1 14:22:31 2026, Create Time/Date: Mon Mar 30 09:14:05 2026, Security: 0\n\n$ hexdump -C holiday_party.jpg | head -4\n00000000  d0 cf 11 e0 a1 b1 1a e1  00 00 00 00 00 00 00 00  |................|\n00000010  00 00 00 00 00 00 00 00  3e 00 03 00 fe ff 09 00  |........>.......||\n00000020  06 00 00 00 00 00 00 00  00 00 00 00 01 00 00 00  |................|\n00000030  01 00 00 00 00 00 00 00  00 10 00 00 01 00 00 00  |................|\n\n$ xxd holiday_party.jpg | head -2\n00000000: d0cf 11e0 a1b1 1ae1 0000 0000 0000 0000  ................\n00000010: 0000 0000 0000 0000 3e00 0300 feff 0900  ........>.......\n\nFile Extension : .jpg\nDetected Type  : OLE2 Compound Document (Microsoft Office)\nMagic Bytes    : D0 CF 11 E0 A1 B1 1A E1\nExpected JPEG  : FF D8 FF\nMismatch       : YES — extension does not match file signature",
+  "valid_answers": ["microsoft word", "word document", "doc", "ole compound document", "composite document", "ms word", "word", "ole2", "ole document"],
+  "hints": [
+    "The `file` command ignores the extension and reads the actual bytes. Look at what it reports the file type to be.",
+    "The first bytes of any file are called the magic bytes or file signature. Compare the detected magic bytes to the expected JPEG signature (FF D8 FF).",
+    "The magic bytes D0 CF 11 E0 indicate this is an OLE2 Compound Document — the container format used by older Microsoft Office applications.",
+    "The `file` command output says 'Composite Document File V2 Document' and mentions 'Microsoft Word' as the creating application. The true type is a Microsoft Word document."
+  ],
+  "steps": [
+    {
+      "question": "What does the `file` command report as the file type of holiday_party.jpg?",
+      "valid_answers": ["composite document file v2 document", "composite document file", "ole2 compound document", "microsoft word", "word document", "ole2"],
+      "hints": [
+        "The `file` command reads the actual file bytes rather than trusting the extension.",
+        "Look at the first line of output from the `file` command — it describes the file type in plain English.",
+        "The output begins: 'holiday_party.jpg: Composite Document File V2 Document...' — what format does that describe?",
+        "The `file` command reports 'Composite Document File V2 Document' — this is the OLE2 format used by Microsoft Office."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "jpeg", "response": "JPEG magic bytes start with FF D8 FF — check the hexdump for what is actually there."},
+        {"pattern": "jpg", "response": "The extension says .jpg but the `file` command ignores extensions and reads the actual bytes."},
+        {"pattern": "pdf", "response": "PDF magic bytes are 25 50 44 46 (%PDF). Look at the `file` command output for what it actually reports."}
+      ]
+    },
+    {
+      "question": "What are the first 4 magic bytes (in hex) that identify this file type?",
+      "valid_answers": ["d0 cf 11 e0", "d0cf11e0", "D0 CF 11 E0", "D0CF11E0", "d0 cf 11 e0 a1 b1 1a e1"],
+      "hints": [
+        "Magic bytes are the first bytes of a file that identify its true format. Look at the hexdump output.",
+        "The hexdump shows the bytes at offset 00000000 — the very first line of the file.",
+        "In the hexdump, the first four byte values on the first line are the magic signature.",
+        "The first four bytes visible in the hexdump are: d0 cf 11 e0 — these are the OLE2 compound document magic bytes."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "ff d8 ff", "response": "FF D8 FF is the JPEG magic signature — but look at what is actually at offset 00000000 in the hexdump."},
+        {"pattern": "4d 5a", "response": "4D 5A (MZ) is the Windows executable signature. Read the hexdump first line carefully."}
+      ]
+    },
+    {
+      "question": "Who is listed as the original author embedded in the OLE metadata?",
+      "valid_answers": ["k.anderson", "anderson", "k anderson"],
+      "hints": [
+        "The `file` command extracted metadata from inside the OLE2 document structure.",
+        "Look at the full `file` command output — it includes several metadata fields extracted from the document.",
+        "The output from the `file` command includes an 'Author:' field.",
+        "The `file` command output shows 'Author: k.anderson' — this is the username embedded in the document metadata."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "microsoft", "response": "Microsoft is the application vendor, not the author. Look for the 'Author:' field in the `file` output."},
+        {"pattern": "windows", "response": "Windows is the OS, not the document author. The 'Author:' field in the `file` output has the name."}
+      ]
+    }
+  ],
+  "learn": "File signatures, also called magic bytes or magic numbers, are sequences of bytes at the beginning of a file that identify its format. Unlike file extensions — which are just part of the filename and trivially changed — magic bytes are embedded in the file content itself and reveal the true format regardless of what the file is named.\n\nThe `file` command on Linux/macOS uses a database of magic byte signatures (typically stored in /usr/share/misc/magic) to identify file types without relying on extensions. This makes it one of the first tools a forensic analyst runs on any unknown file.\n\nKey magic bytes every DFIR analyst should memorize:\n- FF D8 FF — JPEG image\n- 89 50 4E 47 — PNG image (PNG)\n- 25 50 44 46 — PDF file (%PDF in ASCII)\n- 50 4B 03 04 — ZIP archive / DOCX / XLSX / JAR (PK in ASCII)\n- 4D 5A — Windows PE executable (MZ in ASCII)\n- 7F 45 4C 46 — Linux ELF binary\n- D0 CF 11 E0 — Microsoft OLE2 Compound Document (Word .doc, Excel .xls, PowerPoint .ppt pre-2007)\n- 52 61 72 21 — RAR archive\n\nThe OLE2 (Object Linking and Embedding) format is the container used by Microsoft Office versions prior to Office 2007. Modern Office formats (.docx, .xlsx) use ZIP containers instead. The OLE2 signature D0 CF 11 E0 (sometimes called 'DOCFILE' in the Microsoft spec) is unambiguous.\n\nAttackers rename files to disguise malware and bypass naive file-type filters that only check extensions. This technique is also used to smuggle malicious documents past email gateways that only block .doc or .exe files. Real-world examples include malware disguised as .jpg or .pdf files, and executable payloads renamed with innocent extensions.\n\nFor DFIR exams: always verify file type with magic bytes before trusting the extension. The `file` command, TrID, and Detect-It-Easy (DIE) are common tools for this task. In automated forensics pipelines, tools like YARA use magic byte patterns for large-scale classification.",
+  "debrief": {
+    "summary": "The file holiday_party.jpg is actually a Microsoft Word OLE2 Compound Document disguised with a .jpg extension. The magic bytes D0 CF 11 E0 unambiguously identify it as a Word .doc file, not a JPEG image. Metadata inside the file reveals the author as k.anderson.",
+    "real_world": "Forensic triage always begins with file signature verification regardless of extension. In real investigations, tools like Autopsy, Sleuth Kit, and custom YARA rules automatically flag extension-type mismatches across entire disk images.",
+    "next_step": "Open the file in a sandboxed environment and extract macros using olevba (from the oletools suite) to check for malicious VBA code that may have been the actual payload.",
+    "cert_link": "CySA+ CS0-003 Domain 4 (Security Operations), CHFI v10 Module 7 (Understanding File Systems)",
+    "exam_tip": "Magic bytes identify files regardless of extension. D0 CF 11 E0 = OLE2 Compound Document (Word/Excel pre-2007). FF D8 FF = JPEG. 25 50 44 46 = PDF. 4D 5A = Windows PE executable. 50 4B = ZIP/DOCX/XLSX."
+  }
+}

@@ -21,6 +21,49 @@
     "Type 'tools' in the game. The log classifier maps each event description\n        to its primary log source. Find the scheduled task entry in the output.",
     "SPOILER — Scheduled task creation is logged in the Windows Security Log\n        under Event ID 4698. Sysmon Event ID 1 (process create) may also capture\n        the schtasks.exe execution. Primary source: Windows Security Log (Event 4698).\n        Type: windows security log"
   ],
+  "steps": [
+    {
+      "question": "Which log source would you check to find a failed login attempt for user 'administrator' on a Windows system?",
+      "valid_answers": ["windows security log", "security log", "security event log", "event 4625"],
+      "hints": [
+        "Windows logs authentication events in a specific log channel — not the application log or system log",
+        "The Security Event Log records all logon events. Failed logons have a specific Event ID.",
+        "Windows Security Log Event 4625 = Failed logon. This is the correct log source.",
+        "The Windows Security Log (specifically Event ID 4625) records failed login attempts. Type: windows security log"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "sysmon", "response": "Sysmon records process creation and network events — not authentication. Check the Windows Security Log."},
+        {"pattern": "application", "response": "The Application log records application-level events. Authentication failures go in the Security Log."}
+      ]
+    },
+    {
+      "question": "A new scheduled task named 'WindowsUpdate' was created on the system. Which log source records Windows scheduled task creation events?",
+      "valid_answers": ["windows security log", "security log", "event 4698", "windows security log (event 4698)", "sysmon"],
+      "hints": [
+        "Scheduled task creation is a persistence technique. Windows logs it in a specific channel with a specific Event ID.",
+        "Think about which log records system-level security events like new user accounts, scheduled tasks, and process creation",
+        "The Windows Security Log records scheduled task creation under Event ID 4698",
+        "Windows Security Log Event ID 4698 = 'A scheduled task was created'. Type: windows security log"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "task scheduler", "response": "While Task Scheduler has its own logs, the primary security-relevant log for task creation is the Windows Security Log (Event 4698)."},
+        {"pattern": "system log", "response": "The System Log records Windows component events. Task creation security events go in the Security Log (Event 4698)."}
+      ]
+    },
+    {
+      "question": "A USB device (SanDisk 64GB) was inserted. Which Windows Event ID records new external device recognition?",
+      "valid_answers": ["6416", "event 6416", "windows security log event 6416"],
+      "hints": [
+        "USB device events are security-relevant — they are logged in the Windows Security Log",
+        "The Windows Security Log has a specific Event ID for when a new Plug and Play device is recognized",
+        "Look up Windows Security Log event IDs for device events — it is in the 6000s range",
+        "Event ID 6416 = 'A new external device was recognized by the system'. It appears in the Windows Security Log."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "kern", "response": "kern.log is a Linux log source. For Windows USB events, check the Windows Security Log (Event 6416)."}
+      ]
+    }
+  ],
   "tools": "Maps each event description to its primary log source using the embedded event type reference table.",
   "learn": "Knowing which log source records which event is a foundational SOC skill.\nPulling the wrong log wastes investigation time. The CySA+ exam tests this\nextensively — for each event type, you must know where to look.\n\nKey log sources and what they record:\n\nWindows Security Log (Security Event Log):\n  Event 4624 — Successful logon\n  Event 4625 — Failed logon\n  Event 4648 — Logon with explicit credentials\n  Event 4688 — New process created\n  Event 4698 — Scheduled task created\n  Event 4720 — User account created\n  Event 4663 — File object access\n  Event 6416 — New external device recognized (USB)\n\nSysmon (System Monitor — enhanced endpoint logging):\n  Event 1   — Process creation (with command line)\n  Event 3   — Network connection\n  Event 11  — File created\n  Event 13  — Registry modification\n  Event 22  — DNS query\n\nLinux log sources:\n  /var/log/auth.log    — SSH, sudo, PAM authentication\n  /var/log/syslog      — General system events, cron\n  /var/log/kern.log    — Kernel messages (USB, hardware)\n  Web server logs      — nginx/apache access.log, error.log\n\nNetwork log sources:\n  Firewall logs        — blocked/allowed connections, NAT\n  DNS server logs      — all DNS queries by IP\n  DHCP logs            — IP assignment records\n  Proxy logs           — HTTP/HTTPS traffic with URL detail",
   "debrief": {

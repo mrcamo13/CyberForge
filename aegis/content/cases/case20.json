@@ -21,6 +21,44 @@
     "Type 'tools' in the game. The containment advisor scores each option\n        by effectiveness minus detection-tip risk. The option with the best\n        net score is the recommendation.",
     "SPOILER — Network isolation (block outbound C2, keep monitoring)\n        has the best net score for this scenario. It stops the attacker's\n        active C2 channel while limiting the tip-off risk compared to\n        full isolation. Full isolation would trigger immediate attacker\n        response given the 42-day dwell and known attribution.\n        Type: network isolation"
   ],
+  "steps": [
+    {
+      "question": "The attacker is a nation-state APT with 42-day dwell time on a domain controller. What is the PRIMARY risk of using full network and account isolation as the first containment action?",
+      "valid_answers": ["tip off", "attacker knows", "evidence destruction", "countermeasures", "destructive payload"],
+      "hints": [
+        "Full isolation immediately cuts the attacker's access — but what does the attacker notice when they lose their C2 connection?",
+        "A 42-day dwell time means the attacker is sophisticated and has been watching the environment",
+        "If the attacker knows they have been detected, they may trigger destructive payloads or destroy evidence before leaving",
+        "The primary risk is tip-off: full isolation alerts the attacker, who may then destroy evidence or activate a destructive payload."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Given the 42-day dwell, known attribution, and RESTRICTED data sensitivity, which containment approach has the best balance of stopping the threat while minimizing tip-off risk?",
+      "valid_answers": ["network isolation", "network isolation only", "isolate network", "block outbound", "network segment"],
+      "hints": [
+        "Consider the options: Full isolation (stops all access, high tip-off), Network isolation (blocks C2, lower tip-off), Monitoring only (no action), Account lockout",
+        "Data sensitivity is RESTRICTED — you cannot allow continued access. But 42-day dwell with known attribution means tip-off risk is high.",
+        "Blocking the outbound C2 channel cuts the attacker's active commands while allowing continued monitoring. The attacker may think it is a network issue rather than detection.",
+        "Network isolation (block outbound C2, maintain monitoring) has the best net score: stops active operations, minimizes tip-off risk."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "monitoring only", "response": "Monitoring only leaves the attacker with full access to RESTRICTED data. The data sensitivity requires action beyond just watching."},
+        {"pattern": "full isolation", "response": "Full isolation would immediately tip off the attacker who has 42-day dwell and known TTPs — they may trigger destructive countermeasures."}
+      ]
+    },
+    {
+      "question": "What is the recommended first containment action for this known APT on a domain controller with 42-day dwell time and restricted data?",
+      "valid_answers": ["network isolation", "network isolation only", "isolate network", "block outbound", "network segment"],
+      "hints": [
+        "The scoring is: effectiveness minus tip-off risk. Network isolation scores better than full isolation for this long-dwell known APT.",
+        "Network isolation means: block the C2 outbound connections, maintain visibility, continue investigation",
+        "This cuts the attacker's active command channel while preserving evidence and reducing the chance of a destructive response",
+        "Network isolation is the first containment action. It blocks outbound C2 while allowing monitoring to continue."
+      ],
+      "wrong_answer_hints": []
+    }
+  ],
   "tools": "Scores containment options (full isolation, network isolation, monitoring, account lockout) against scenario parameters and recommends the best strategy.",
   "learn": "Containment strategy is one of the hardest decisions in incident response.\nThe goal is to stop the threat while preserving evidence and avoiding\ntriggering attacker countermeasures.\n\nContainment options:\n\nFULL ISOLATION (network + account lockout):\n  Stops all attacker access immediately.\n  High tip-off risk — attacker knows immediately.\n  Risk: attacker may trigger destructive payload or evidence wipe.\n  Best for: ransomware (already noisy), low dwell time, unknown actor.\n\nNETWORK ISOLATION (block external C2, keep internal monitoring):\n  Cuts attacker's command channel while maintaining visibility.\n  Lower tip-off risk — attacker may think it's a network issue.\n  Allows continued monitoring to gather forensic evidence.\n  Best for: long dwell APT, known actor, intelligence gathering phase.\n\nMONITORING ONLY (observe without intervening):\n  Maximum intelligence collection. Zero tip-off risk.\n  Low effectiveness — attacker continues operating.\n  Best for: very early in investigation, unknown actor, < 7 day dwell.\n\nACCOUNT LOCKOUT ONLY:\n  Removes attacker's credential access.\n  High tip-off risk if attacker has established monitoring of their accounts.\n  Moderate effectiveness — attacker may have other persistence mechanisms.\n\nDecision factors:\n  Dwell time     — longer dwell = more persistence = higher containment urgency\n  Attribution    — known actor = higher tip-off risk\n  Asset type     — domain controller = high priority but high risk if tipped\n  Data sensitivity — RESTRICTED = cannot allow continued access\n  Legal requirements — law enforcement may want continued monitoring\n\nThe NIST SP 800-61 principle: containment must balance \"stopping the bleeding\"\nagainst the intelligence value of continued observation.",
   "debrief": {

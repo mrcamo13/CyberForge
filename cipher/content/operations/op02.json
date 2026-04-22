@@ -18,6 +18,38 @@
   ],
   "learn": "Base64 is an encoding scheme — not encryption.\nIt converts binary data into ASCII text using 64 printable characters\n(A-Z, a-z, 0-9, +, /) so it can be safely transmitted as text.\n\nBase64 is NOT secure. It adds no secrecy — anyone can decode it instantly.\nIt is used for transport, not protection.\n\nPentesters find Base64 constantly: in HTTP headers, JWT tokens,\nenvironment variables, config files, and source code comments.\nRecognizing the = padding at the end is the first clue.\n\nReal example: the Authorization header in HTTP Basic Auth is\njust Base64-encoded \"username:password\". Decode it and you have\ncredentials in plaintext.",
   "tools": "Decodes the Base64 string from the vault file and displays the plaintext result.",
+  "steps": [
+    {
+      "question": "Examine the encoded string \"ZGVwbG95bWFzdGVy\". What encoding scheme was used to produce this string?",
+      "valid_answers": ["base64", "base 64", "b64"],
+      "hints": [
+        "Look at the character set: the string only uses A-Z, a-z, 0-9, +, and /. That is a strong indicator.",
+        "This encoding is extremely common in HTTP headers, JWT tokens, and config files. It is NOT encryption.",
+        "The string length is a multiple of 4 and uses only the 64 printable characters that give this scheme its name.",
+        "SPOILER — It is Base64 encoding. Any decoder can reverse it instantly. Type: base64"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "caesar", "response": "Caesar cipher only uses letters. Base64 can include digits and symbols like + and /."},
+        {"pattern": "hex", "response": "Hexadecimal only uses 0-9 and a-f. This string contains uppercase letters — that points to a different scheme."},
+        {"pattern": "aes", "response": "AES produces binary output, not clean ASCII text. This is a simpler, reversible encoding."}
+      ]
+    },
+    {
+      "question": "Decode the Base64 string \"ZGVwbG95bWFzdGVy\" to recover the plaintext username for the deployment server.",
+      "valid_answers": ["deploymaster"],
+      "hints": [
+        "Go to CyberChef (gchq.github.io/CyberChef), search \"From Base64\", drag it to the recipe, and paste the string in the Input box.",
+        "In a terminal you can run: python3 -c \"import base64; print(base64.b64decode('ZGVwbG95bWFzdGVy').decode())\"",
+        "Type 'tools' in the game. The Base64 decoder will automatically decode the string. Read the output carefully.",
+        "SPOILER — ZGVwbG95bWFzdGVy decodes to \"deploymaster\". Type: deploymaster"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "deploy", "response": "Almost — the full username is one word. Decode the complete string to get the full value."},
+        {"pattern": "master", "response": "That is the second half. Decode the full Base64 string to get the complete username."},
+        {"pattern": "ZGVwbG95bWFzdGVy", "response": "That is the encoded string itself. Run it through a Base64 decoder to get the plaintext."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You decoded a Base64-encoded credential found during analysis of\nNexusCorp's vault system artifacts. Base64 is encoding, not encryption —\nit provides zero security and is trivially reversed. The username\n\"deploymaster\" opens the internal deployment server.",
     "real_world": "Pentesters find Base64-encoded credentials in HTTP Basic Auth\nheaders, JWT tokens, environment variables, Docker configs, and source code.\nAlways run suspected Base64 strings through a decoder during recon —\nit costs seconds and occasionally hands you credentials in plaintext.",

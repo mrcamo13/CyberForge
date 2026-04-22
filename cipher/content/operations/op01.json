@@ -18,6 +18,37 @@
   ],
   "learn": "A Caesar cipher is one of the oldest encryption techniques.\nEach letter in the message is shifted a fixed number of\npositions in the alphabet. Julius Caesar used a shift of 3.\n\nA->D, B->E, C->F ... Z->C\n\nTo decrypt: shift backwards by the same amount.\nQ(shift 3 back)=N, H=E, A=X, X=U, V=S ... -> NEXUSCORP\n\nReal attackers encounter encoded strings in config files,\nenvironment variables, logs, and memory dumps. Recognizing\nencoding schemes (Caesar, Base64, hex, ROT13) and decoding\nthem quickly is a core reconnaissance skill.",
   "tools": "Runs the Caesar decoder on the intercepted string QHAXVFRUS. Displays all 26 shift results so you can identify the one that produces a real word.",
+  "steps": [
+    {
+      "question": "Identify the cipher type: the intercepted string \"QHAXVFRUS\" shifts each letter by a fixed amount. What is the name of this encryption technique?",
+      "valid_answers": ["caesar", "caesar cipher", "caesar's cipher", "rot", "substitution cipher"],
+      "hints": [
+        "This is one of the oldest and simplest encryption methods, named after a Roman general.",
+        "The technique replaces each letter with another letter a fixed number of positions away in the alphabet.",
+        "Julius Caesar famously used this cipher in his military correspondence with a shift of 3.",
+        "SPOILER — It is a Caesar cipher (also called a ROT cipher). Type: caesar"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "base64", "response": "Base64 uses letters, numbers, +, / and often ends with = padding. QHAXVFRUS has none of those signs."},
+        {"pattern": "vigenere", "response": "Vigenère uses a keyword — this string uses a single fixed shift, which is simpler than that."},
+        {"pattern": "aes", "response": "AES produces binary output, not readable uppercase letters. This encoding is much simpler."}
+      ]
+    },
+    {
+      "question": "Decode the intercepted string \"QHAXVFRUS\" using a Caesar cipher. What is the plaintext vault password?",
+      "valid_answers": ["nexuscorp", "NEXUSCORP"],
+      "hints": [
+        "Try each possible shift value (1-25) until the output is a recognizable English word or company name.",
+        "Use CyberChef (gchq.github.io/CyberChef) — search ROT13, drag it to the recipe, and adjust the Amount from 13 until the output makes sense.",
+        "The correct shift is 3. Shift Q back 3 to get N, H back 3 to get E, and continue through the string.",
+        "SPOILER — Shift 3 backwards: QHAXVFRUS → NEXUSCORP. Type: nexuscorp"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "qhaxvfrus", "response": "That is the encoded string, not the decoded result. Apply the Caesar shift to reverse it."},
+        {"pattern": "password", "response": "Close guess but not this one. Run the Caesar decoder on QHAXVFRUS — look for a company name in the output."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You identified and decoded a Caesar cipher — a substitution\ncipher where each letter is shifted by a fixed amount.\nShift 3 backwards turned \"QHAXVFRUS\" into \"NEXUSCORP.\"",
     "real_world": "Penetration testers regularly find encoded strings in config\nfiles, environment variables, and intercepted traffic.\nRecognizing and decoding these quickly is a core recon skill\nthat shows up in every real engagement.",

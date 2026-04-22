@@ -18,6 +18,48 @@
   ],
   "tools": "Matches each CVE against threat intelligence indicators (exploited in wild, PoC availability, APT attribution) and outputs a threat-prioritized remediation order with tier labels.",
   "learn": "Threat intelligence integration transforms vulnerability management from reactive\n(patch by CVSS score) to predictive (patch what attackers are actually using).\n\nThreat intel priority tiers:\n\n[IMMEDIATE] -- Exploited in wild:\n  Active exploitation means attackers are compromising systems today.\n  Source: CISA KEV catalog, threat intel feeds (Recorded Future, Mandiant).\n\n[ELEVATED] -- PoC available:\n  Public exploit code (GitHub, Metasploit) accelerates attack capability.\n  Metasploit module = mass exploitation likely within days.\n\n[MONITOR] -- APT-linked:\n  A tracked threat actor has shown interest but isn't actively exploiting yet.\n  May indicate an upcoming campaign -- patch before they strike.\n\n[ROUTINE] -- CVSS only:\n  No known exploitation, no PoC, no APT interest.\n  Prioritize by CVSS score as tie-break. Schedule normally.\n\nWhy CVSS alone is insufficient:\n  CVE-2021-0001 (CVSS 9.0, no exploit) is theoretically severe but practically\n  irrelevant today -- no attacker capability exists yet.\n  CVE-2023-5678 (CVSS 7.2, actively exploited) is your real problem.\n\nThreat intel sources:\n  CISA KEV catalog     -- mandated, free, authoritative\n  FIRST/EPSS           -- probability of exploitation in 30 days (free)\n  Shodan/Censys        -- see how many systems are still vulnerable\n  Recorded Future      -- commercial threat intel platform\n  Mandiant Advantage   -- commercial, APT attribution",
+  "steps": [
+    {
+      "question": "Look at the four CVEs in the backlog. Which CVE is listed as actively exploited in the wild?",
+      "valid_answers": ["cve-2023-5678", "2023-5678"],
+      "hints": [
+        "The scenario lists three threat intel fields for each CVE: Exploited in wild, PoC available, and APT-linked.",
+        "Only one CVE has 'Exploited in wild: YES' — scan each CVE block from top to bottom.",
+        "CVE-2023-5678 is the first CVE listed. Check its 'Exploited in wild' field.",
+        "CVE-2023-5678 shows: Exploited in wild: YES. It is also CISA KEV listed."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "2021-0001", "response": "CVE-2021-0001 has the highest CVSS (9.0) but no active exploitation — no wild, no PoC, no APT link."},
+        {"pattern": "2022-9876", "response": "CVE-2022-9876 has a Metasploit PoC but is NOT currently exploited in the wild."},
+        {"pattern": "2023-1111", "response": "CVE-2023-1111 is APT-linked but has no public PoC and is not exploited in the wild."}
+      ]
+    },
+    {
+      "question": "CVE-2023-5678 satisfies all three threat intel indicators. Which additional indicator beyond 'exploited in wild' does it also have? (PoC available or APT-linked — name one)",
+      "valid_answers": ["poc available", "poc", "proof of concept", "apt-linked", "apt linked", "ironveil", "apt attributed"],
+      "hints": [
+        "The challenge_data encodes three fields per CVE as yes/no: exploited in wild, PoC available, APT-linked.",
+        "CVE-2023-5678's data row is: CVE-2023-5678|7.2|yes|yes|yes — all three fields are yes.",
+        "The scenario text says CVE-2023-5678 has a public GitHub PoC and is attributed to IRONVEIL threat group.",
+        "CVE-2023-5678 has BOTH a public PoC AND APT attribution to IRONVEIL — either is a valid answer here."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Using threat intelligence enrichment (not CVSS score), which CVE should be patched first?",
+      "valid_answers": ["cve-2023-5678", "2023-5678"],
+      "hints": [
+        "Threat intel priority tiers rank: exploited in wild > PoC available > APT-linked > CVSS score only.",
+        "CVE-2021-0001 has CVSS 9.0 but sits in the ROUTINE tier — no exploitation evidence at all.",
+        "Type 'tools' to run the intel correlator — it labels each CVE with IMMEDIATE, ELEVATED, MONITOR, or ROUTINE.",
+        "CVE-2023-5678 is the only IMMEDIATE tier CVE: actively exploited, public PoC, and APT-attributed to IRONVEIL. Patch it first."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "2021-0001", "response": "CVSS score alone does not determine patch priority when threat intel is available. CVE-2021-0001 has no exploitation activity — it is ROUTINE."},
+        {"pattern": "2022-9876", "response": "CVE-2022-9876 is ELEVATED (Metasploit PoC) but not actively exploited in the wild — lower priority than CVE-2023-5678."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "CVE-2023-5678 is the immediate priority despite having the lowest CVSS (7.2) of the enriched CVEs. Active exploitation in the wild -- confirmed by CISA KEV listing and attribution to the IRONVEIL threat group -- makes it the most dangerous in practice. CVE-2021-0001 has the highest CVSS (9.0) but no exploitation activity -- it is a routine patch. Threat intelligence inverts CVSS-based rankings when exploitation evidence exists.",
     "real_world": "The CISA KEV catalog was created specifically because federal agencies were spending time patching high-CVSS CVEs with no exploitation history while missing lower-CVSS CVEs being actively exploited. When Log4Shell broke in Dec 2021, CISA mandated patching within 2 weeks -- for high-risk systems, the actual window before exploitation was hours.",

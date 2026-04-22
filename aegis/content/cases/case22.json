@@ -17,6 +17,43 @@
     "SPOILER -- CVE-2021-44228 (Log4Shell) scores 17.0:\n        CVSS 10.0 + asset critical (+3) + exploit yes (+2) + internet yes (+2) = 17.0\n        Despite PrintNightmare having a high CVSS (8.8), it scores only 12.8\n        because it is not internet-facing. Context changes everything.\n        Type: cve-2021-44228"
   ],
   "tools": "Scores each CVE using CVSS plus contextual bonuses (asset criticality, exploit availability, internet exposure) and ranks them highest to lowest priority.",
+  "steps": [
+    {
+      "question": "Using the contextual scoring formula (CVSS + asset bonus + exploit bonus + internet bonus), calculate the total score for CVE-2021-44228 (CVSS 10.0, asset=critical, internet=yes, exploit=yes). Bonuses: critical=+3, exploit=+2, internet=+2. What is the total?",
+      "valid_answers": ["17", "17.0"],
+      "hints": [
+        "Start with the CVSS base score: 10.0. Then add bonuses for each contextual factor.",
+        "Asset=critical adds +3. Internet=yes adds +2. Exploit=yes adds +2.",
+        "10.0 + 3 + 2 + 2 = ?",
+        "10.0 + 3 + 2 + 2 = 17.0. CVE-2021-44228 (Log4Shell) scores 17.0."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "Calculate the contextual score for CVE-2021-34527 (PrintNightmare: CVSS 8.8, asset=high, internet=no, exploit=yes). Using bonuses: high=+2, exploit=+2, internet=+0. What is the total?",
+      "valid_answers": ["12.8", "12"],
+      "hints": [
+        "Start with CVSS 8.8. Asset=high adds +2. Internet=no adds +0. Exploit=yes adds +2.",
+        "8.8 + 2 + 0 + 2 = ?",
+        "8.8 + 2 + 0 + 2 = 12.8",
+        "PrintNightmare scores 12.8 — despite CVSS 8.8, it is not internet-facing which reduces its real-world urgency."
+      ],
+      "wrong_answer_hints": []
+    },
+    {
+      "question": "CVE-2021-44228 scores 17.0 and CVE-2021-34527 scores 12.8 contextually. Despite CVE-2021-34527 having a higher raw CVSS (8.8 vs 10.0... wait Log4j is 10.0). Which CVE has the highest contextual risk score and should be patched first?",
+      "valid_answers": ["cve-2021-44228", "log4shell", "log4j"],
+      "hints": [
+        "Compare the contextual scores: CVE-2021-44228=17.0, CVE-2022-30190=?, CVE-2023-1234=?, CVE-2021-34527=12.8",
+        "CVE-2021-44228 (Log4Shell) has the highest total: CVSS 10.0 + critical asset (+3) + exploit (+2) + internet (+2) = 17.0",
+        "No other CVE in the list can exceed 17.0 with the given data — Log4Shell is the clear winner",
+        "CVE-2021-44228 (Log4Shell) has the highest contextual score at 17.0. Type: cve-2021-44228"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "cve-2021-34527", "response": "PrintNightmare scores 12.8 contextually — lower than Log4Shell (17.0). CVSS alone doesn't determine priority; internet exposure and asset criticality matter."}
+      ]
+    }
+  ],
   "learn": "Vulnerability prioritization is one of the most important -- and most misunderstood --\nskills in vulnerability management. Raw CVSS scores alone are insufficient for\ntriage. A CVSS 10.0 on an isolated test server may be less urgent than a CVSS 6.5\non a critical internet-facing system.\n\nContextual risk scoring adds business context to technical severity:\n\nAsset criticality:\n  What is the impact if this asset is compromised?\n  Critical assets (domain controllers, customer DBs) need faster patching.\n  Lower-criticality assets (dev boxes, test servers) can wait longer.\n\nExploit availability:\n  Is working exploit code publicly available?\n  Published exploits dramatically increase the likelihood of attack.\n  'No known exploit' lowers urgency (but doesn't eliminate risk).\n\nInternet exposure:\n  Is the vulnerable service reachable from the internet?\n  Internet-facing assets have a much larger attacker pool.\n  Internal-only assets require the attacker to already be inside.\n\nReal-world prioritization frameworks:\n  SSVC (Stakeholder-Specific Vulnerability Categorization) -- CISA recommended\n  EPSS (Exploit Prediction Scoring System) -- probability of exploitation in 30 days\n  CVSS + Business Impact = Risk-Based Vulnerability Management (RBVM)\n\nKey principle: Patch what the attacker can reach and exploit today, not just what\nscores highest on paper.",
   "debrief": {
     "summary": "CVE-2021-44228 (Log4Shell) scores 17.0 -- the highest in the backlog -- because it combines maximum CVSS (10.0) with a critical asset, a public exploit, and internet exposure. PrintNightmare scores 12.8 despite a high CVSS because it is not internet-facing. Contextual scoring captures what pure CVSS cannot: the real-world likelihood and impact of exploitation.",

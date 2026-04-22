@@ -18,6 +18,53 @@
   ],
   "learn": "SQL injection occurs when user input is inserted directly into an\nSQL query without sanitization. The attacker injects SQL syntax to\nchange the meaning of the query.\n\nClassic login bypass:\n\n  Normal query:\n  SELECT * FROM users WHERE username='alice' AND password='secret'\n\n  Injected query (username = admin' --):\n  SELECT * FROM users WHERE username='admin' --' AND password='...'\n\n  The -- starts a SQL comment. Everything after it is ignored.\n  The query becomes: SELECT * FROM users WHERE username='admin'\n  If 'admin' exists, login succeeds regardless of password.\n\nWhy this works:\n- The application trusts user input\n- Input is concatenated directly into the query string\n- No parameterized queries or prepared statements used\n\nPrevention: always use parameterized queries (prepared statements).\nNever concatenate user input into SQL strings.\n\nSQLi is one of the OWASP Top 10 vulnerabilities and appears on\nvirtually every real web application pentest.",
   "tools": "Tests the SQL injection payload against the simulated login form and shows the constructed query and result.",
+  "steps": [
+    {
+      "question": "The login form at /backup/report-login passes user input directly into an SQL query. What category of web vulnerability does this represent?",
+      "valid_answers": ["sql injection", "sqli", "sql i", "injection", "code injection"],
+      "hints": [
+        "This vulnerability occurs when user-supplied input is concatenated directly into a database query string without sanitization.",
+        "It is consistently listed in the OWASP Top 10 — a ranking of the most critical web application security risks.",
+        "The vulnerability type is named after the language used by relational databases like MySQL, PostgreSQL, and SQLite.",
+        "SPOILER — This is SQL injection (SQLi). Unsanitized input lets attackers modify the database query. Type: sql injection"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "xss", "response": "XSS (Cross-Site Scripting) injects JavaScript into web pages. This vulnerability targets the database layer — a different attack type."},
+        {"pattern": "csrf", "response": "CSRF forces authenticated users to make unintended requests. This vulnerability is about injecting database commands through a form field."},
+        {"pattern": "overflow", "response": "Buffer overflow targets memory. This login form passes your input directly to the database — a different class of vulnerability."}
+      ]
+    },
+    {
+      "question": "Analyze the login query structure: SELECT * FROM users WHERE username='INPUT' AND password='INPUT'. What character injected into the username field will break the query syntax and allow you to modify it?",
+      "valid_answers": ["'", "single quote", "apostrophe", "quote"],
+      "hints": [
+        "SQL strings are delimited by a specific character. Injecting that same character into user input breaks the string boundary and exposes the query to modification.",
+        "Look at the query: username='INPUT'. If INPUT itself contains the string delimiter, the parser gets confused about where the string ends.",
+        "Try entering just this character into a form field on a vulnerable site — if the server returns an SQL error, you have found an injection point.",
+        "SPOILER — A single quote (') is the SQL string delimiter. Injecting it breaks the query syntax. Type: '"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "--", "response": "-- is a SQL comment and is part of the full payload, but it alone does not break the string boundary. Another character comes first."},
+        {"pattern": "\"", "response": "Double quotes work in some databases, but the most universally exploited string delimiter in SQL injection is the single quote."},
+        {"pattern": ";", "response": "Semicolons can chain SQL statements, but the first step to break this specific query structure is injecting the string delimiter character."}
+      ]
+    },
+    {
+      "question": "Construct the SQL injection payload to bypass the login. The query is: SELECT * FROM users WHERE username='INPUT' AND password='INPUT'. What value entered in the username field grants access without knowing the password?",
+      "valid_answers": ["admin --", "admin'--", "admin' --"],
+      "hints": [
+        "You need to: (1) close the username string with a single quote, (2) provide a valid username, (3) comment out the password check using SQL comment syntax.",
+        "SQL comment syntax: -- (two dashes, optionally followed by a space) causes the database to ignore everything after it on that line.",
+        "Injecting: admin' -- transforms the query to: SELECT * FROM users WHERE username='admin' -- ' AND password='...' — the password check is commented out.",
+        "SPOILER — The payload is: admin' -- (admin, single quote, space, two dashes). Type: admin' --"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "admin", "response": "Without the injection characters, the server will require the actual password. Add the single quote and comment syntax after the username."},
+        {"pattern": "' or '1'='1", "response": "That classic payload works on some queries, but the cleaner approach for this specific form uses a comment to bypass the password check entirely."},
+        {"pattern": "' or 1=1", "response": "OR-based payloads work but can return multiple rows. For login bypass, commenting out the password check with -- is more reliable here."}
+      ]
+    }
+  ],
   "debrief": {
     "summary": "You constructed an SQL injection payload that bypassed NexusCorp's\nreporting system login by turning the password check into a SQL comment.\nThe application concatenated your input directly into a query string —\na classic injection vulnerability that gives unauthenticated access.",
     "real_world": "SQL injection remains one of the most common critical vulnerabilities\nfound in web application penetration tests. Parameterized queries\n(prepared statements) prevent it completely — but many legacy applications\nstill concatenate user input directly. Finding an SQLi point typically\nmeans the database contents can be fully extracted.",

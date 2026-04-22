@@ -16,6 +16,52 @@
     "Type 'tools' in the game. The notification reference table lists\nkey regulations with their notification timelines. Find GDPR and\nread the supervisory authority notification requirement.",
     "SPOILER — GDPR Article 33 requires notification to the supervisory\nauthority 'without undue delay and, where feasible, not later than\n72 hours' after becoming aware of the breach. Type: 72"
   ],
+  "steps": [
+    {
+      "question": "Veridian Systems processes EU customer personal data (email addresses). Which data protection regulation applies to organizations handling EU residents' personal data?",
+      "valid_answers": ["gdpr", "general data protection regulation"],
+      "hints": [
+        "Think about EU data protection law. There is a major regulation that applies to any organization handling EU personal data.",
+        "The regulation uses the acronym GDPR and was enacted in 2018.",
+        "GDPR stands for General Data Protection Regulation — it applies to any org processing EU residents' data.",
+        "The applicable regulation is GDPR. It covers email addresses as personal data."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "hipaa", "response": "HIPAA applies to US healthcare data — not EU personal data. The EU regulation is GDPR."},
+        {"pattern": "pci", "response": "PCI DSS applies to payment card data. Email addresses fall under GDPR."},
+        {"pattern": "ccpa", "response": "CCPA applies to California consumer data. EU customer data is covered by GDPR."}
+      ]
+    },
+    {
+      "question": "Under GDPR Article 33, what is the maximum number of hours after becoming aware of a personal data breach that an organization must notify the supervisory authority?",
+      "valid_answers": ["72", "72 hours"],
+      "hints": [
+        "GDPR Article 33 sets the notification timeline for reporting to the supervisory authority (not individuals)",
+        "The GDPR timeline is measured in hours, not days. It is under 4 days.",
+        "GDPR Article 33: notification must occur 'without undue delay and, where feasible, not later than X hours'",
+        "GDPR Article 33 requires notification within 72 hours of becoming aware. Type: 72"
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "60", "response": "60 hours is not the GDPR limit. 60 days is the HIPAA notification window — different regulation."},
+        {"pattern": "24", "response": "GDPR gives 72 hours, not 24. Read Article 33 of the GDPR for the exact wording."},
+        {"pattern": "48", "response": "The GDPR supervisory authority notification window is 72 hours, not 48."}
+      ]
+    },
+    {
+      "question": "The breach was confirmed at 2026-04-11T03:15 UTC. What is the notification deadline (date only) under GDPR's 72-hour requirement?",
+      "valid_answers": ["2026-04-14", "april 14", "april 14 2026", "april 14th"],
+      "hints": [
+        "GDPR requires notification within 72 hours of discovery. Add 72 hours to the breach discovery timestamp.",
+        "Breach confirmed: 2026-04-11 at 03:15 UTC. Add 72 hours = 3 days.",
+        "April 11 + 3 days = April 14. The deadline is the same time of day (03:15 UTC) three days later.",
+        "Deadline: 2026-04-14T03:15 UTC. Notification must reach the supervisory authority by then."
+      ],
+      "wrong_answer_hints": [
+        {"pattern": "april 12", "response": "April 12 would be only 24 hours from discovery. GDPR allows 72 hours (3 days) — calculate again."},
+        {"pattern": "april 13", "response": "April 13 would be 48 hours from discovery. GDPR allows 72 hours total — that is 3 full days."}
+      ]
+    }
+  ],
   "learn": "Breach notification requirements are determined by which regulations apply\nto your organization and the type of data involved. Analysts must know\nthe key timeframes to avoid regulatory penalties.\n\nKey breach notification regulations:\n\nGDPR (EU — General Data Protection Regulation):\n  Applies to:   Any org processing EU residents' personal data\n  To regulator: Within 72 hours of becoming aware (Article 33)\n  To subjects:  'Without undue delay' if high risk to individuals (Article 34)\n  Penalty:      Up to €20M or 4% of global annual turnover\n\nHIPAA (US — Health Insurance Portability and Accountability Act):\n  Applies to:   Healthcare providers, insurers, and their business associates\n  To HHS:       Within 60 days of discovery\n  To subjects:  Within 60 days; within 60 days via media if >500 in a state\n  Penalty:      Up to $1.9M per violation category per year\n\nPCI DSS (Payment Card Industry Data Security Standard):\n  Applies to:   Any org storing, processing, or transmitting cardholder data\n  To brands:    Immediately upon suspicion\n  To law enf.:  Within 72 hours in some jurisdictions\n  Penalty:      Fines and loss of card processing rights\n\nCCPA (California Consumer Privacy Act):\n  Applies to:   Businesses serving California residents (revenue thresholds)\n  To subjects:  'In the most expedient time possible'\n  Penalty:      $100-$750 per consumer per incident\n\nNotification triggers (GDPR):\n  Personal data breach = any breach of security leading to accidental/unlawful\n  destruction, loss, alteration, unauthorized disclosure or access.\n  Email addresses = personal data under GDPR → notification required.",
   "tools": "Displays breach notification requirements for key regulations including GDPR, HIPAA, PCI DSS, and CCPA with notification timelines.",
   "debrief": {
