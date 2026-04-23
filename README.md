@@ -6,6 +6,20 @@ A terminal-based cybersecurity training simulator built for people studying for 
 
 ---
 
+## 📘 CyberForge Installation Guide
+
+For full setup instructions and gameplay overview, download the official guide:
+
+👉 CyberForge_Infographic_Guide.pdf
+
+This guide includes:
+- Step-by-step installation
+- How to run the game (including play.bat)
+- Troubleshooting tips
+- Overview of learning objectives (Python + Cybersecurity)
+
+---
+
 ## What is it?
 
 CyberForge drops you into a simulated terminal and walks you through hands-on investigations. Instead of flashcards, you run tools, analyze output, and work through chained questions that build on each other — the same way real analysts actually work. Each case is a multi-step investigation, not a single question.
