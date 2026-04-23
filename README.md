@@ -10,7 +10,7 @@ A terminal-based cybersecurity training simulator built for people studying for 
 
 For full setup instructions and gameplay overview, download the official guide:
 
-👉 CyberForge_Infographic_Guide.pdf
+👉 CyberForgeInstructions.pdf
 
 This guide includes:
 - Step-by-step installation

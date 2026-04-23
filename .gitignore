@@ -5,13 +5,17 @@ __pycache__/
 *.pyd
 .Python
 
-# Save files (player data — not part of the codebase)
-aegis/saves/
-cipher/saves/
+# Player save files — never commit personal progress data
+**/saves/*.json
+**/saves/*.backup.json
+**/saves/*.tmp.json
+**/saves/*.corrupted.json
 
 # Checksums (generated on run, not source)
 aegis/content/checksums.json
 cipher/content/checksums.json
+lab/content/checksums.json
+forensics/content/checksums.json
 
 # OS
 .DS_Store
